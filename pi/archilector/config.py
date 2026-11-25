@@ -29,7 +29,16 @@ POR_DEFECTO: dict = {
         "region_canto": [0.0, 0.2, 0.15, 0.8],
         "paso_numeracion": 2,  # la página derecha avanza de 2 en 2 por hoja
     },
-    "ocr": {"activo": True},
+    "ocr": {
+        "activo": True,
+        "motor": "rapidocr",  # rapidocr | tesseract | hibrido (recomendado: acentos y ~5 veces más rápido)
+        "idioma": "spa",  # idioma de Tesseract
+        "psm": 6,  # Tesseract: un bloque de texto uniforme
+        "conf_palabra": 60,  # una palabra es «confiable» con confianza >= 60 (0–100)
+        "min_palabras_confiables": 12,  # menos que esto (y poca confianza) = no hay página legible
+        "conf_media_aceptable": 75,  # ...salvo pocas palabras muy seguras (portadas)
+        "umbral_respaldo": 0.70,  # híbrido: bajo esta confianza media se pide opinión a RapidOCR
+    },
     "ia": {
         "modelo_verificador": "modelos/verificador.tflite",
         "modelo_clasificador": "modelos/clasificador.tflite",

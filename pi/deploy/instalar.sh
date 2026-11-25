@@ -11,7 +11,7 @@ cd "$CARPETA"
 echo "==> Paquetes del sistema"
 sudo apt-get update
 sudo apt-get install -y python3-venv python3-picamera2 python3-libcamera libcamera-apps \
-    alsa-utils zram-tools libatlas-base-dev unzip wget
+    alsa-utils zram-tools libatlas-base-dev unzip wget tesseract-ocr tesseract-ocr-spa
 
 echo "==> zram para aliviar los 2 GB de RAM"
 echo -e "ALGO=zstd\nPERCENT=50" | sudo tee /etc/default/zramswap >/dev/null

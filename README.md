@@ -137,6 +137,28 @@ El micrófono se elige en `voz.microfono` por fragmentos del nombre en orden de 
 `[GW600, USB]` para usar el de la webcam y, si no está, el micrófono USB; si se desconecta, la escucha
 pasa al siguiente sola (ver la [guía de armado](docs/armado/README.md#cámara-alternativa-webcam-usb)).
 
+### Motor de OCR (`ocr.motor` en `config.yaml`)
+
+| Motor | Qué hace | Medido en una Pi 4 con una página real |
+|---|---|---|
+| `rapidocr` (defecto) | PP-OCRv4 «ch» con onnxruntime | 22–31 s por página, **sin acentos ni ñ**, leyó todas las líneas aun con la cámara inclinada |
+| `tesseract` | Tesseract con idioma `spa` | 3–6 s por página, **con acentos, ñ y ¿ ¡** |
+| `hibrido` | Tesseract y, si duda, RapidOCR | como Tesseract salvo páginas dudosas |
+
+Tesseract necesita `sudo apt install tesseract-ocr tesseract-ocr-spa` (el instalador ya lo hace); si falta, el
+software avisa y usa RapidOCR. Tesseract entrega la caja de cada línea, así que el PDF buscable también funciona
+(comprobado: se buscan palabras con acentos en el PDF generado).
+
+Si la imagen no tiene una página legible, Tesseract devuelve un resultado vacío en vez de inventar palabras
+(regla `valorar` en `vision/ocr_tesseract.py`: ≥ 12 palabras con confianza ≥ 60, o pocas pero muy seguras).
+
+**Límites conocidos** (pocas fotos de un solo libro, con la cámara en mano y no en el atril):
+* Algunas líneas salen con basura en el borde derecho cuando hay sombra o inclinación; la confianza media de la
+  página sigue siendo alta, así que el respaldo del híbrido no siempre se activa.
+* No leyó el número de página impreso, así que la segunda comprobación del verificador queda sin dato (`None`).
+* Con esas mismas fotos, el preproceso del proyecto empeoró el resultado; hay que repetir la prueba con el montaje
+  real (cámara fija, luz de la tira LED) antes de cambiar el motor por defecto.
+
 ### Panel web
 
 * **Estado:** estado en vivo, último veredicto, controles, nuevo documento y tasa de volteos correctos /
