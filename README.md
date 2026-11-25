@@ -146,6 +146,20 @@ pasa al siguiente sola (ver la [guía de armado](docs/armado/README.md#cámara-a
 * **Calibración:** parámetros de la tabla 5.5 por `CFG`, botones HOME, TURN, RETRY, BACK, STOP, LIGHT, BEEP,
   y elección de la cámara con foto de prueba.
 
+### Panel de pruebas de lectura (herramienta de laboratorio)
+
+`pi/herramientas/panel_pruebas.py` muestra la cámara en vivo y, con un botón, captura la página, la lee con
+Tesseract o RapidOCR, la sintetiza con Piper y re-transcribe el audio con Vosk para medir el error de palabras.
+Sirve para elegir el motor de OCR, la velocidad de voz y el encuadre antes de montar el robot completo.
+
+```bash
+sudo apt install tesseract-ocr tesseract-ocr-spa     # solo si se quiere probar Tesseract
+cd pi && .venv/bin/python herramientas/panel_pruebas.py --puerto 8889   # http://<pi>.local:8889
+```
+
+Ocupa la cámara (no usar a la vez que `ejecutar` con cámara real), **no tiene autenticación** y solo debe usarse
+en la red local. El audio suena en el navegador de quien abre la página, no en la Pi.
+
 ---
 
 ## 3. Entrenamiento de la IA (Google Colab)
