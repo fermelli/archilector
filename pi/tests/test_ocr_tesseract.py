@@ -124,11 +124,20 @@ def test_hibrido_no_consulta_el_respaldo_si_tesseract_esta_seguro():
     assert resp.llamadas == 0
 
 
-def test_hibrido_no_consulta_el_respaldo_si_no_hay_pagina():
+def test_hibrido_no_consulta_el_respaldo_con_muy_pocas_palabras():
     resp = _RespaldoFalso("x" * 999, 0.95)
     h = OCRHibrido(_TesseractFalso(_tsv([(1, 1, 1, "xq", 30, 0, 0, 10, 10)])), resp)
     assert h.leer(IMG).texto == ""
-    assert resp.llamadas == 0  # no se gastan ~25 s en una imagen sin página
+    assert resp.llamadas == 0  # una hoja en blanco no debe costar una segunda lectura
+
+
+def test_hibrido_con_basura_abundante_consulta_pero_no_acepta_una_lectura_dudosa():
+    # Caso medido: una foto de la sala dio 91 palabras sueltas con confianza media 32 %
+    basura = _pagina_larga(conf=32, lineas=5, por_linea=6)
+    dudosa = _RespaldoFalso("ruido " * 40, 0.55)
+    h = OCRHibrido(_TesseractFalso(basura), dudosa)
+    assert h.leer(IMG).texto == ""   # Tesseract la rechaza y RapidOCR no es fiable: resultado vacío
+    assert dudosa.llamadas == 1
 
 
 def test_hibrido_usa_rapidocr_si_tesseract_duda_y_rapidocr_trae_mas_texto():

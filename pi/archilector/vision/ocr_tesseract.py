@@ -129,10 +129,12 @@ def _confianza_media(res: ResultadoOCR) -> float:
 class OCRHibrido:
     """Tesseract primero; si duda de una página con texto, pide una segunda opinión a RapidOCR.
 
-    Duda = al menos ``min_palabras`` palabras leídas pero con confianza media < ``umbral_respaldo``.
+    Duda = al menos ``min_palabras`` palabras leídas pero con confianza media < ``umbral_respaldo``,
+    aunque Tesseract haya concluido que no hay página legible (podría ser una página difícil).
     Se usa el resultado de RapidOCR solo si trae claramente más texto (> 20 %) y sus líneas tienen
-    confianza media ≥ 0,80; si no, se queda el de Tesseract. Con una imagen sin página no se llama
-    a RapidOCR (sería gastar ~25 s).
+    confianza media ≥ 0,80; si no, se queda el de Tesseract. Una foto sin página (medido: 91 palabras
+    sueltas con confianza 32 %) consulta a RapidOCR, que no encuentra texto fiable, y el resultado sigue
+    vacío; ese intento cuesta ~2,5 s en una imagen chica y hasta ~25 s a 2592×1944.
     """
 
     def __init__(self, principal: OCRTesseract, respaldo, umbral_respaldo: float = 0.70, min_palabras: int = 12):
