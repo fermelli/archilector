@@ -40,7 +40,7 @@ def construir(cfg: dict, puerto: str, fuente_camara: str, sin_voz: bool):
     from .orquestador import Orquestador
     from .salida.db import BaseDatos
     from .simulacion import LibroSimulado
-    from .vision.ocr import OCR, OCRNulo
+    from .vision.ocr_tesseract import crear as crear_ocr
     from .voz import stt, tts
 
     datos = Path(cfg["datos"])
@@ -59,7 +59,7 @@ def construir(cfg: dict, puerto: str, fuente_camara: str, sin_voz: bool):
 
     camara = cam.crear(fuente_camara, libro, cfg["camara"], datos, al_cambiar_camara)
     clasificador = Clasificador(ia["modelo_clasificador"])
-    ocr = OCR() if cfg["ocr"]["activo"] else OCRNulo()
+    ocr = crear_ocr(cfg["ocr"])
     db = BaseDatos(datos / "archilector.db")
     voz = tts.VozConsola() if sin_voz else tts.crear(cfg["voz"])
     registro = RegistroPares(datos / "pares", ia["guardar_pares"])

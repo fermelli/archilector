@@ -15,6 +15,13 @@ camara:
   luz_captura: 100                # % de la tira LED al fotografiar (figura 8.2)
   luz_reposo: 30
 
+ocr:
+  motor: hibrido                  # rapidocr (defecto) | tesseract | hibrido
+                                  # hibrido: Tesseract (acentos, ~3-6 s) y RapidOCR solo si Tesseract duda
+                                  # requiere: sudo apt install tesseract-ocr tesseract-ocr-spa
+  # min_palabras_confiables: 12   # menos palabras seguras que esto = "no hay página legible"
+  # umbral_respaldo: 0.70         # confianza media bajo la cual el híbrido consulta a RapidOCR
+
 vision:
   lado_pagina: derecha            # una cara por volteo (alcance 1.4 del Diseño)
   region_canto: [0.0, 0.2, 0.15, 0.8]   # canto de las hojas pasadas en la foto: ajustar tras el montaje
