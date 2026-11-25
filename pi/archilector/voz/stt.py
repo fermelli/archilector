@@ -3,7 +3,7 @@ vocabulario restringido a unas pocas palabras (sección 3.6 del Diseño).
 
 El micrófono se elige con ``voz.microfono``: un dispositivo ALSA exacto
 (``plughw:CARD=Camera,DEV=0``) o fragmentos del nombre de la tarjeta en orden de
-preferencia (``[GW600, USB]``). Si el micrófono deja de entregar audio (se
+preferencia (``[REDRAGON, USB]``: la GW600 se llama «REDRAGON Live Camera»). Si el micrófono deja de entregar audio (se
 desconectó la webcam), la escucha vuelve a buscarlo y se relanza sola.
 """
 from __future__ import annotations

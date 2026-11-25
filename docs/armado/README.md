@@ -325,11 +325,12 @@ imagen haría falta una webcam de 1080p o más **con autofoco**.
 al micrófono USB, o quedar como primera opción con el USB de respaldo:
 
 1. Con la webcam conectada, ver el nombre de su tarjeta de sonido: `arecord -l` (o `cat /proc/asound/cards`).
+   La GW600 aparece como **«REDRAGON Live Camera»** (tarjeta `Camera`): el fragmento «GW600» no la encuentra.
 2. Poner en `config.yaml` fragmentos de los nombres en orden de preferencia, por ejemplo:
 
    ```yaml
    voz:
-     microfono: [GW600, USB]   # la webcam primero; si no está, el micrófono USB
+     microfono: [REDRAGON, USB]   # la webcam primero; si no está, el micrófono USB
    ```
 
    Se busca el fragmento en el nombre de las tarjetas que graban, así que basta una parte que solo tenga

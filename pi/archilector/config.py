@@ -65,7 +65,7 @@ POR_DEFECTO: dict = {
         "velocidad": 1.0,  # length_scale de Piper: >1 más lento
         "escuchar": True,
         # Micrófono: None (predeterminado), un dispositivo ALSA ("plughw:CARD=Camera,DEV=0")
-        # o fragmentos del nombre de la tarjeta en orden de preferencia, p. ej. ["GW600", "USB"]
+        # o fragmentos del nombre de la tarjeta en orden de preferencia, p. ej. ["REDRAGON", "USB"] (la GW600 se llama «REDRAGON Live Camera»)
         # (ver arecord -l). Si se desconecta, la escucha pasa al siguiente en unos 3 s.
         "microfono": None,
     },

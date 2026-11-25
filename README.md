@@ -134,7 +134,7 @@ Durante el documento: A seguir · B pausa · C repetir · D parada inmediata · 
 \# confirmar · 1/2 volumen · 4/6 velocidad de la voz · 0 ayuda. En pausa, **#** termina el documento.
 **Voz:** «siguiente», «repite», «pausa», «continuar», «anterior», «parar», «ayuda».
 El micrófono se elige en `voz.microfono` por fragmentos del nombre en orden de preferencia, p. ej.
-`[GW600, USB]` para usar el de la webcam y, si no está, el micrófono USB; si se desconecta, la escucha
+`[REDRAGON, USB]` para usar el de la webcam (la GW600 se llama «REDRAGON Live Camera» en `arecord -l`) y, si no está, el micrófono USB; si se desconecta, la escucha
 pasa al siguiente sola (ver la [guía de armado](docs/armado/README.md#cámara-alternativa-webcam-usb)).
 
 ### Motor de OCR (`ocr.motor` en `config.yaml`)

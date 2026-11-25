@@ -49,7 +49,7 @@ voz:
   piper_modelo: modelos/voz/es_ES-davefx-medium.onnx
   vosk_modelo: modelos/vosk-model-small-es-0.42
   volumen: 70
-  # microfono: [GW600, USB]       # fragmentos del nombre (arecord -l) en orden de preferencia:
+  # microfono: [REDRAGON, USB]    # fragmentos del nombre (arecord -l) en orden de preferencia:
                                   # la webcam primero y, si no está, el micrófono USB
 
 web:
