@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 920" width="1200" height="920" font-family="Arial, Helvetica, sans-serif">
+  <style>
+    text { fill: #1d2330; font-size: 14px; }
+    .t { font-size: 22px; font-weight: 700; }
+    .st { font-size: 14px; fill: #5b6472; }
+    .b { font-weight: 700; }
+    .s { font-size: 13px; fill: #3f4652; }
+    .pin { font-size: 12px; font-weight: 700; font-family: Consolas, "Courier New", monospace; }
+    .comp { fill: #ffffff; stroke: #1d2330; stroke-width: 1.5; }
+    .hdr { fill: #2b2f36; }
+    .lider { stroke: #8a8f99; stroke-width: 1.2; fill: none; stroke-dasharray: 4 3; }
+    .v5 { stroke: #d32f2f; stroke-width: 4; fill: none; stroke-linecap: round; }
+    .gnd { stroke: #1d2330; stroke-width: 4; fill: none; stroke-linecap: round; }
+    .v33 { stroke: #ef7d00; stroke-width: 3; fill: none; stroke-linecap: round; }
+    .aviso { fill: #fff8e1; stroke: #b38600; stroke-width: 1.5; }
+  </style>
+  <defs>
+    <pattern id="agujeros" x="300" y="110" width="17.78" height="17.78" patternUnits="userSpaceOnUse">
+      <rect width="17.78" height="17.78" fill="#e9c98f"/>
+      <circle cx="8.89" cy="8.89" r="3.4" fill="#c79a52"/><circle cx="8.89" cy="8.89" r="1.6" fill="#fff"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="920" fill="#ffffff"/>
+  <text x="30" y="40" class="t">Placa de control: placa perforada de 7 × 9 cm (disposición sugerida)</text>
+  <text x="30" y="64" class="st">Documento Técnico 4.5 · vista desde el lado de los componentes · 7 px = 1 mm · la ubicación exacta queda a criterio del equipo</text>
+
+  <!-- placa -->
+  <rect x="300" y="110" width="490" height="630" rx="6" fill="url(#agujeros)" stroke="#8a6d2f" stroke-width="2"/>
+  <text x="545" y="760" text-anchor="middle" class="s">70 mm</text>
+  <text x="290" y="660" class="s" transform="rotate(-90 290 660)" text-anchor="middle">90 mm</text>
+
+  <!-- buses -->
+  <path d="M352 570 V640 H760 V250" class="v5"/>
+  <path d="M352 570 V172 M352 246 H372 M352 410 H372" class="v5"/>
+  <path d="M362 600 V652 H770 V268" class="gnd"/>
+  <path d="M362 600 V190" class="gnd"/>
+  <path d="M456 150 V128 H668 V510" class="v33"/>
+
+  <!-- DevKit -->
+  <rect x="447" y="131" width="196" height="385" rx="8" fill="#1f5fbf" fill-opacity="0.12" stroke="#1f5fbf" stroke-width="2.5" stroke-dasharray="8 5"/>
+  <rect x="451" y="152" width="10" height="340" class="hdr"/><rect x="629" y="152" width="10" height="340" class="hdr"/>
+  <rect x="512" y="300" width="66" height="80" rx="4" fill="#ffffff" stroke="#1f5fbf"/>
+  <text x="545" y="333" text-anchor="middle" class="b" style="fill:#1f5fbf">ESP32</text>
+  <text x="545" y="352" text-anchor="middle" class="s">DevKit</text>
+  <text x="545" y="398" text-anchor="middle" class="s">zócalos hembra</text>
+  <rect x="525" y="116" width="40" height="22" rx="3" fill="#b0b6c0" stroke="#5b6472"/>
+  <path d="M545 112 V86" stroke="#6a3fb5" stroke-width="3"/><polygon points="539,90 545,78 551,90" fill="#6a3fb5"/>
+  <text x="560" y="94" class="s">micro USB → Raspberry Pi (C16)</text>
+  <text x="472" y="166" class="pin">3V3</text>
+
+  <!-- conectores izquierda -->
+  <g>
+    <rect x="320" y="157" width="18" height="54" class="hdr"/>
+    <rect x="320" y="231" width="18" height="54" class="hdr"/>
+    <rect x="320" y="315" width="18" height="106" class="hdr"/>
+    <circle cx="329" cy="166" r="4" fill="#d4a600"/><circle cx="329" cy="248" r="4" fill="#d4a600"/>
+  </g>
+  <path d="M338 166 H451" stroke="#d4a600" stroke-width="2.5"/>
+  <path d="M338 248 H451" stroke="#d4a600" stroke-width="2.5"/>
+  <path d="M338 330 H451 M338 348 H451 M338 366 H451 M338 384 H451" stroke="#8a8f99" stroke-width="2.5"/>
+  <path d="M320 184 H230" class="lider"/><text x="225" y="180" text-anchor="end" class="b">Servo brazos · C07</text><text x="225" y="197" text-anchor="end" class="s">señal · +5 V · GND (GPIO18)</text>
+  <path d="M320 258 H230" class="lider"/><text x="225" y="254" text-anchor="end" class="b">Servo barra · C08</text><text x="225" y="271" text-anchor="end" class="s">señal · +5 V · GND (GPIO19)</text>
+  <path d="M320 368 H230" class="lider"/><text x="225" y="364" text-anchor="end" class="b">ULN2003 · C09</text><text x="225" y="381" text-anchor="end" class="s">IN1–IN4 · +5 V · GND</text><text x="225" y="398" text-anchor="end" class="s">(GPIO 32, 33, 25, 26)</text>
+
+  <!-- borne de alimentación -->
+  <rect x="318" y="552" width="56" height="64" rx="4" fill="#2e7d32" fill-opacity="0.25" stroke="#2e7d32" stroke-width="2"/>
+  <circle cx="335" cy="570" r="7" fill="#fff" stroke="#1d2330"/><circle cx="335" cy="600" r="7" fill="#fff" stroke="#1d2330"/>
+  <path d="M342 570 H352 M342 600 H362" stroke="#1d2330" stroke-width="2"/>
+  <path d="M318 585 H230" class="lider"/><text x="225" y="572" text-anchor="end" class="b">Entrada única de alimentación</text>
+  <text x="225" y="589" text-anchor="end" class="s">+5 V de la bornera (C02, AWG 20)</text><text x="225" y="606" text-anchor="end" class="s">GND de la bornera (C15, AWG 20)</text>
+
+  <!-- MOSFET y resistencias -->
+  <rect x="420" y="548" width="70" height="58" rx="3" fill="#9aa3ae" stroke="#1d2330"/>
+  <rect x="425" y="540" width="60" height="12" fill="#c9ced6" stroke="#1d2330"/>
+  <text x="455" y="582" text-anchor="middle" class="b" style="font-size:12px">IRLZ44N</text>
+  <rect x="408" y="616" width="34" height="11" rx="5" fill="#d8c7a0" stroke="#1d2330"/><text x="400" y="628" text-anchor="end" class="s">100 Ω</text>
+  <rect x="456" y="616" width="34" height="11" rx="5" fill="#d8c7a0" stroke="#1d2330"/><text x="497" y="611" class="s">100 kΩ</text>
+  <rect x="425" y="690" width="56" height="36" rx="4" fill="#2e7d32" fill-opacity="0.25" stroke="#2e7d32" stroke-width="2"/>
+  <circle cx="440" cy="708" r="6" fill="#fff" stroke="#1d2330"/><circle cx="466" cy="708" r="6" fill="#fff" stroke="#1d2330"/>
+  <path d="M453 726 V808 H445" class="lider"/><text x="440" y="815" text-anchor="end" class="b">Tira LED · C14</text><text x="440" y="832" text-anchor="end" class="s">(+) y (−) del drenador</text>
+
+  <!-- buzzer -->
+  <path d="M536 552 a16 16 0 0 1 32 0 v22 h-32 z" fill="#1d2330"/>
+  <text x="552" y="592" text-anchor="middle" class="b" style="font-size:12px">2N2222</text>
+  <rect x="580" y="556" width="34" height="11" rx="5" fill="#d8c7a0" stroke="#1d2330"/><text x="621" y="566" class="s">1 kΩ</text>
+  <rect x="580" y="580" width="30" height="9" rx="4" fill="#e04a3a" stroke="#1d2330"/><rect x="603" y="580" width="5" height="9" fill="#1d2330"/>
+  <text x="621" y="590" class="s">1N4148</text>
+  <rect x="530" y="690" width="56" height="36" rx="4" fill="#2e7d32" fill-opacity="0.25" stroke="#2e7d32" stroke-width="2"/>
+  <circle cx="545" cy="708" r="6" fill="#fff" stroke="#1d2330"/><circle cx="571" cy="708" r="6" fill="#fff" stroke="#1d2330"/>
+  <path d="M558 726 V808 H570" class="lider"/><text x="575" y="815" class="b">Buzzer · C13</text><text x="575" y="832" class="s">(dentro de la caja)</text>
+
+  <!-- BSS138 -->
+  <rect x="678" y="152" width="96" height="98" rx="4" fill="#1f5fbf" fill-opacity="0.18" stroke="#1f5fbf" stroke-width="2"/>
+  <text x="726" y="196" text-anchor="middle" class="b" style="font-size:13px">BSS138</text>
+  <text x="726" y="213" text-anchor="middle" class="s">LV ← · → HV</text>
+  <path d="M774 200 H840" class="lider"/><text x="845" y="196" class="b">Adaptador de nivel I2C (C10)</text><text x="845" y="213" class="s">LV: 3V3 y GPIO 21/22 · HV: +5 V</text>
+  <path d="M639 172 H678 M639 190 H678" stroke="#1f5fbf" stroke-width="2.5"/>
+  <!-- LCD -->
+  <rect x="740" y="280" width="18" height="72" class="hdr"/>
+  <path d="M758 316 H840" class="lider"/><text x="845" y="312" class="b">LCD 16×2 · C11</text><text x="845" y="329" class="s">+5 V · GND · SDA · SCL (lado HV)</text>
+  <!-- teclado -->
+  <rect x="740" y="372" width="18" height="142" class="hdr"/>
+  <path d="M639 400 H740 M639 420 H740 M639 440 H740 M639 460 H740" stroke="#8a8f99" stroke-width="2"/>
+  <g fill="#d8c7a0" stroke="#1d2330"><rect x="680" y="470" width="11" height="30" rx="5"/><rect x="694" y="470" width="11" height="30" rx="5"/><rect x="708" y="470" width="11" height="30" rx="5"/><rect x="722" y="470" width="11" height="30" rx="5"/></g>
+  <path d="M758 440 H840" class="lider"/><text x="845" y="436" class="b">Teclado 4×4 · C12</text><text x="845" y="453" class="s">8 hilos: filas 13/16/17/23,</text><text x="845" y="470" class="s">columnas 34/35/36/39</text>
+  <path d="M733 488 H840" class="lider"/><text x="845" y="492" class="s">4 × 10 kΩ de las columnas a 3V3</text>
+
+  <!-- leyenda buses -->
+  <path d="M845 560 H885" class="v5"/><text x="892" y="565">bus +5 V (desde C02)</text>
+  <path d="M845 588 H885" class="gnd"/><text x="892" y="593">bus GND (desde C15)</text>
+  <path d="M845 616 H885" class="v33"/><text x="892" y="621">3V3 del DevKit (no alimenta cargas)</text>
+
+  <rect x="20" y="850" width="1160" height="58" rx="8" class="aviso"/>
+  <text x="35" y="873" class="s">1) Soldar zócalos, conectores, borne, resistencias, MOSFET y transistor; NO insertar el DevKit todavía. 2) Con el multímetro: ningún zócalo del ESP32 con continuidad</text>
+  <text x="35" y="893" class="s">a +5 V; +5 V y GND sin corto. 3) Medir la separación entre filas de su DevKit (25,4 mm el de 38 pines; ~22,9 mm el de 30 pines) antes de soldar los zócalos.</text>
+</svg>

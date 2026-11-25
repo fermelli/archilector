@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" width="1200" height="640" font-family="Arial, Helvetica, sans-serif">
+  <style>
+    text { fill: #1d2330; font-size: 14px; }
+    .t { font-size: 22px; font-weight: 700; }
+    .st { font-size: 14px; fill: #5b6472; }
+    .h { font-size: 16px; font-weight: 700; }
+    .s { font-size: 12.5px; fill: #3f4652; }
+    .p { font-family: Consolas, "Courier New", monospace; font-weight: 700; fill: #1f5fbf; }
+    .marco { fill: #fbfcfd; stroke: #c9ced6; stroke-width: 1.5; }
+    .brazo { stroke: #5b6472; stroke-width: 6; stroke-linecap: round; }
+    .rod { fill: #1f5fbf; stroke: #103a7a; stroke-width: 1.5; }
+    .hoja { stroke: #1f5fbf; stroke-width: 2.5; fill: none; }
+    .fant { stroke: #8a8f99; stroke-width: 1.5; fill: none; stroke-dasharray: 5 4; }
+    .palanca { stroke: #4a4f58; stroke-width: 3; }
+  </style>
+  <defs>
+    <marker id="fa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1f5fbf"/></marker>
+    <g id="fondo">
+      <rect width="380" height="250" rx="10" class="marco"/>
+      <rect x="40" y="178" width="146" height="16" fill="#f7f5ef" stroke="#8a8f99"/>
+      <rect x="194" y="174" width="146" height="20" fill="#f7f5ef" stroke="#8a8f99"/>
+      <rect x="30" y="194" width="320" height="6" fill="#d9b98a"/>
+      <rect x="14" y="150" width="20" height="20" rx="3" fill="#1f5fbf" fill-opacity="0.85"/>
+      <circle cx="190" cy="160" r="5" fill="#103a7a"/>
+    </g>
+  </defs>
+  <rect width="1200" height="640" fill="#ffffff"/>
+  <text x="30" y="38" class="t">Secuencia TURN del mecanismo B (figura 8.2 del Técnico) y parámetros de calibración</text>
+  <text x="30" y="62" class="st">Todo lo ejecuta el ESP32 en el núcleo 1. Los nombres en azul son los parámetros CFG de la tabla 5.5.</text>
+
+  <!-- 1 reposo -->
+  <g transform="translate(20,80)">
+    <use href="#fondo"/>
+    <text x="14" y="26" class="h">1 · Reposo</text>
+    <path d="M190 160 V55" class="brazo"/><circle cx="190" cy="55" r="11" class="rod"/>
+    <path d="M32 160 L120 176" class="palanca"/><circle cx="120" cy="176" r="4" fill="#9aa3ae" stroke="#1d2330"/>
+    <path d="M194 173 H340" class="hoja"/>
+    <text x="14" y="222" class="s">Brazo en <tspan class="p">ANG_REPOSO</tspan> (90°), barra en</text>
+    <text x="14" y="239" class="s"><tspan class="p">BARRA_CERRADA</tspan>. La Pi toma la foto «antes».</text>
+  </g>
+  <!-- 2 apoyar -->
+  <g transform="translate(410,80)">
+    <use href="#fondo"/>
+    <text x="14" y="26" class="h">2 · Apoyar</text>
+    <path d="M190 55 A105 105 0 0 1 291 133" class="fant" marker-end="url(#fa)"/>
+    <path d="M190 160 H295" class="brazo"/><circle cx="295" cy="160" r="11" class="rod"/>
+    <path d="M32 160 L120 176" class="palanca"/><circle cx="120" cy="176" r="4" fill="#9aa3ae" stroke="#1d2330"/>
+    <path d="M194 173 H340" class="hoja"/>
+    <text x="14" y="222" class="s">Rampa a <tspan class="p">ANG_CONTACTO</tspan> (0°) a <tspan class="p">VEL_GIRO</tspan>;</text>
+    <text x="14" y="239" class="s">pausa <tspan class="p">T_ASENTAR</tspan>. El rodillo queda sobre la hoja.</text>
+  </g>
+  <!-- 3 arquear -->
+  <g transform="translate(800,80)">
+    <use href="#fondo"/>
+    <text x="14" y="26" class="h">3 · Arquear</text>
+    <path d="M190 160 H295" class="brazo"/><circle cx="295" cy="160" r="11" class="rod"/>
+    <path d="M308 150 A17 17 0 1 1 282 170" stroke="#1f5fbf" stroke-width="2" fill="none" marker-end="url(#fa)"/>
+    <path d="M32 160 L120 176" class="palanca"/><circle cx="120" cy="176" r="4" fill="#9aa3ae" stroke="#1d2330"/>
+    <path d="M194 173 C 215 120, 268 122, 286 166" class="hoja"/><path d="M286 172 H340" class="hoja"/>
+    <text x="14" y="222" class="s">El rodillo gira <tspan class="p">PASOS_ARCO</tspan> (+ extra en RETRY)</text>
+    <text x="14" y="239" class="s">hacia el lomo (<tspan class="p">DIR_RODILLO</tspan>): arquea una hoja.</text>
+  </g>
+  <!-- 4 abrir barra -->
+  <g transform="translate(20,350)">
+    <use href="#fondo"/>
+    <text x="14" y="26" class="h">4 · Abrir la barra</text>
+    <path d="M190 160 H295" class="brazo"/><circle cx="295" cy="160" r="11" class="rod"/>
+    <path d="M32 160 L110 100" class="palanca"/><circle cx="110" cy="100" r="4" fill="#9aa3ae" stroke="#1d2330"/>
+    <path d="M32 160 L120 176" class="fant"/>
+    <path d="M194 173 C 215 120, 268 122, 286 166" class="hoja"/>
+    <text x="14" y="222" class="s">Barra a <tspan class="p">BARRA_ABIERTA</tspan> (<tspan class="p">VEL_BARRA</tspan>). El motor</text>
+    <text x="14" y="239" class="s">se desenergiza: el rodillo gira libre al salir la hoja.</text>
+  </g>
+  <!-- 5 llevar -->
+  <g transform="translate(410,350)">
+    <use href="#fondo"/>
+    <text x="14" y="26" class="h">5 · Llevar</text>
+    <path d="M295 160 A105 105 0 0 0 89 133" class="fant" marker-end="url(#fa)"/>
+    <path d="M190 160 H85" class="brazo"/><circle cx="85" cy="160" r="11" class="rod"/>
+    <path d="M32 160 L110 100" class="palanca"/><circle cx="110" cy="100" r="4" fill="#9aa3ae" stroke="#1d2330"/>
+    <path d="M192 171 C 165 135, 110 140, 80 174" class="hoja"/>
+    <text x="14" y="222" class="s">Giro a <tspan class="p">ANG_DEPOSITO</tspan> (180°): los dedos llevan</text>
+    <text x="14" y="239" class="s">la hoja a la izquierda; pausa <tspan class="p">T_ASENTAR</tspan>.</text>
+  </g>
+  <!-- 6 soltar y volver -->
+  <g transform="translate(800,350)">
+    <use href="#fondo"/>
+    <text x="14" y="26" class="h">6 · Sujetar y volver</text>
+    <path d="M85 160 A105 105 0 0 1 163 59" class="fant" marker-end="url(#fa)"/>
+    <path d="M190 160 V55" class="brazo"/><circle cx="190" cy="55" r="11" class="rod"/>
+    <path d="M40 176 H186" class="hoja"/>
+    <path d="M32 160 L120 174" class="palanca"/><circle cx="120" cy="174" r="4" fill="#9aa3ae" stroke="#1d2330"/>
+    <text x="14" y="222" class="s"><tspan class="p">BARRA_CERRADA</tspan> aplana la hoja; brazo a 90°;</text>
+    <text x="14" y="239" class="s">responde DONE. Foto «después» y verificador IA.</text>
+  </g>
+
+  <text x="30" y="625" class="s">Si cualquier paso supera 10 s: FAIL,E04 y estado FALLA. STOP, la tecla D o 5 s sin tramas detienen el movimiento en menos de 100 ms (FAIL,E06). RETRY,n repite con n pasos extra de arco.</text>
+</svg>

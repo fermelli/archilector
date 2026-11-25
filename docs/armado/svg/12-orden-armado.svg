@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" font-family="Arial, Helvetica, sans-serif">
+  <style>
+    text { fill: #1d2330; font-size: 14px; }
+    .t { font-size: 22px; font-weight: 700; }
+    .st { font-size: 14px; fill: #5b6472; }
+    .h { font-size: 16px; font-weight: 700; }
+    .b { font-weight: 700; }
+    .s { font-size: 12.5px; fill: #3f4652; }
+    .prueba { font-size: 12.5px; font-weight: 700; fill: #2e7d32; }
+    .mec { fill: #f4efe6; stroke: #8a6d2f; stroke-width: 1.5; }
+    .ele { fill: #eaf1fb; stroke: #1f5fbf; stroke-width: 1.5; }
+    .pi { fill: #e9f5ea; stroke: #2e7d32; stroke-width: 1.5; }
+    .int { fill: #ffffff; stroke: #1d2330; stroke-width: 2; }
+    .carril { fill: none; stroke: #d9dde4; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .flecha { stroke: #5b6472; stroke-width: 1.8; fill: none; }
+  </style>
+  <defs>
+    <marker id="f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#5b6472"/></marker>
+  </defs>
+  <rect width="1200" height="800" fill="#ffffff"/>
+  <text x="30" y="38" class="t">Orden de armado y pruebas (Documento Técnico 9.3, 9.4 y 10.1)</text>
+  <text x="30" y="62" class="st">Los tres carriles pueden avanzar en paralelo con personas distintas. No se pasa a la caja siguiente con una prueba fallida.</text>
+
+  <rect x="20" y="80" width="370" height="390" rx="10" class="carril"/>
+  <rect x="410" y="80" width="370" height="390" rx="10" class="carril"/>
+  <rect x="800" y="80" width="380" height="390" rx="10" class="carril"/>
+  <text x="205" y="104" text-anchor="middle" class="h" style="fill:#8a6d2f">Mecánica (B3, P11)</text>
+  <text x="595" y="104" text-anchor="middle" class="h" style="fill:#1f5fbf">Electrónica (B1, B2, B6)</text>
+  <text x="990" y="104" text-anchor="middle" class="h" style="fill:#2e7d32">Raspberry Pi (B4, B5)</text>
+
+  <!-- Mecánica -->
+  <rect x="35" y="118" width="340" height="54" rx="8" class="mec"/><text x="47" y="140" class="b">1. Base P01 y atril P02</text><text x="47" y="159" class="s">marcar la línea del lomo · esquema 01</text>
+  <rect x="35" y="188" width="340" height="54" rx="8" class="mec"/><text x="47" y="210" class="b">2. Soportes P03 y eje del lomo P04</text><text x="47" y="229" class="s">paralelo al lomo, error ≤ 1 mm · esquema 07</text>
+  <rect x="35" y="258" width="340" height="54" rx="8" class="mec"/><text x="47" y="280" class="b">3. Eje del rodillo fuera del mecanismo</text><text x="47" y="299" class="prueba">T3.0 rodillos · esquema 08</text>
+  <rect x="35" y="328" width="340" height="54" rx="8" class="mec"/><text x="47" y="350" class="b">4. Brazos, eje, motor, dedos y barra</text><text x="47" y="369" class="s">MG996R a 90° antes de acoplar · esquema 06</text>
+  <rect x="35" y="398" width="340" height="54" rx="8" class="mec"/><text x="47" y="420" class="b">5. Torre P11 y viga</text><text x="47" y="439" class="s">fuera del giro del brazo · esquema 09</text>
+  <path d="M205 172 V186" class="flecha" marker-end="url(#f)"/><path d="M205 242 V256" class="flecha" marker-end="url(#f)"/><path d="M205 312 V326" class="flecha" marker-end="url(#f)"/><path d="M205 382 V396" class="flecha" marker-end="url(#f)"/>
+
+  <!-- Electrónica -->
+  <rect x="425" y="118" width="340" height="54" rx="8" class="ele"/><text x="437" y="140" class="b">1. Alimentación: jack, fusible, bornera</text><text x="437" y="159" class="prueba">T1.1 · T1.2 · T1.3 · esquema 02</text>
+  <rect x="425" y="188" width="340" height="54" rx="8" class="ele"/><text x="437" y="210" class="b">2. Placa de control, sin el DevKit</text><text x="437" y="229" class="s">continuidad: ningún pin a +5 V · esquemas 03–05</text>
+  <rect x="425" y="258" width="340" height="54" rx="8" class="ele"/><text x="437" y="280" class="b">3. Firmware prueba_salidas</text><text x="437" y="299" class="prueba">T2.2 · T2.3 · T2.4 · T2.5</text>
+  <rect x="425" y="328" width="340" height="54" rx="8" class="ele"/><text x="437" y="350" class="b">4. Firmware principal + prueba-enlace</text><text x="437" y="369" class="prueba">T2.1 · TC.1 a TC.6</text>
+  <rect x="425" y="398" width="340" height="54" rx="8" class="ele"/><text x="437" y="420" class="b">5. LCD, teclado y buzzer en la caja</text><text x="437" y="439" class="prueba">T6.1 · T6.2 (D detiene en &lt; 100 ms)</text>
+  <path d="M595 172 V186" class="flecha" marker-end="url(#f)"/><path d="M595 242 V256" class="flecha" marker-end="url(#f)"/><path d="M595 312 V326" class="flecha" marker-end="url(#f)"/><path d="M595 382 V396" class="flecha" marker-end="url(#f)"/>
+
+  <!-- Pi -->
+  <rect x="815" y="118" width="350" height="54" rx="8" class="pi"/><text x="827" y="140" class="b">1. Pi OS Lite 64 bits + instalar.sh</text><text x="827" y="159" class="s">regla udev, servicio, Piper y Vosk</text>
+  <rect x="815" y="188" width="350" height="54" rx="8" class="pi"/><text x="827" y="210" class="b">2. Cámara en la viga, LED con difusor</text><text x="827" y="229" class="prueba">T4.1 · T4.2 · T4.3 · T4.4</text>
+  <rect x="815" y="258" width="350" height="54" rx="8" class="pi"/><text x="827" y="280" class="b">3. Audio: PAM8403, parlante, micrófono</text><text x="827" y="299" class="prueba">T6.3 · T6.4</text>
+  <rect x="815" y="328" width="350" height="54" rx="8" class="pi"/><text x="827" y="350" class="b">4. Temperatura, puerto fijo y tiempos</text><text x="827" y="369" class="prueba">T5.1 · T5.2 · T5.3</text>
+  <path d="M990 172 V186" class="flecha" marker-end="url(#f)"/><path d="M990 242 V256" class="flecha" marker-end="url(#f)"/><path d="M990 312 V326" class="flecha" marker-end="url(#f)"/>
+
+  <!-- integración -->
+  <path d="M205 452 V505 H405" class="flecha" marker-end="url(#f)"/>
+  <path d="M595 452 V476" class="flecha" marker-end="url(#f)"/>
+  <path d="M990 382 V575 H790" class="flecha" marker-end="url(#f)"/>
+  <rect x="410" y="478" width="380" height="54" rx="8" class="int"/><text x="422" y="500" class="b">6. Calibrar el mecanismo con CFG (tabla 5.5)</text><text x="422" y="519" class="prueba">T3.1 ángulos · T3.2 arco · T3.3 20 ciclos sin libro</text>
+  <path d="M600 532 V546" class="flecha" marker-end="url(#f)"/>
+  <rect x="410" y="548" width="380" height="54" rx="8" class="int"/><text x="422" y="570" class="b">7. Energización por etapas (9.4) y ciclo completo</text><text x="422" y="589" class="prueba">TI.1 · TI.2 · TI.3 · T1.4</text>
+  <path d="M600 602 V616" class="flecha" marker-end="url(#f)"/>
+  <rect x="410" y="618" width="380" height="54" rx="8" class="int"/><text x="422" y="640" class="b">8. 100 volteos con 3 libros, verificador activo</text><text x="422" y="659" class="prueba">T3.4 · TI.4 (el panel muestra las tasas)</text>
+  <path d="M600 672 V688" class="flecha" marker-end="url(#f)"/>
+  <polygon points="600,690 770,730 600,770 430,730" fill="#fff8e1" stroke="#b38600" stroke-width="2"/>
+  <text x="600" y="726" text-anchor="middle" class="b">≥ 90 % correctos y</text><text x="600" y="744" text-anchor="middle" class="b">≤ 5 % hojas dobles?</text>
+  <path d="M770 730 H815" class="flecha" marker-end="url(#f)"/><text x="790" y="722" text-anchor="middle" class="b" style="fill:#2e7d32">Sí</text>
+  <rect x="815" y="700" width="365" height="62" rx="8" class="pi"/><text x="827" y="723" class="b">Seguir con B: TI.5 · TI.6 · TI.7</text><text x="827" y="744" class="s">juntar ~1 200 pares, etiquetar y entrenar en Colab</text>
+  <path d="M430 730 H385" class="flecha" marker-end="url(#f)"/><text x="408" y="722" text-anchor="middle" class="b" style="fill:#b3261e">No</text>
+  <rect x="20" y="700" width="365" height="62" rx="8" fill="#fdecea" stroke="#d32f2f" stroke-width="1.5"/><text x="32" y="723" class="b">Pasar a la alternativa A</text><text x="32" y="744" class="s">ventosa de vacío (Anexo A del Técnico)</text>
+  <text x="30" y="788" class="s">Cada prueba se anota en la hoja de registro (Técnico 10.2), aunque falle. Plan B si no llega ninguna mecánica: modo asistido (la persona pasa la hoja).</text>
+</svg>

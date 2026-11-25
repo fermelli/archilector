@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" width="1200" height="700" font-family="Arial, Helvetica, sans-serif">
+  <style>
+    text { fill: #1d2330; font-size: 14px; }
+    .t { font-size: 22px; font-weight: 700; }
+    .st { font-size: 14px; fill: #5b6472; }
+    .b { font-weight: 700; }
+    .s { font-size: 13px; fill: #3f4652; }
+    .madera { fill: #d9b98a; stroke: #8a6d2f; stroke-width: 1.5; }
+    .papel { fill: #f7f5ef; stroke: #8a8f99; stroke-width: 1.2; }
+    .cota { stroke: #5b6472; stroke-width: 1.2; fill: none; }
+    .fant { stroke: #8a8f99; stroke-width: 2; fill: none; stroke-dasharray: 7 6; }
+    .ref { stroke: #b0b6c0; stroke-width: 1; fill: none; stroke-dasharray: 3 3; }
+  </style>
+  <defs>
+    <marker id="f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5b6472"/></marker>
+    <marker id="fa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#1f5fbf"/></marker>
+  </defs>
+  <rect width="1200" height="700" fill="#ffffff"/>
+  <text x="30" y="40" class="t">Mecanismo B · vista frontal (el eje del lomo apunta hacia usted)</text>
+  <text x="30" y="64" class="st">Escala 2 px = 1 mm · libro de 14 × 21 cm · Documento Técnico 5.1, tabla 5.1 y tabla 5.5</text>
+
+  <!-- cámara -->
+  <path d="M600 200 V100" stroke="#5b6472" stroke-width="1.5" marker-end="url(#f)"/>
+  <text x="612" y="112" class="s">cámara a 350 mm de la página (esquema 09)</text>
+
+  <!-- base y atril -->
+  <rect x="100" y="540" width="1000" height="18" class="madera"/>
+  <text x="1095" y="600" text-anchor="end" class="s">P01 base · MDF 9 mm · 500 × 380 mm</text>
+  <rect x="280" y="530" width="640" height="10" class="madera" style="fill:#e8d2ad"/>
+  <rect x="280" y="510" width="10" height="20" class="madera"/><rect x="910" y="510" width="10" height="20" class="madera"/>
+  <text x="285" y="600" class="s">P02 atril · MDF 5 mm · 320 mm, con topes laterales de 10 mm</text>
+
+  <!-- libro -->
+  <rect x="316" y="527" width="568" height="4" fill="#7a2e2e"/>
+  <rect x="320" y="512" width="278" height="16" class="papel"/>
+  <rect x="602" y="506" width="278" height="22" class="papel"/>
+  <path d="M600 531 V470" class="ref"/>
+  <text x="459" y="524" text-anchor="middle" class="s">páginas leídas</text>
+  <text x="741" y="522" text-anchor="middle" class="s">páginas por leer</text>
+
+  <!-- soporte P03 -->
+  <rect x="586" y="455" width="28" height="85" rx="3" fill="#8a6d2f" fill-opacity="0.18" stroke="#8a6d2f" stroke-dasharray="4 3"/>
+
+  <!-- trayectoria -->
+  <path d="M840 476 A240 240 0 0 0 360 476" class="fant"/>
+  <path d="M780 300 A 210 210 0 0 0 700 262" stroke="#1f5fbf" stroke-width="2" fill="none" marker-end="url(#fa)"/>
+
+  <!-- brazo en 90° y 180° (fantasmas) -->
+  <path d="M600 476 V236" class="fant"/><circle cx="600" cy="236" r="24" class="fant"/>
+  <path d="M600 476 H360" class="fant"/><circle cx="360" cy="476" r="24" class="fant"/>
+
+  <!-- barra de retención -->
+  <rect x="196" y="472" width="40" height="34" rx="4" fill="#1f5fbf" fill-opacity="0.85"/>
+  <text x="216" y="494" text-anchor="middle" style="fill:#fff;font-size:12px;font-weight:700">SG90</text>
+  <path d="M232 488 L464 505" stroke="#5b6472" stroke-width="4"/>
+  <circle cx="470" cy="505" r="7" fill="#9aa3ae" stroke="#1d2330"/>
+  <path d="M232 488 L430 398" class="fant"/><circle cx="434" cy="396" r="7" fill="none" stroke="#8a8f99" stroke-width="2" stroke-dasharray="3 2"/>
+  <text x="444" y="392" class="s">barra abierta</text>
+  <path d="M216 506 V600" class="cota"/>
+  <text x="30" y="618" class="b">P10 barra de retención + SG90</text>
+  <text x="30" y="636" class="s">varilla de aluminio 6 × 260 mm, paralela al lomo;</text>
+  <text x="30" y="653" class="s">ángulos BARRA_ABIERTA y BARRA_CERRADA</text>
+
+  <!-- hoja arqueada -->
+  <path d="M604 506 C 650 425, 775 425, 812 497" stroke="#1f5fbf" stroke-width="3" fill="none"/>
+  <text x="700" y="420" text-anchor="middle" class="b" style="fill:#1f5fbf">hoja arqueada</text>
+
+  <!-- brazo en 0° -->
+  <path d="M600 476 H840" stroke="#5b6472" stroke-width="9" stroke-linecap="round"/>
+  <rect x="788" y="486" width="30" height="6" fill="#4a4f58"/>
+  <circle cx="840" cy="476" r="24" fill="#1f5fbf" stroke="#103a7a" stroke-width="2"/>
+  <circle cx="840" cy="476" r="6" fill="#d9dde4"/>
+  <circle cx="600" cy="476" r="10" fill="#103a7a"/>
+
+  <!-- etiquetas de piezas -->
+  <path d="M600 476 L520 560" class="cota"/>
+  <text x="380" y="640" class="b">P04 eje del lomo (Ø 8 mm, 300 mm) + P09 servo MG996R</text>
+  <path d="M520 560 V625" class="cota"/>
+  <text x="380" y="658" class="s">P03 soportes delantero y trasero con 608ZZ y ranura de altura</text>
+  <path d="M864 466 H930" class="cota"/>
+  <text x="935" y="455" class="b">P06 rodillos Canon (2)</text>
+  <text x="935" y="473" class="s">en la varilla M8 (P12),</text>
+  <text x="935" y="490" class="s">girados por el 28BYJ-48 (P07)</text>
+  <path d="M826 480 L930 508" class="cota"/>
+  <text x="935" y="512" class="s">P05 brazos (par) · acrílico 3 mm</text>
+  <path d="M818 492 L930 526" class="cota"/>
+  <text x="935" y="531" class="s">P08 dedos de arrastre (PET 0,3 mm)</text>
+
+  <!-- ángulos -->
+  <text x="935" y="380" class="b" style="fill:#1f5fbf">0° · contacto (ANG_CONTACTO)</text>
+  <text x="935" y="397" class="s">unos grados menos = más presión</text>
+  <text x="935" y="414" class="s">del rodillo sobre la página</text>
+  <text x="672" y="228" class="b" style="fill:#1f5fbf">90° · reposo (ANG_REPOSO)</text>
+  <text x="672" y="246" class="s">casi no tapa la vista de la cámara</text>
+  <text x="330" y="440" text-anchor="end" class="b" style="fill:#1f5fbf">180° · depósito</text>
+  <text x="330" y="458" text-anchor="end" class="s">ANG_DEPOSITO</text>
+
+  <!-- cotas -->
+  <path d="M600 448 H840" class="cota" marker-start="url(#f)" marker-end="url(#f)"/>
+  <text x="720" y="442" text-anchor="middle" class="s">120 mm</text>
+  <path d="M565 476 H590 M565 506 H602" class="ref"/>
+  <path d="M570 478 V504" class="cota" marker-start="url(#f)" marker-end="url(#f)"/>
+  <text x="562" y="496" text-anchor="end" class="s">~15 mm</text>
+  <path d="M602 572 H880" class="cota" marker-start="url(#f)" marker-end="url(#f)"/>
+  <text x="741" y="566" text-anchor="middle" class="s">140 mm</text>
+  <path d="M624 212 H660 M640 506 H660" class="ref"/>
+  <path d="M655 214 V504" class="cota" marker-start="url(#f)" marker-end="url(#f)"/>
+  <text x="662" y="330" class="s">≈ 135 mm</text>
+  <text x="662" y="346" class="s">altura máx.</text>
+
+  <text x="30" y="690" class="s">Ciclo TURN: 0° contacto → el rodillo arquea la hoja (PASOS_ARCO) → la barra se abre → giro a 180° → la barra cierra → vuelta a 90° (esquema 11).</text>
+</svg>

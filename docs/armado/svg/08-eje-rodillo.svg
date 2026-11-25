@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 690" width="1060" height="690" font-family="Arial, Helvetica, sans-serif">
+  <style>
+    text { fill: #1d2330; font-size: 14px; }
+    .t { font-size: 22px; font-weight: 700; }
+    .st { font-size: 14px; fill: #5b6472; }
+    .b { font-weight: 700; }
+    .s { font-size: 13px; fill: #3f4652; }
+    .r { font-size: 12px; fill: #3f4652; font-family: Consolas, "Courier New", monospace; }
+    .tuerca { fill: #4a4f58; }
+    .lider { stroke: #8a8f99; stroke-width: 1.2; fill: none; stroke-dasharray: 4 3; }
+    .cota { stroke: #5b6472; stroke-width: 1.2; fill: none; }
+    .paso { fill: #f6f8fb; stroke: #c9ced6; stroke-width: 1.5; }
+  </style>
+  <defs>
+    <pattern id="rosca" width="6" height="16" patternUnits="userSpaceOnUse" patternTransform="skewX(-25)"><rect width="6" height="16" fill="#b7bec8"/><path d="M0 0 V16" stroke="#6b737e" stroke-width="2"/></pattern>
+  </defs>
+  <rect width="1060" height="690" fill="#ffffff"/>
+  <text x="20" y="36" class="t">Eje del rodillo: dos rodillos Canon FB6-3405-000 sobre varilla M8</text>
+  <text x="20" y="60" class="st">Vista lateral · 3 px = 1 mm · posiciones desde el centro de la página: (−) hacia el brazo trasero, (+) hacia el delantero (tabla 5.2)</text>
+
+  <!-- regla -->
+  <path d="M180 160 H990" stroke="#5b6472" stroke-width="1.2"/>
+  <g stroke="#5b6472" stroke-width="1.2">
+    <path d="M180 154 V166 M240 154 V166 M285 154 V166 M495 154 V166 M600 150 V170 M705 154 V166 M915 154 V166 M960 154 V166 M990 154 V166"/>
+  </g>
+  <g class="r" text-anchor="middle">
+    <text x="180" y="146">−140</text><text x="240" y="146">−120</text><text x="285" y="128">−105</text><text x="495" y="146">−35</text>
+    <text x="600" y="143" style="font-weight:700">0</text>
+    <text x="705" y="146">+35</text><text x="915" y="128">+105</text><text x="960" y="146">+120</text><text x="1000" y="128">+130</text>
+  </g>
+  <text x="1000" y="100" text-anchor="middle" class="s">posición (mm)</text>
+  <g stroke="#d9dde4" stroke-width="1"><path d="M240 166 V190 M495 166 V190 M705 166 V190 M960 166 V190 M180 166 V220 M990 166 V220"/></g>
+
+  <!-- brazos -->
+  <rect x="223" y="150" width="34" height="165" rx="6" fill="#cfe0f5" fill-opacity="0.8" stroke="#1f5fbf"/>
+  <rect x="943" y="150" width="34" height="165" rx="6" fill="#cfe0f5" fill-opacity="0.8" stroke="#1f5fbf"/>
+  <text x="240" y="330" text-anchor="middle" class="s" style="fill:#1f5fbf">brazo trasero</text>
+  <text x="960" y="330" text-anchor="middle" class="s" style="fill:#1f5fbf">brazo delantero</text>
+
+  <!-- varilla -->
+  <rect x="180" y="222" width="810" height="16" fill="url(#rosca)" stroke="#4a4f58"/>
+
+  <!-- motor y acople -->
+  <rect x="48" y="188" width="57" height="84" rx="12" fill="#3f6fb5" stroke="#1d2330"/>
+  <text x="76" y="234" text-anchor="middle" style="fill:#fff;font-size:11px;font-weight:700">28BYJ</text>
+  <rect x="105" y="225" width="18" height="10" fill="#9aa3ae" stroke="#4a4f58"/>
+  <rect x="120" y="212" width="72" height="36" rx="5" fill="#d0d5dc" stroke="#4a4f58"/>
+  <path d="M132 212 V248 M144 212 V248 M156 212 V248 M168 212 V248 M180 212 V248" stroke="#8a8f99"/>
+
+  <!-- rodamientos y tuercas -->
+  <rect x="229" y="197" width="22" height="66" rx="3" fill="#ffffff" stroke="#1d2330" stroke-width="2"/>
+  <circle cx="240" cy="230" r="7" fill="none" stroke="#1d2330"/>
+  <rect x="207" y="211" width="20" height="38" class="tuerca"/><rect x="253" y="211" width="20" height="38" class="tuerca"/>
+  <rect x="949" y="197" width="22" height="66" rx="3" fill="#ffffff" stroke="#1d2330" stroke-width="2"/>
+  <circle cx="960" cy="230" r="7" fill="none" stroke="#1d2330"/>
+  <rect x="927" y="211" width="20" height="38" class="tuerca"/><rect x="972" y="211" width="18" height="38" class="tuerca"/>
+
+  <!-- rodillos -->
+  <rect x="438" y="200" width="12" height="60" fill="#2b2f36"/>
+  <rect x="450" y="192" width="90" height="76" rx="10" fill="#1f5fbf" stroke="#103a7a" stroke-width="2"/>
+  <path d="M462 192 V268 M474 192 V268 M486 192 V268 M498 192 V268 M510 192 V268 M522 192 V268" stroke="#174a94" stroke-width="2"/>
+  <rect x="416" y="211" width="20" height="38" class="tuerca"/><rect x="542" y="211" width="20" height="38" class="tuerca"/>
+  <rect x="750" y="200" width="12" height="60" fill="#2b2f36"/>
+  <rect x="660" y="192" width="90" height="76" rx="10" fill="#1f5fbf" stroke="#103a7a" stroke-width="2"/>
+  <path d="M672 192 V268 M684 192 V268 M696 192 V268 M708 192 V268 M720 192 V268 M732 192 V268" stroke="#174a94" stroke-width="2"/>
+  <rect x="638" y="211" width="20" height="38" class="tuerca"/><rect x="764" y="211" width="20" height="38" class="tuerca"/>
+
+  <!-- ancho de página -->
+  <rect x="285" y="290" width="630" height="14" rx="3" fill="#eceef1"/>
+  <text x="600" y="301" text-anchor="middle" class="s">ancho de la página: 210 mm (borde a borde)</text>
+
+  <!-- etiquetas -->
+  <path d="M76 272 V362" class="lider"/>
+  <text x="20" y="378" class="b">28BYJ-48 (P07)</text><text x="20" y="394" class="s">fijo al brazo trasero</text>
+  <path d="M156 248 V410" class="lider"/>
+  <text x="120" y="426" class="b">Acople flexible 5 × 8 mm</text><text x="120" y="442" class="s">la varilla entra ~4 mm</text>
+  <path d="M240 315 V362" class="lider"/>
+  <text x="220" y="378" class="b">608ZZ (P14) en el brazo</text><text x="220" y="394" class="s">tuerca a cada lado</text>
+  <path d="M495 268 V362" class="lider"/>
+  <text x="495" y="378" text-anchor="middle" class="b">Rodillo Canon 1 (P06)</text><text x="495" y="394" text-anchor="middle" class="s">engranaje negro hacia afuera</text>
+  <path d="M705 268 V410" class="lider"/>
+  <text x="705" y="426" text-anchor="middle" class="b">Rodillo Canon 2 (P06)</text><text x="705" y="442" text-anchor="middle" class="s">el engranaje no se usa</text>
+  <path d="M960 315 V362" class="lider"/>
+  <text x="1045" y="378" text-anchor="end" class="b">608ZZ en el brazo</text><text x="1045" y="394" text-anchor="end" class="s">+ 2 tuercas</text>
+  <text x="600" y="476" text-anchor="middle" class="s">Tuercas y arandelas M8 (P13): 4 fijan los rodillos y 4 traban los rodamientos → 8 + 8 · La varilla mide 270 mm (P12).</text>
+
+  <!-- pasos -->
+  <rect x="20" y="496" width="1020" height="180" rx="10" class="paso"/>
+  <text x="36" y="522" class="b">Armado fuera del mecanismo (Documento Técnico 5.4, pasos 4 a 6)</text>
+  <text x="36" y="548">1. Antes de montar, prueba T3.0: sujetar el engranaje y girar la goma en ambos sentidos. Si gira suelta, tiene embrague → CFG EMBRAGUE 1.</text>
+  <text x="36" y="572">2. Medir el diámetro D y el largo de la goma. Cortar la varilla a 270 mm y marcar el centro, ±35 mm y ±120 mm.</text>
+  <text x="36" y="596">3. Por cada rodillo: tuerca + arandela, rodillo con el engranaje hacia afuera, arandela + tuerca. Apretar con el centro de la goma en ±35 mm.</text>
+  <text x="36" y="620">4. Pasar los extremos por los 608ZZ de los brazos y trabar con una tuerca a cada lado de cada brazo, sin apretar tanto que frenen el giro.</text>
+  <text x="36" y="644">5. Montar el motor en el brazo trasero y unirlo con el acople. La varilla debe girar sin rozar ni cabecear.</text>
+  <text x="36" y="668">6. Alternativa: varilla lisa de 8 mm con collarines con prisionero (más prolija). Un husillo T8 no sirve: no acepta tuercas M8.</text>
+</svg>

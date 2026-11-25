@@ -7,10 +7,14 @@ varilla M8, brazo con servo MG996R, motor 28BYJ-48 y barra de retención con SG9
 
 ```
 ArchiLector/
+├─ docs/armado/        Guía de armado paso a paso con 12 esquemas SVG
 ├─ firmware/esp32/     ESP32 · PlatformIO + Arduino · tiempo real del volteo (bloque B2)
 ├─ pi/                 Raspberry Pi 4 · Python · visión, OCR, IA, voz, PDF y panel web (B4, B5, B6)
 └─ entrenamiento/      Google Colab · verificador de volteo y clasificador de páginas (Bloque IV)
 ```
+
+**¿Empezando desde cero?** Siga la [guía de armado](docs/armado/README.md): lista de compras,
+esquemas eléctricos y mecánicos, orden de armado, pruebas y calibración.
 
 La regla de reparto es la del Documento Técnico: **la Raspberry Pi nunca mueve un actuador y el ESP32
 nunca decide si una página quedó bien volteada.**

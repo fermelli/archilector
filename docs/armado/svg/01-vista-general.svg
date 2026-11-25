@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" font-family="Arial, Helvetica, sans-serif">
+  <style>
+    text { fill: #1d2330; font-size: 14px; }
+    .t { font-size: 22px; font-weight: 700; }
+    .st { font-size: 14px; fill: #5b6472; }
+    .b { font-weight: 700; }
+    .s { font-size: 13px; fill: #3f4652; }
+    .madera { fill: #ecd9b8; stroke: #8a6d2f; stroke-width: 2; }
+    .atril { fill: #e1c697; stroke: #8a6d2f; stroke-width: 1.5; }
+    .papel { fill: #f7f5ef; stroke: #8a8f99; stroke-width: 1.2; }
+    .elev { fill: none; stroke: #5b6472; stroke-width: 1.8; stroke-dasharray: 7 5; }
+    .lider { stroke: #8a8f99; stroke-width: 1.2; fill: none; }
+    .cable { stroke: #6a3fb5; stroke-width: 2.5; fill: none; stroke-dasharray: 2 4; stroke-linecap: round; }
+    .cota { stroke: #5b6472; stroke-width: 1.2; fill: none; }
+  </style>
+  <defs>
+    <marker id="f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5b6472"/></marker>
+  </defs>
+  <rect width="1200" height="800" fill="#ffffff"/>
+  <text x="30" y="38" class="t">Vista general desde arriba: disposición sugerida sobre la base</text>
+  <text x="30" y="62" class="st">Escala 1,6 px = 1 mm · línea discontinua = elevado (viga, cámara, Pi) · brazo dibujado en reposo (90°) · el usuario está abajo</text>
+
+  <!-- base -->
+  <rect x="200" y="110" width="800" height="608" rx="6" class="madera"/>
+  <path d="M200 740 H1000" class="cota" marker-start="url(#f)" marker-end="url(#f)"/><text x="600" y="760" text-anchor="middle" class="s">P01 base · 500 mm</text>
+  <path d="M222 112 V716" class="cota" marker-start="url(#f)" marker-end="url(#f)"/><text x="238" y="520" text-anchor="middle" class="s" transform="rotate(-90 238 520)">380 mm</text>
+
+  <!-- atril y libro -->
+  <rect x="344" y="222" width="512" height="384" class="atril"/>
+  <rect x="376" y="246" width="224" height="336" class="papel"/><rect x="600" y="246" width="224" height="336" class="papel"/>
+  <text x="430" y="300" text-anchor="middle" class="s">páginas leídas</text>
+  <text x="712" y="300" text-anchor="middle" class="s">páginas por leer</text>
+  <text x="712" y="570" text-anchor="middle" class="s">libro abierto 280 × 210 mm</text>
+
+  <!-- eje del lomo, soportes, servo -->
+  <rect x="568" y="158" width="64" height="32" rx="3" fill="#d9b98a" stroke="#8a6d2f"/>
+  <rect x="568" y="638" width="64" height="32" rx="3" fill="#d9b98a" stroke="#8a6d2f"/>
+  <rect x="596" y="166" width="8" height="496" fill="#9aa3ae" stroke="#4a4f58"/>
+  <rect x="568" y="118" width="64" height="36" rx="4" fill="#1d2330"/>
+  <text x="600" y="141" text-anchor="middle" style="fill:#fff;font-size:12px;font-weight:700">MG996R</text>
+  <!-- brazos en reposo y varilla elevada -->
+  <rect x="606" y="190" width="12" height="432" rx="4" class="elev"/>
+  <rect x="604" y="214" width="16" height="16" fill="#cfe0f5" stroke="#1f5fbf"/><rect x="604" y="598" width="16" height="16" fill="#cfe0f5" stroke="#1f5fbf"/>
+
+  <!-- barra -->
+  <rect x="491" y="206" width="10" height="416" rx="5" fill="#9aa3ae" stroke="#4a4f58"/>
+  <rect x="480" y="626" width="32" height="26" rx="3" fill="#1f5fbf"/>
+
+  <!-- torre, viga, cámara, Pi -->
+  <rect x="928" y="390" width="48" height="48" rx="3" fill="#c9ced6" stroke="#4a4f58" stroke-width="2"/>
+  <rect x="560" y="404" width="392" height="20" class="elev"/>
+  <circle cx="600" cy="414" r="11" fill="#2e7d32"/><circle cx="600" cy="414" r="4" fill="#1d2330"/>
+  <rect x="660" y="390" width="136" height="48" rx="4" class="elev" style="stroke:#2e7d32"/>
+  <text x="728" y="419" text-anchor="middle" class="s" style="fill:#2e7d32">Pi 4</text>
+  <rect x="540" y="396" width="14" height="36" class="elev" style="stroke:#b38600"/><rect x="646" y="396" width="10" height="36" class="elev" style="stroke:#b38600"/>
+
+  <!-- caja de electrónica -->
+  <rect x="864" y="478" width="128" height="232" rx="6" fill="#ffffff" stroke="#1d2330" stroke-width="2"/>
+  <rect x="876" y="494" width="104" height="40" rx="3" fill="#fdecea" stroke="#d32f2f"/><text x="928" y="519" text-anchor="middle" class="s">bornera</text>
+  <rect x="876" y="544" width="104" height="96" rx="3" fill="#eaf1fb" stroke="#1f5fbf"/><text x="928" y="588" text-anchor="middle" class="s">placa de</text><text x="928" y="604" text-anchor="middle" class="s">control</text>
+  <rect x="876" y="650" width="104" height="44" rx="3" fill="#eceef1" stroke="#5b6472"/><text x="928" y="677" text-anchor="middle" class="s">teclado 4×4</text>
+  <rect x="872" y="704" width="112" height="10" fill="#9ad08d" stroke="#2e7d32"/>
+  <circle cx="985" cy="484" r="5" fill="#1d2330"/>
+
+  <!-- micrófono -->
+  <circle cx="420" cy="698" r="10" fill="#4a4f58"/><circle cx="420" cy="698" r="4" fill="#c9ced6"/>
+
+  <!-- cables -->
+  <path d="M952 438 V470" class="cable"/>
+
+  <!-- etiquetas izquierda -->
+  <path d="M568 136 H190" class="lider"/><text x="20" y="140" class="b">P09 MG996R</text><text x="20" y="157" class="s">en el soporte trasero</text>
+  <path d="M568 174 L330 200 H200" class="lider"/>
+  <text x="20" y="208" class="b">P03 soportes del eje</text><text x="20" y="225" class="s">trasero y delantero, 608ZZ</text>
+  <path d="M496 400 H190" class="lider"/><text x="20" y="396" class="b">P10 barra de retención</text><text x="20" y="413" class="s">sobre las páginas leídas</text>
+  <path d="M480 640 H190" class="lider"/><text x="20" y="636" class="b">SG90 de la barra</text>
+  <path d="M410 698 L190 690" class="lider"/><text x="20" y="682" class="b">Micrófono USB</text><text x="20" y="699" class="s">al frente, lejos de los servos;</text><text x="20" y="716" class="s">su cable sube por la torre</text>
+
+  <!-- etiquetas derecha -->
+  <path d="M618 300 L1010 230" class="lider"/><text x="1015" y="214" class="b">Brazos + rodillos</text><text x="1015" y="231" class="s">en reposo, sobre el lomo</text><text x="1015" y="248" class="s">(esquemas 06 a 08)</text>
+  <path d="M600 414 L620 360 H1010 V300" class="lider"/><text x="1015" y="286" class="b">Cámara a 350 mm</text><text x="1015" y="303" class="s">en la viga (esquema 09)</text>
+  <path d="M976 414 H1010" class="lider"/><text x="1015" y="410" class="b">P11 torre</text><text x="1015" y="427" class="s">fuera del giro del brazo</text>
+  <path d="M992 560 H1010" class="lider"/><text x="1015" y="540" class="b">Caja de electrónica</text><text x="1015" y="557" class="s">bornera, fusible, placa</text><text x="1015" y="574" class="s">de control y buzzer</text>
+  <path d="M984 709 H1010" class="lider"/><text x="1015" y="700" class="b">LCD en el frente</text><text x="1015" y="717" class="s">teclado sobre la caja</text>
+  <path d="M985 484 L1010 470" class="lider"/><text x="1015" y="474" class="s">jack 5 V e interruptor</text>
+  <text x="1015" y="620" class="s" style="fill:#6a3fb5">USB Pi ↔ ESP32 (C16)</text><text x="1015" y="637" class="s" style="fill:#6a3fb5">baja por la torre, ≤ 1 m</text>
+  <path d="M952 455 L1010 615" class="lider"/>
+
+  <text x="600" y="790" text-anchor="middle" class="b">FRENTE · usuario</text>
+</svg>

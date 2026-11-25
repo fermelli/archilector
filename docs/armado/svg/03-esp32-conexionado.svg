@@ -1,0 +1,197 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1300 900" width="1300" height="900" font-family="Arial, Helvetica, sans-serif">
+  <style>
+    text { fill: #1d2330; font-size: 14px; }
+    .t { font-size: 22px; font-weight: 700; }
+    .st { font-size: 14px; fill: #5b6472; }
+    .b { font-weight: 700; }
+    .s { font-size: 12.5px; fill: #5b6472; }
+    .pin { font-size: 14px; font-weight: 700; font-family: Consolas, "Courier New", monospace; }
+    .caja { fill: #ffffff; stroke: #1d2330; stroke-width: 1.5; }
+    .ctrl { fill: #eaf1fb; stroke: #1f5fbf; stroke-width: 2.5; }
+    .pad { fill: #f5c542; stroke: #8a6d00; stroke-width: 1; }
+    .v5 { stroke: #d32f2f; stroke-width: 3; fill: none; }
+    .gnd { stroke: #1d2330; stroke-width: 3; fill: none; }
+    .v33 { stroke: #ef7d00; stroke-width: 3; fill: none; }
+    .pwm { stroke: #d4a600; stroke-width: 3.5; fill: none; }
+    .sda { stroke: #1f5fbf; stroke-width: 3; fill: none; }
+    .scl { stroke: #2e7d32; stroke-width: 3; fill: none; }
+    .sig { stroke: #8a8f99; stroke-width: 3; fill: none; }
+    .usb { stroke: #6a3fb5; stroke-width: 3; fill: none; }
+    .aviso { fill: #fff8e1; stroke: #b38600; stroke-width: 1.5; }
+    .no { fill: #fdecea; stroke: #d32f2f; stroke-width: 1.5; }
+  </style>
+  <rect width="1300" height="900" fill="#ffffff"/>
+  <text x="30" y="40" class="t">Bloque B2 · Conexionado del ESP32 DevKit (tabla 4.3 del Documento Técnico)</text>
+  <text x="30" y="64" class="st">Actuadores a la izquierda, interfaz y enlaces a la derecha. Busque cada pin por su número GPIO en la serigrafía (en algunas placas «D32» = GPIO32).</text>
+
+  <!-- ===================== ESP32 ===================== -->
+  <rect x="520" y="100" width="260" height="660" rx="14" class="ctrl"/>
+  <text x="650" y="130" text-anchor="middle" class="b" style="font-size:17px">ESP32 DevKit</text>
+  <text x="650" y="148" text-anchor="middle" class="s">ESP32-WROOM-32</text>
+  <!-- pines izquierda -->
+  <g class="pin">
+    <text x="534" y="185">GPIO32</text><text x="534" y="215">GPIO33</text>
+    <text x="534" y="245">GPIO25</text><text x="534" y="275">GPIO26</text>
+    <text x="534" y="345">GPIO18</text><text x="534" y="415">GPIO19</text>
+    <text x="534" y="485">GPIO27</text><text x="534" y="555">GPIO4</text>
+    <text x="534" y="645">5V / VIN</text>
+  </g>
+  <g class="pad">
+    <rect x="512" y="173" width="16" height="16"/><rect x="512" y="203" width="16" height="16"/>
+    <rect x="512" y="233" width="16" height="16"/><rect x="512" y="263" width="16" height="16"/>
+    <rect x="512" y="333" width="16" height="16"/><rect x="512" y="403" width="16" height="16"/>
+    <rect x="512" y="473" width="16" height="16"/><rect x="512" y="543" width="16" height="16"/>
+    <rect x="512" y="633" width="16" height="16"/>
+  </g>
+  <!-- pines derecha -->
+  <g class="pin" text-anchor="end">
+    <text x="766" y="185">GPIO21 SDA</text><text x="766" y="215">GPIO22 SCL</text><text x="766" y="245">3V3</text>
+    <text x="766" y="315">GPIO13 F1</text><text x="766" y="345">GPIO16 F2</text>
+    <text x="766" y="375">GPIO17 F3</text><text x="766" y="405">GPIO23 F4</text>
+    <text x="766" y="455">GPIO34 C1</text><text x="766" y="485">GPIO35 C2</text>
+    <text x="766" y="515">GPIO36 C3</text><text x="766" y="545">GPIO39 C4</text>
+    <text x="766" y="645">micro USB</text><text x="766" y="705">GND</text>
+  </g>
+  <g class="pad">
+    <rect x="772" y="173" width="16" height="16"/><rect x="772" y="203" width="16" height="16"/><rect x="772" y="233" width="16" height="16"/>
+    <rect x="772" y="303" width="16" height="16"/><rect x="772" y="333" width="16" height="16"/>
+    <rect x="772" y="363" width="16" height="16"/><rect x="772" y="393" width="16" height="16"/>
+    <rect x="772" y="443" width="16" height="16"/><rect x="772" y="473" width="16" height="16"/>
+    <rect x="772" y="503" width="16" height="16"/><rect x="772" y="533" width="16" height="16"/>
+    <rect x="772" y="633" width="16" height="16"/><rect x="772" y="693" width="16" height="16"/>
+  </g>
+  <text x="650" y="722" text-anchor="middle" class="s">Libres a propósito:</text>
+  <text x="650" y="738" text-anchor="middle" class="s">GPIO 0, 2, 5, 12, 15 (arranque)</text>
+  <text x="650" y="754" text-anchor="middle" class="s">GPIO 1 y 3 (puente USB)</text>
+
+  <!-- ===================== IZQUIERDA ===================== -->
+  <!-- motor -->
+  <rect x="20" y="160" width="120" height="110" rx="8" class="caja"/>
+  <circle cx="80" cy="200" r="24" fill="#eceef1" stroke="#5b6472" stroke-width="1.5"/>
+  <text x="80" y="245" text-anchor="middle" class="b">28BYJ-48</text>
+  <text x="80" y="262" text-anchor="middle" class="s">en el brazo</text>
+  <path d="M140 215 H190" stroke="#1d2330" stroke-width="2"/>
+  <text x="165" y="207" text-anchor="middle" class="s">C03</text>
+  <text x="165" y="232" text-anchor="middle" class="s">5 hilos</text>
+  <rect x="190" y="160" width="190" height="130" rx="8" class="caja"/>
+  <text x="285" y="150" text-anchor="middle" class="b">Módulo ULN2003</text>
+  <g class="pin" style="font-size:13px"><text x="370" y="185" text-anchor="end">IN1</text><text x="370" y="215" text-anchor="end">IN2</text>
+  <text x="370" y="245" text-anchor="end">IN3</text><text x="370" y="275" text-anchor="end">IN4</text></g>
+  <text x="200" y="185" class="s">+ ← 5 V (rojo)</text>
+  <text x="200" y="203" class="s">− ← GND (negro)</text>
+  <text x="200" y="260" class="s">de la placa</text>
+  <path d="M380 181 H512" class="sig"/><path d="M380 211 H512" class="sig"/>
+  <path d="M380 241 H512" class="sig"/><path d="M380 271 H512" class="sig"/>
+  <text x="446" y="300" text-anchor="middle" class="s">C09 · 6 hilos</text>
+
+  <!-- servos -->
+  <rect x="190" y="315" width="190" height="56" rx="8" class="caja"/>
+  <text x="200" y="338" class="b">Servo MG996R · C07</text>
+  <text x="200" y="358" class="s">giro de los brazos</text>
+  <path d="M380 341 H512" class="pwm"/>
+  <rect x="190" y="385" width="190" height="56" rx="8" class="caja"/>
+  <text x="200" y="408" class="b">Servo SG90 · C08</text>
+  <text x="200" y="428" class="s">barra de retención</text>
+  <path d="M380 411 H512" class="pwm"/>
+  <text x="20" y="335" class="s">Cable del servo:</text>
+  <text x="20" y="353" class="s">naranja = señal</text>
+  <text x="20" y="371" class="s">rojo = +5 V placa</text>
+  <text x="20" y="389" class="s">marrón = GND</text>
+  <text x="446" y="333" text-anchor="middle" class="s">PWM 50 Hz</text>
+
+  <!-- LED y buzzer -->
+  <rect x="190" y="455" width="190" height="56" rx="8" class="caja"/>
+  <text x="200" y="478" class="b">IRLZ44N → tira LED</text>
+  <text x="200" y="498" class="s">C14 · circuito (a) en 04</text>
+  <path d="M380 481 H512" class="sig"/>
+  <text x="446" y="473" text-anchor="middle" class="s">PWM 1 kHz</text>
+  <rect x="190" y="525" width="190" height="56" rx="8" class="caja"/>
+  <text x="200" y="548" class="b">2N2222 → buzzer</text>
+  <text x="200" y="568" class="s">C13 · circuito (b) en 04</text>
+  <path d="M380 551 H512" class="sig"/>
+
+  <!-- VIN prohibido -->
+  <rect x="20" y="610" width="440" height="72" rx="8" class="no"/>
+  <path d="M460 641 H512" stroke="#d32f2f" stroke-width="2" stroke-dasharray="6 5"/>
+  <text x="482" y="633" fill="#d32f2f" font-weight="700" font-size="20">✕</text>
+  <text x="35" y="636" class="b" style="fill:#b3261e">5V / VIN del DevKit: SIN CONECTAR</text>
+  <text x="35" y="656" class="s">El ESP32 se alimenta solo por el USB de la Pi (C16).</text>
+  <text x="35" y="673" class="s">El +5 V de los servos nunca toca este pin.</text>
+
+  <!-- ===================== DERECHA ===================== -->
+  <!-- I2C -->
+  <path d="M788 181 H880" class="sda"/><path d="M788 211 H880" class="scl"/><path d="M788 241 H880" class="v33"/>
+  <rect x="880" y="160" width="170" height="110" rx="8" class="caja"/>
+  <text x="965" y="152" text-anchor="middle" class="b">Módulo BSS138</text>
+  <g class="pin" style="font-size:13px"><text x="890" y="185">LV1</text><text x="890" y="215">LV2</text><text x="890" y="245">LV</text>
+  <text x="1040" y="185" text-anchor="end">HV1</text><text x="1040" y="215" text-anchor="end">HV2</text><text x="1040" y="245" text-anchor="end">HV</text></g>
+  <text x="965" y="263" text-anchor="middle" class="s">GND común · C10</text>
+  <path d="M1050 181 H1110" class="sda"/><path d="M1050 211 H1110" class="scl"/>
+  <path d="M1050 241 H1068" class="v5"/><text x="1071" y="246" class="s">+5 V</text>
+  <rect x="1110" y="160" width="170" height="110" rx="8" class="caja"/>
+  <text x="1195" y="152" text-anchor="middle" class="b">LCD 16×2 + PCF8574</text>
+  <g class="pin" style="font-size:13px"><text x="1120" y="185">SDA</text><text x="1120" y="215">SCL</text></g>
+  <text x="1120" y="240" class="s">VCC +5 V · GND</text>
+  <text x="1120" y="258" class="s">C11 · 0x27 o 0x3F</text>
+
+  <!-- teclado -->
+  <path d="M788 311 H900" class="sig"/><path d="M788 341 H900" class="sig"/>
+  <path d="M788 371 H900" class="sig"/><path d="M788 401 H900" class="sig"/>
+  <path d="M788 451 H900" class="sig"/><path d="M788 481 H900" class="sig"/>
+  <path d="M788 511 H900" class="sig"/><path d="M788 541 H900" class="sig"/>
+  <!-- pull-ups -->
+  <g stroke="#ef7d00" stroke-width="2" fill="#fff">
+    <path d="M820 430 H880" class="v33"/>
+    <path d="M826 430 V451" stroke="#ef7d00"/><path d="M842 430 V481" stroke="#ef7d00"/>
+    <path d="M858 430 V511" stroke="#ef7d00"/><path d="M874 430 V541" stroke="#ef7d00"/>
+  </g>
+  <g fill="#fff" stroke="#1d2330" stroke-width="1.3">
+    <rect x="821" y="436" width="10" height="10"/><rect x="837" y="448" width="10" height="16"/>
+    <rect x="853" y="460" width="10" height="22"/><rect x="869" y="470" width="10" height="28"/>
+  </g>
+  <circle cx="826" cy="451" r="3" fill="#1d2330"/><circle cx="842" cy="481" r="3" fill="#1d2330"/>
+  <circle cx="858" cy="511" r="3" fill="#1d2330"/><circle cx="874" cy="541" r="3" fill="#1d2330"/>
+  <text x="808" y="425" class="s">10 kΩ a 3V3</text>
+
+  <rect x="900" y="290" width="380" height="270" rx="8" class="caja"/>
+  <text x="1090" y="282" text-anchor="middle" class="b">Teclado 4×4 · C12 (cinta de 8 hilos)</text>
+  <g class="pin" style="font-size:13px">
+    <text x="910" y="315">F1</text><text x="910" y="345">F2</text><text x="910" y="375">F3</text><text x="910" y="405">F4</text>
+    <text x="910" y="455">C1</text><text x="910" y="485">C2</text><text x="910" y="515">C3</text><text x="910" y="545">C4</text>
+  </g>
+  <g font-size="16" font-weight="700" text-anchor="middle">
+    <g fill="#eceef1" stroke="#5b6472">
+      <rect x="1000" y="305" width="54" height="54" rx="6"/><rect x="1060" y="305" width="54" height="54" rx="6"/><rect x="1120" y="305" width="54" height="54" rx="6"/><rect x="1180" y="305" width="54" height="54" rx="6" fill="#dde7f7"/>
+      <rect x="1000" y="365" width="54" height="54" rx="6"/><rect x="1060" y="365" width="54" height="54" rx="6"/><rect x="1120" y="365" width="54" height="54" rx="6"/><rect x="1180" y="365" width="54" height="54" rx="6" fill="#dde7f7"/>
+      <rect x="1000" y="425" width="54" height="54" rx="6"/><rect x="1060" y="425" width="54" height="54" rx="6"/><rect x="1120" y="425" width="54" height="54" rx="6"/><rect x="1180" y="425" width="54" height="54" rx="6" fill="#dde7f7"/>
+      <rect x="1000" y="485" width="54" height="54" rx="6"/><rect x="1060" y="485" width="54" height="54" rx="6"/><rect x="1120" y="485" width="54" height="54" rx="6"/><rect x="1180" y="485" width="54" height="54" rx="6" fill="#fbe4e2"/>
+    </g>
+    <text x="1027" y="338">1</text><text x="1087" y="338">2</text><text x="1147" y="338">3</text><text x="1207" y="338">A</text>
+    <text x="1027" y="398">4</text><text x="1087" y="398">5</text><text x="1147" y="398">6</text><text x="1207" y="398">B</text>
+    <text x="1027" y="458">7</text><text x="1087" y="458">8</text><text x="1147" y="458">9</text><text x="1207" y="458">C</text>
+    <text x="1027" y="518">*</text><text x="1087" y="518">0</text><text x="1147" y="518">#</text><text x="1207" y="518">D</text>
+  </g>
+  <text x="900" y="578" class="s">Conector: pines 1–4 filas · 5–8 columnas (verificar)</text>
+
+  <!-- USB y GND -->
+  <path d="M788 641 H900" class="usb"/>
+  <rect x="900" y="615" width="380" height="54" rx="8" class="caja"/>
+  <text x="912" y="638" class="b">Raspberry Pi · USB 2.0 (C16)</text>
+  <text x="912" y="657" class="s">115200 8N1 · /dev/archilector-esp32 · alimenta al ESP32</text>
+  <path d="M788 701 H900" class="gnd"/>
+  <rect x="900" y="680" width="380" height="54" rx="8" class="caja"/>
+  <text x="912" y="703" class="b">Bornera GND (C15)</text>
+  <text x="912" y="722" class="s">tierra única: une la rama de la Pi con la de actuadores</text>
+
+  <!-- leyenda colores -->
+  <rect x="20" y="780" width="1260" height="100" rx="8" class="aviso"/>
+  <text x="35" y="805" class="b">Código de colores de cables (sección 1.3)</text>
+  <path d="M35 832 H75" class="v5"/><text x="82" y="837">Rojo +5 V</text>
+  <path d="M190 832 H230" class="v33"/><text x="237" y="837">Naranja +3,3 V</text>
+  <path d="M370 832 H410" class="gnd"/><text x="417" y="837">Negro GND</text>
+  <path d="M520 832 H560" class="pwm"/><text x="567" y="837">Amarillo PWM servos</text>
+  <path d="M730 832 H770" class="sda"/><text x="777" y="837">Azul SDA</text>
+  <path d="M870 832 H910" class="scl"/><text x="917" y="837">Verde SCL</text>
+  <path d="M1010 832 H1050" class="sig"/><text x="1057" y="837">Blanco (gris aquí): otras</text>
+  <text x="35" y="864" class="s">El +5 V de la bornera (C02) alimenta servos, ULN2003, tira LED, buzzer y el lado HV del BSS138. Antes de insertar el DevKit: ningún pin del ESP32 con continuidad a +5 V.</text>
+</svg>

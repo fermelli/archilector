@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 820" width="1200" height="820" font-family="Arial, Helvetica, sans-serif">
+  <style>
+    text { fill: #1d2330; font-size: 14px; }
+    .t { font-size: 22px; font-weight: 700; }
+    .st { font-size: 14px; fill: #5b6472; }
+    .b { font-weight: 700; }
+    .s { font-size: 13px; fill: #3f4652; }
+    .madera { fill: #d9b98a; stroke: #8a6d2f; stroke-width: 1.5; }
+    .papel { fill: #f7f5ef; stroke: #8a8f99; stroke-width: 1.2; }
+    .cota { stroke: #5b6472; stroke-width: 1.2; fill: none; }
+    .ref { stroke: #b0b6c0; stroke-width: 1; fill: none; stroke-dasharray: 3 3; }
+    .lider { stroke: #8a8f99; stroke-width: 1.2; fill: none; }
+    .nota { fill: #f6f8fb; stroke: #c9ced6; stroke-width: 1.5; }
+  </style>
+  <defs>
+    <marker id="f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5b6472"/></marker>
+  </defs>
+  <rect width="1200" height="820" fill="#ffffff"/>
+  <text x="30" y="38" class="t">Bloques B4 y B5 · torre, cámara e iluminación (vista frontal)</text>
+  <text x="30" y="62" class="st">Escala 1,4 px = 1 mm · Documento Técnico 6.2 y 6.5 · el lado largo de la imagen va a lo ancho del libro abierto</text>
+
+  <!-- campo de visión -->
+  <polygon points="500,210 253,700 747,700" fill="#1f5fbf" fill-opacity="0.07"/>
+  <path d="M500 210 L253 700 M500 210 L747 700" stroke="#1f5fbf" stroke-width="1.5" stroke-dasharray="8 5"/>
+  <text x="500" y="300" text-anchor="middle" class="b" style="fill:#1f5fbf">53,5°</text>
+  <text x="500" y="318" text-anchor="middle" class="s" style="fill:#1f5fbf">campo horizontal V1.3</text>
+
+  <!-- barrido del brazo -->
+  <path d="M689 679 A189 189 0 0 0 311 679" stroke="#8a8f99" stroke-width="2" stroke-dasharray="6 5" fill="none"/>
+  <circle cx="500" cy="490" r="17" fill="none" stroke="#8a8f99" stroke-width="2" stroke-dasharray="3 3"/>
+  <path d="M500 679 V507" stroke="#8a8f99" stroke-width="5"/>
+  <text x="330" y="560" class="s">barrido del brazo</text>
+  <text x="330" y="576" class="s">(máx. ~135 mm)</text>
+
+  <!-- base, atril y libro -->
+  <rect x="150" y="720" width="700" height="13" class="madera"/>
+  <rect x="276" y="713" width="448" height="7" class="madera" style="fill:#e8d2ad"/>
+  <rect x="304" y="702" width="194" height="11" class="papel"/><rect x="502" y="699" width="194" height="14" class="papel"/>
+  <circle cx="500" cy="679" r="6" fill="#103a7a"/>
+
+  <!-- torre y viga -->
+  <rect x="787" y="150" width="42" height="570" rx="3" fill="#c9ced6" stroke="#4a4f58" stroke-width="1.5"/>
+  <rect x="802" y="150" width="12" height="90" rx="6" fill="#ffffff" stroke="#4a4f58"/>
+  <rect x="400" y="160" width="429" height="20" rx="3" fill="#c9ced6" stroke="#4a4f58" stroke-width="1.5"/>
+  <!-- Pi -->
+  <rect x="535" y="124" width="150" height="34" rx="4" fill="#2e7d32" fill-opacity="0.85" stroke="#1b4d1f"/>
+  <rect x="595" y="104" width="34" height="20" rx="3" fill="#4a4f58"/>
+  <text x="610" y="146" text-anchor="middle" style="fill:#fff;font-size:12px;font-weight:700">Raspberry Pi 4</text>
+  <!-- cámara -->
+  <rect x="482" y="180" width="36" height="20" fill="#2e7d32" stroke="#1b4d1f"/>
+  <rect x="494" y="200" width="12" height="10" fill="#1d2330"/>
+  <path d="M518 186 C 535 186, 540 170, 540 158" stroke="#c79100" stroke-width="3" fill="none"/>
+  <!-- LED -->
+  <rect x="418" y="182" width="52" height="9" rx="2" fill="#fff3b0" stroke="#b38600" transform="rotate(-35 444 186)"/>
+  <rect x="530" y="182" width="52" height="9" rx="2" fill="#fff3b0" stroke="#b38600" transform="rotate(35 556 186)"/>
+  <!-- parlante -->
+  <rect x="829" y="440" width="44" height="50" rx="5" fill="#4a4f58"/>
+  <circle cx="851" cy="465" r="14" fill="#8a8f99"/>
+
+  <!-- etiquetas -->
+  <path d="M685 130 H760 V96 H880" class="lider"/><text x="885" y="92" class="b">Raspberry Pi 4 sobre la viga</text><text x="885" y="109" class="s">con disipadores y ventilador de 30 mm</text>
+  <path d="M540 170 H560" class="lider"/>
+  <path d="M829 190 H880" class="lider"/><text x="885" y="186" class="b">P11 torre</text><text x="885" y="203" class="s">viga con ranura: lente a 350 ± 30 mm</text>
+  <path d="M506 205 L585 250 H880" class="lider"/><text x="885" y="246" class="b">Cámara V1.3 (CSI, cinta de 15 cm)</text><text x="885" y="263" class="s">lente hacia abajo, sensor paralelo al atril</text>
+  <path d="M560 200 L600 290 H880" class="lider"/><text x="885" y="286" class="b">Tiras LED a ~45° con difusor</text><text x="885" y="303" class="s">a ambos lados de la cámara (circuito a)</text>
+  <path d="M873 465 H880" class="lider"/><text x="885" y="461" class="b">Parlante + PAM8403</text><text x="885" y="478" class="s">en la torre, lejos de los motores</text>
+
+  <!-- cotas -->
+  <path d="M170 210 H494 M170 700 H304" class="ref"/>
+  <path d="M180 212 V698" class="cota" marker-start="url(#f)" marker-end="url(#f)"/>
+  <text x="188" y="450" class="b">350 mm</text><text x="188" y="467" class="s">lente → página</text>
+  <path d="M440 473 H483 M440 212 H494" class="ref"/>
+  <path d="M450 214 V471" class="cota" marker-start="url(#f)" marker-end="url(#f)"/>
+  <text x="380" y="380" class="s">≥ 200 mm</text><text x="380" y="396" class="s">libres</text>
+  <path d="M253 760 H747" class="cota" marker-start="url(#f)" marker-end="url(#f)"/>
+  <path d="M253 700 V770 M747 700 V770" class="ref"/>
+  <text x="500" y="785" text-anchor="middle" class="s">cobertura a 350 mm: 353 × 265 mm · 2592 px / 353 mm ≈ 7,3 px/mm (≈ 186 ppp)</text>
+  <path d="M500 735 V752 M808 735 V752" class="ref"/>
+  <path d="M502 745 H806" class="cota" marker-start="url(#f)" marker-end="url(#f)"/>
+  <text x="816" y="749" class="s">~220 mm del lomo (propuesta)</text>
+
+  <rect x="880" y="520" width="300" height="270" rx="10" class="nota"/>
+  <text x="895" y="545" class="b">Montaje (Técnico 6.5)</text>
+  <text x="895" y="570" class="s">• Torre en el borde de la base, fuera</text>
+  <text x="905" y="587" class="s">del radio de giro del brazo.</text>
+  <text x="895" y="610" class="s">• Nivelar la cámara con nivel de burbuja.</text>
+  <text x="895" y="633" class="s">• Cinta CSI con la Pi apagada; en la Pi,</text>
+  <text x="905" y="650" class="s">los contactos miran a los HDMI.</text>
+  <text x="895" y="673" class="s">• Si el texto sale borroso, enfocar el</text>
+  <text x="905" y="690" class="s">lente para 350 mm, con cuidado.</text>
+  <text x="895" y="713" class="s">• Torre y viga: medidas no fijadas en el</text>
+  <text x="905" y="730" class="s">documento; propuesta: listón de 30 × 30</text>
+  <text x="905" y="747" class="s">mm o perfil de aluminio, ~450 mm de alto.</text>
+  <text x="895" y="770" class="s">• Pruebas T4.1 a T4.4 y T5.1 a T5.3.</text>
+</svg>

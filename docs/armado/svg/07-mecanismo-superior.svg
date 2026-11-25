@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1250 840" width="1250" height="840" font-family="Arial, Helvetica, sans-serif">
+  <style>
+    text { fill: #1d2330; font-size: 14px; }
+    .t { font-size: 22px; font-weight: 700; }
+    .st { font-size: 14px; fill: #5b6472; }
+    .b { font-weight: 700; }
+    .s { font-size: 13px; fill: #3f4652; }
+    .madera { fill: #e8d2ad; stroke: #8a6d2f; stroke-width: 1.5; }
+    .papel { fill: #f7f5ef; stroke: #8a8f99; stroke-width: 1.2; }
+    .acero { fill: #9aa3ae; stroke: #4a4f58; stroke-width: 1.2; }
+    .tuerca { fill: #4a4f58; }
+    .brazo { fill: #cfe0f5; stroke: #1f5fbf; stroke-width: 1.5; fill-opacity: 0.9; }
+    .cota { stroke: #5b6472; stroke-width: 1.2; fill: none; }
+    .ref { stroke: #b0b6c0; stroke-width: 1; fill: none; stroke-dasharray: 3 3; }
+    .lider { stroke: #8a8f99; stroke-width: 1.2; fill: none; }
+  </style>
+  <defs>
+    <marker id="f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5b6472"/></marker>
+    <pattern id="rosca" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(30)"><rect width="6" height="6" fill="#b7bec8"/><path d="M0 0 V6" stroke="#6b737e" stroke-width="2"/></pattern>
+  </defs>
+  <rect width="1250" height="840" fill="#ffffff"/>
+  <text x="30" y="38" class="t">Mecanismo B · vista superior con el brazo en 0° (rodillos apoyados)</text>
+  <text x="30" y="62" class="st">Escala 2 px = 1 mm · arriba = trasero (−) · abajo = delantero (+) · tabla 5.2</text>
+
+  <!-- atril y libro -->
+  <rect x="280" y="180" width="640" height="480" class="madera"/>
+  <text x="290" y="200" class="s">P02 atril 320 × 240 mm</text>
+  <rect x="320" y="210" width="280" height="420" class="papel"/>
+  <rect x="600" y="210" width="280" height="420" class="papel"/>
+  <text x="332" y="245" class="s">página izquierda</text>
+  <text x="614" y="245" class="s">página derecha (por leer)</text>
+
+  <!-- barra P10 -->
+  <rect x="460" y="160" width="12" height="520" rx="6" class="acero"/>
+  <rect x="440" y="684" width="56" height="34" rx="4" fill="#1f5fbf" fill-opacity="0.85"/>
+  <text x="468" y="706" text-anchor="middle" style="fill:#fff;font-size:12px;font-weight:700">SG90</text>
+  <path d="M466 680 V684" stroke="#4a4f58" stroke-width="4"/>
+  <path d="M440 700 H330" class="lider"/>
+  <text x="325" y="696" text-anchor="end" class="b">P10 barra 260 mm</text>
+  <text x="325" y="713" text-anchor="end" class="s">+ SG90 en el extremo delantero</text>
+
+  <!-- soportes y eje del lomo -->
+  <rect x="566" y="104" width="68" height="32" rx="3" fill="#d9b98a" stroke="#8a6d2f" stroke-width="1.5"/>
+  <rect x="566" y="704" width="68" height="32" rx="3" fill="#d9b98a" stroke="#8a6d2f" stroke-width="1.5"/>
+  <rect x="588" y="113" width="24" height="14" fill="#ffffff" stroke="#4a4f58"/><rect x="588" y="713" width="24" height="14" fill="#ffffff" stroke="#4a4f58"/>
+  <rect x="596" y="96" width="8" height="644" class="acero"/>
+  <rect x="560" y="62" width="80" height="40" rx="4" fill="#1d2330"/>
+  <text x="600" y="87" text-anchor="middle" style="fill:#fff;font-size:12px;font-weight:700">MG996R</text>
+
+  <!-- brazos -->
+  <rect x="592" y="174" width="250" height="12" rx="4" class="brazo"/>
+  <rect x="592" y="654" width="250" height="12" rx="4" class="brazo"/>
+  <rect x="588" y="170" width="24" height="20" fill="#4a4f58"/><rect x="588" y="650" width="24" height="20" fill="#4a4f58"/>
+
+  <!-- travesaño y dedos -->
+  <rect x="786" y="186" width="6" height="468" fill="#8a8f99"/>
+  <rect x="756" y="392" width="30" height="18" fill="#4a4f58" fill-opacity="0.8"/>
+  <rect x="756" y="430" width="30" height="18" fill="#4a4f58" fill-opacity="0.8"/>
+
+  <!-- eje del rodillo -->
+  <rect x="836" y="140" width="8" height="540" fill="url(#rosca)" stroke="#4a4f58"/>
+  <!-- rodamientos 608ZZ + tuercas -->
+  <rect x="818" y="173" width="44" height="14" fill="#ffffff" stroke="#1d2330" stroke-width="1.5"/>
+  <rect x="818" y="653" width="44" height="14" fill="#ffffff" stroke="#1d2330" stroke-width="1.5"/>
+  <rect x="827" y="160" width="26" height="12" class="tuerca"/><rect x="827" y="188" width="26" height="12" class="tuerca"/>
+  <rect x="827" y="640" width="26" height="12" class="tuerca"/><rect x="827" y="668" width="26" height="12" class="tuerca"/>
+  <!-- rodillos -->
+  <rect x="815" y="320" width="50" height="60" rx="8" fill="#1f5fbf" stroke="#103a7a" stroke-width="1.5"/>
+  <rect x="820" y="308" width="40" height="12" fill="#2b2f36"/>
+  <rect x="815" y="460" width="50" height="60" rx="8" fill="#1f5fbf" stroke="#103a7a" stroke-width="1.5"/>
+  <rect x="820" y="520" width="40" height="12" fill="#2b2f36"/>
+  <rect x="827" y="295" width="26" height="12" class="tuerca"/><rect x="827" y="381" width="26" height="12" class="tuerca"/>
+  <rect x="827" y="447" width="26" height="12" class="tuerca"/><rect x="827" y="533" width="26" height="12" class="tuerca"/>
+  <!-- acople y motor -->
+  <rect x="830" y="100" width="20" height="44" rx="4" fill="#d0d5dc" stroke="#4a4f58"/>
+  <rect x="812" y="56" width="56" height="44" rx="10" fill="#3f6fb5" stroke="#1d2330"/>
+  <path d="M800 78 H812 M868 78 H880" stroke="#1d2330" stroke-width="4"/>
+  <text x="840" y="83" text-anchor="middle" style="fill:#fff;font-size:11px;font-weight:700">28BYJ</text>
+
+  <!-- etiquetas derecha -->
+  <path d="M880 78 H990" class="lider"/><text x="995" y="74" class="b">P07 motor 28BYJ-48</text><text x="995" y="91" class="s">montado en el brazo trasero</text>
+  <path d="M850 122 H990" class="lider"/><text x="995" y="126" class="s">acople flexible 5 × 8 mm (entra ~4 mm)</text>
+  <path d="M862 180 H990" class="lider"/><text x="995" y="176" class="b">608ZZ en cada brazo (P14)</text><text x="995" y="193" class="s">trabado con tuerca a cada lado</text>
+  <path d="M865 350 H990" class="lider"/><text x="995" y="346" class="b">P06 rodillo Canon 1 (−35 mm)</text><text x="995" y="363" class="s">engranaje negro hacia afuera</text>
+  <path d="M865 490 H990" class="lider"/><text x="995" y="486" class="b">P06 rodillo Canon 2 (+35 mm)</text><text x="995" y="503" class="s">apretado entre 2 tuercas M8</text>
+  <path d="M844 600 H990" class="lider"/><text x="995" y="596" class="b">P12 varilla roscada M8 · 270 mm</text><text x="995" y="613" class="s">de −140 a +130 mm (P13 tuercas)</text>
+  <path d="M842 660 H990" class="lider"/><text x="995" y="664" class="s">P05 brazos a ±120 mm (240 mm entre sí)</text>
+  <path d="M756 440 L700 520" class="lider"/><text x="640" y="540" class="s">P08 dedos en el travesaño</text>
+  <path d="M560 100 L540 108" class="lider"/><text x="535" y="112" text-anchor="end" class="b">P09 MG996R en el soporte trasero</text><text x="535" y="129" text-anchor="end" class="s">bocina metálica fijada al eje P04</text>
+  <path d="M566 720 H530" class="lider"/><text x="525" y="760" text-anchor="end" class="s">P03 soportes con 608ZZ</text>
+
+  <!-- cotas -->
+  <path d="M556 120 V720" class="cota" marker-start="url(#f)" marker-end="url(#f)"/>
+  <text x="548" y="420" class="s" text-anchor="middle" transform="rotate(-90 548 420)">P04 eje del lomo · 300 mm</text>
+  <path d="M300 210 V630" class="cota" marker-start="url(#f)" marker-end="url(#f)"/>
+  <text x="292" y="420" class="s" text-anchor="middle" transform="rotate(-90 292 420)">210 mm (alto del libro)</text>
+  <path d="M908 180 V660" class="cota" marker-start="url(#f)" marker-end="url(#f)"/>
+  <text x="918" y="425" class="s">240</text>
+  <path d="M600 790 H840" class="cota" marker-start="url(#f)" marker-end="url(#f)"/>
+  <path d="M600 740 V800 M840 688 V800" class="ref"/>
+  <text x="720" y="784" text-anchor="middle" class="s">120 mm del eje del lomo al rodillo</text>
+  <path d="M870 420 H900 M870 350 H880" class="ref"/>
+  <path d="M600 420 H612" stroke="#d32f2f" stroke-width="2"/>
+  <text x="612" y="415" class="s" style="fill:#d32f2f">0 = centro de la página</text>
+
+  <text x="30" y="825" class="s">Rodillos a 70 mm de cada borde de la página. Si en T3.3 el MG996R se esfuerza o vibra, agregar un contrapeso del otro lado del eje del lomo (Técnico 5.3).</text>
+</svg>

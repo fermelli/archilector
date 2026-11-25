@@ -1,0 +1,169 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1010" width="1200" height="1010" font-family="Arial, Helvetica, sans-serif">
+  <style>
+    text { fill: #1d2330; font-size: 14px; }
+    .t { font-size: 22px; font-weight: 700; }
+    .st { font-size: 14px; fill: #5b6472; }
+    .h { font-size: 16px; font-weight: 700; }
+    .b { font-weight: 700; }
+    .s { font-size: 13px; fill: #3f4652; }
+    .pin { font-size: 13px; font-weight: 700; font-family: Consolas, "Courier New", monospace; }
+    .marco { fill: #fbfcfd; stroke: #c9ced6; stroke-width: 1.5; }
+    .caja { fill: #ffffff; stroke: #1d2330; stroke-width: 1.5; }
+    .w { stroke: #1d2330; stroke-width: 2; fill: none; }
+    .v5 { stroke: #d32f2f; stroke-width: 2.5; fill: none; }
+    .v33 { stroke: #ef7d00; stroke-width: 2.5; fill: none; }
+    .sda { stroke: #1f5fbf; stroke-width: 2.5; fill: none; }
+    .scl { stroke: #2e7d32; stroke-width: 2.5; fill: none; }
+    .gnd { stroke: #1d2330; stroke-width: 2.5; fill: none; }
+    .r { fill: #ffffff; stroke: #1d2330; stroke-width: 2; }
+    .nodo { fill: #1d2330; }
+  </style>
+  <defs>
+    <g id="tierra"><path d="M-13 0 H13 M-8 5 H8 M-3 10 H3" stroke="#1d2330" stroke-width="2"/></g>
+  </defs>
+  <rect width="1200" height="1010" fill="#ffffff"/>
+  <text x="30" y="40" class="t">Circuitos auxiliares de la placa de control (Documento Técnico, tabla 4.4)</text>
+  <text x="30" y="64" class="st">Se sueldan en la misma placa perforada del ESP32. Resistencias de 1/4 W.</text>
+
+  <!-- ============ (a) ILUMINACIÓN ============ -->
+  <g transform="translate(20,90)">
+    <rect width="570" height="400" rx="10" class="marco"/>
+    <text x="15" y="30" class="h">(a) Iluminación: GPIO27 → IRLZ44N → tira LED</text>
+    <!-- +5V y tira -->
+    <path d="M500 77 V50" class="v5"/><text x="485" y="44" class="b" style="fill:#d32f2f">+5 V</text>
+    <rect x="230" y="58" width="220" height="40" rx="6" fill="#fffbe6" stroke="#b38600" stroke-width="1.5"/>
+    <text x="340" y="83" text-anchor="middle" class="b">Tira LED blanca 5 V</text>
+    <text x="458" y="72" class="s">(+)</text><text x="198" y="72" class="s">(−)</text>
+    <path d="M450 77 H500" class="v5"/>
+    <path d="M230 77 H190 V188" class="w"/>
+    <!-- MOSFET -->
+    <circle cx="182" cy="210" r="40" fill="none" stroke="#5b6472" stroke-width="1.5"/>
+    <path d="M163 184 V236" stroke="#1d2330" stroke-width="2.5"/>
+    <path d="M173 180 V195 M173 203 V217 M173 225 V240" stroke="#1d2330" stroke-width="2.5"/>
+    <path d="M173 188 H190 M173 232 H190 V310" class="w"/>
+    <path d="M190 210 H180" class="w"/><path d="M190 210 V232" class="w"/>
+    <polygon points="175,210 184,205 184,215" fill="#1d2330"/>
+    <path d="M163 232 H150" class="w"/>
+    <text x="196" y="170" class="b">D</text><text x="145" y="252" class="b">G</text><text x="196" y="262" class="b">S</text>
+    <text x="232" y="205" class="b">IRLZ44N</text><text x="232" y="223" class="s">MOSFET de nivel lógico</text>
+    <!-- gate -->
+    <text x="12" y="237" class="pin">GPIO27</text>
+    <path d="M70 232 H80" class="w"/>
+    <rect x="80" y="225" width="40" height="14" class="r"/><text x="100" y="218" text-anchor="middle" class="s">100 Ω</text>
+    <path d="M120 232 H150" class="w"/>
+    <circle cx="140" cy="232" r="3.5" class="nodo"/>
+    <path d="M140 232 V258" class="w"/>
+    <rect x="133" y="258" width="14" height="40" class="r"/><text x="100" y="283" text-anchor="middle" class="s">100 kΩ</text>
+    <path d="M140 298 V310" class="w"/>
+    <use href="#tierra" x="140" y="312"/><use href="#tierra" x="190" y="312"/>
+    <!-- notas -->
+    <text x="262" y="268" class="s">• PWM 1 kHz (canal LEDC 2): el brillo</text>
+    <text x="272" y="285" class="s">0–100 % lo fija el comando LIGHT.</text>
+    <text x="262" y="308" class="s">• La de 100 kΩ deja la tira apagada</text>
+    <text x="272" y="325" class="s">mientras el ESP32 arranca (T2.2).</text>
+    <text x="262" y="348" class="s">• De frente (letras hacia usted):</text>
+    <text x="272" y="365" class="s">G · D · S; la pestaña metálica es D.</text>
+    <text x="15" y="385" class="s">La tira va pegada bajo la viga, a ambos lados de la cámara, a 45° y con difusor.</text>
+  </g>
+
+  <!-- ============ (b) BUZZER ============ -->
+  <g transform="translate(610,90)">
+    <rect width="570" height="400" rx="10" class="marco"/>
+    <text x="15" y="30" class="h">(b) Buzzer: GPIO4 → 2N2222</text>
+    <path d="M295 40 H425" class="v5"/><text x="432" y="45" class="b" style="fill:#d32f2f">+5 V</text>
+    <path d="M295 40 V62" class="v5"/>
+    <rect x="235" y="62" width="120" height="46" rx="6" fill="#fffbe6" stroke="#b38600" stroke-width="1.5"/>
+    <text x="295" y="82" text-anchor="middle" class="b">Buzzer</text>
+    <text x="295" y="99" text-anchor="middle" class="s">activo, 5 V</text>
+    <text x="300" y="58" class="s">(+)</text><text x="300" y="124" class="s">(−)</text>
+    <path d="M295 108 V182" class="w"/>
+    <circle cx="295" cy="150" r="3.5" class="nodo"/>
+    <!-- diodo -->
+    <path d="M295 150 H420 V130 M420 108 V40" class="w"/>
+    <polygon points="409,130 431,130 420,111" fill="#ffffff" stroke="#1d2330" stroke-width="2"/>
+    <path d="M408 109 H432" stroke="#1d2330" stroke-width="3"/>
+    <text x="440" y="118" class="b">1N4148</text><text x="440" y="135" class="s">franja hacia +5 V</text>
+    <!-- NPN -->
+    <circle cx="288" cy="210" r="38" fill="none" stroke="#5b6472" stroke-width="1.5"/>
+    <path d="M272 188 V232" stroke="#1d2330" stroke-width="3"/>
+    <path d="M272 200 L295 182" class="w"/>
+    <path d="M272 220 L295 238 V300" class="w"/>
+    <polygon points="295,238 283,236 289,228" fill="#1d2330"/>
+    <text x="303" y="178" class="b">C</text><text x="250" y="204" class="b">B</text><text x="303" y="252" class="b">E</text>
+    <text x="335" y="205" class="b">2N2222</text><text x="335" y="222" class="s">NPN, TO-92</text>
+    <use href="#tierra" x="295" y="302"/>
+    <!-- base -->
+    <text x="12" y="215" class="pin">GPIO4</text>
+    <path d="M62 210 H85" class="w"/>
+    <rect x="85" y="203" width="45" height="14" class="r"/><text x="107" y="196" text-anchor="middle" class="s">1 kΩ</text>
+    <path d="M130 210 H272" class="w"/>
+    <!-- notas -->
+    <text x="335" y="262" class="s">• BEEP 1: corto · 2: largo ·</text>
+    <text x="345" y="279" class="s">3: tres largos (tabla 7.3).</text>
+    <text x="335" y="302" class="s">• El diodo absorbe el pico</text>
+    <text x="345" y="319" class="s">de tensión al apagar.</text>
+    <text x="15" y="365" class="s">El orden de patas E · B · C del 2N2222 cambia según el fabricante (PN2222A, P2N2222A…):</text>
+    <text x="15" y="383" class="s">verifíquelo en la hoja de datos del que compre antes de soldar.</text>
+  </g>
+
+  <!-- ============ (c) TECLADO ============ -->
+  <g transform="translate(20,510)">
+    <rect width="570" height="400" rx="10" class="marco"/>
+    <text x="15" y="30" class="h">(c) Teclado 4×4: pull-ups externos en las columnas</text>
+    <path d="M160 60 H470" class="v33"/><text x="478" y="65" class="b" style="fill:#c25e00">3V3</text>
+    <g>
+      <path d="M180 60 V75 M260 60 V75 M340 60 V75 M420 60 V75" class="v33"/>
+      <rect x="173" y="75" width="14" height="42" class="r"/><rect x="253" y="75" width="14" height="42" class="r"/>
+      <rect x="333" y="75" width="14" height="42" class="r"/><rect x="413" y="75" width="14" height="42" class="r"/>
+      <path d="M180 117 V230 M260 117 V230 M340 117 V230 M420 117 V230" class="w"/>
+      <circle cx="180" cy="150" r="3.5" class="nodo"/><circle cx="260" cy="150" r="3.5" class="nodo"/>
+      <circle cx="340" cy="150" r="3.5" class="nodo"/><circle cx="420" cy="150" r="3.5" class="nodo"/>
+      <path d="M180 150 H195 M260 150 H275 M340 150 H355 M420 150 H435" class="w"/>
+    </g>
+    <text x="110" y="100" class="s">4 × 10 kΩ</text>
+    <g class="pin"><text x="198" y="146">G34</text><text x="278" y="146">G35</text><text x="358" y="146">G36</text><text x="438" y="146">G39</text></g>
+    <rect x="140" y="230" width="320" height="140" rx="8" class="caja"/>
+    <g class="pin"><text x="172" y="250">C1</text><text x="252" y="250">C2</text><text x="332" y="250">C3</text><text x="412" y="250">C4</text></g>
+    <text x="300" y="350" text-anchor="middle" class="b">Teclado 4×4 de membrana</text>
+    <path d="M140 270 H75 M140 298 H75 M140 326 H75 M140 354 H75" class="w"/>
+    <g class="pin" text-anchor="end"><text x="70" y="275">F1·G13</text><text x="70" y="303">F2·G16</text><text x="70" y="331">F3·G17</text><text x="70" y="359">F4·G23</text></g>
+    <text x="150" y="275" class="s">filas: salidas,</text><text x="150" y="292" class="s">una en bajo a la vez</text>
+    <text x="15" y="392" class="s">GPIO 34–39 no tienen pull-up interno: sin estas resistencias el teclado no funciona.</text>
+  </g>
+
+  <!-- ============ (d) I2C ============ -->
+  <g transform="translate(610,510)">
+    <rect width="570" height="400" rx="10" class="marco"/>
+    <text x="15" y="30" class="h">(d) Adaptador de nivel I2C (3,3 V ↔ 5 V)</text>
+    <text x="240" y="72" text-anchor="middle" class="b">Módulo BSS138 · 4 canales</text>
+    <rect x="150" y="82" width="180" height="170" rx="6" class="caja"/>
+    <g class="pin"><text x="160" y="115">LV</text><text x="160" y="155">LV1</text><text x="160" y="195">LV2</text><text x="160" y="235">GND</text>
+    <text x="320" y="115" text-anchor="end">HV</text><text x="320" y="155" text-anchor="end">HV1</text><text x="320" y="195" text-anchor="end">HV2</text><text x="320" y="235" text-anchor="end">GND</text></g>
+    <!-- lado ESP32 -->
+    <text x="12" y="115" class="pin">3V3</text><path d="M45 110 H150" class="v33"/>
+    <text x="12" y="155" class="pin">GPIO21</text><path d="M68 150 H150" class="sda"/>
+    <text x="12" y="195" class="pin">GPIO22</text><path d="M68 190 H150" class="scl"/>
+    <text x="12" y="235" class="pin">GND</text><path d="M45 230 H150" class="gnd"/>
+    <text x="80" y="143" class="s">SDA</text><text x="80" y="183" class="s">SCL</text>
+    <!-- lado 5 V -->
+    <path d="M365 92 V270" class="v5"/><text x="345" y="86" class="b" style="fill:#d32f2f">+5 V</text>
+    <path d="M330 110 H365" class="v5"/><circle cx="365" cy="110" r="3.5" fill="#d32f2f"/>
+    <path d="M330 150 H410" class="sda"/><path d="M330 190 H410" class="scl"/>
+    <path d="M330 230 H410" class="gnd"/><path d="M365 270 H410" class="v5"/>
+    <rect x="410" y="82" width="150" height="210" rx="6" class="caja"/>
+    <rect x="430" y="98" width="110" height="30" rx="3" fill="#cfe8c5" stroke="#5b6472"/>
+    <text x="485" y="118" text-anchor="middle" class="pin">LISTO</text>
+    <g class="pin"><text x="420" y="155">SDA</text><text x="420" y="195">SCL</text><text x="420" y="235">GND</text><text x="420" y="275">VCC</text></g>
+    <text x="485" y="310" text-anchor="middle" class="s">LCD 16×2 + PCF8574</text>
+    <text x="15" y="340" class="s">• Las pull-ups ya vienen en el módulo y en la mochila PCF8574: no agregue otras.</text>
+    <text x="15" y="360" class="s">• El contraste se ajusta con el potenciómetro azul de la mochila.</text>
+    <text x="15" y="380" class="s">• T2.4: el escaneo I2C debe mostrar la LCD en 0x27 (o 0x3F).</text>
+  </g>
+
+  <!-- ============ SERVOS ============ -->
+  <rect x="20" y="925" width="1160" height="70" rx="10" class="marco"/>
+  <text x="35" y="952" class="h">Conectores de servo (3 pines macho en la placa)</text>
+  <rect x="470" y="934" width="30" height="24" fill="#d4a600"/><rect x="500" y="934" width="30" height="24" fill="#d32f2f"/><rect x="530" y="934" width="30" height="24" fill="#6d4c41"/>
+  <text x="575" y="952">Señal (naranja) · +5 V (rojo) · GND (marrón).</text>
+  <text x="35" y="978" class="s">Sin componentes: la señal de 3,3 V basta para MG996R y SG90. Si un servo tiembla, pasar su señal por un canal libre del BSS138 (LV3 → HV3).</text>
+</svg>
