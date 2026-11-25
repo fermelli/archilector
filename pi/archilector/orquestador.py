@@ -187,10 +187,10 @@ class Orquestador:
             actual = self._analizar(self._capturar())
             while True:
                 self._procesar_pagina(doc_id, modo, actual)
+                if modo == LECTURA:
+                    self._leer(actual)  # también la última: el límite solo evita voltear otra hoja
                 if self._max_paginas and self._numero >= self._max_paginas:
                     break
-                if modo == LECTURA:
-                    self._leer(actual)
                 self._revisar_ordenes_pendientes()
                 actual = self._esperar_cambio(actual) if modo == ASISTIDO else self._pasar_pagina(actual)
         except FinDocumento:

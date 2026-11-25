@@ -136,7 +136,8 @@ def test_lectura_lee_cada_pagina(tmp_path):
     o, sim, *_ = armar(tmp_path, VerificadorGuionado())
     o.iniciar_documento("x", "l", LECTURA, max_paginas=2)
     o.esperar_fin(20)
-    assert any("No se reconoció texto" in d for d in o.voz.dicho)
+    # las dos páginas se leen, incluida la última (antes el límite cortaba antes de leerla)
+    assert sum("No se reconoció texto" in d for d in o.voz.dicho) == 2
 
 
 def test_asistido_detecta_el_cambio(tmp_path):
