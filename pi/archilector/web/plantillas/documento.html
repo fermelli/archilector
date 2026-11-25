@@ -1,42 +1,84 @@
 {% extends "base.html" %}
+{% from "_iconos.html" import icono %}
 {% block titulo %}{{ doc.titulo }} · ArchiLector{% endblock %}
+{% set MODOS = {"lectura": ("Lectura", "info"), "archivo": ("Archivo", "acento"), "asistido": ("Asistido", "aviso")} %}
+{% set TONOS_CLASE = {"pagina_nueva": "ok", "misma_pagina": "aviso", "dos_hojas": "peligro", "hoja_doblada": "peligro"} %}
 {% block contenido %}
-<h1>{{ doc.titulo }}</h1>
-<p class="dato">Libro {{ doc.libro }} · modo {{ doc.modo }} · {{ doc.paginas }} páginas · {{ doc.creado }}{% if doc.terminado %} → {{ doc.terminado }}{% endif %}</p>
-{% if doc.paginas %}<p><a class="boton" href="/documentos/{{ doc.id }}/pdf">Descargar PDF buscable</a></p>{% endif %}
+{% set modo = MODOS.get(doc.modo, (doc.modo, "")) %}
+<p style="margin:0 0 10px"><a class="chico" href="/documentos">← Documentos</a></p>
+<div class="cabecera">
+  <div>
+    <h1>{{ doc.titulo }}</h1>
+    <div class="botones" style="margin-top:10px; align-items:center">
+      <span class="insignia {{ modo[1] }}">{{ modo[0] }}</span>
+      <span class="insignia">{{ doc.paginas }} páginas</span>
+      <span class="insignia">Libro {{ doc.libro }}</span>
+      {% if doc.terminado %}<span class="insignia ok"><i class="punto"></i>Terminado</span>{% else %}<span class="insignia info"><i class="punto vivo"></i>En curso</span>{% endif %}
+      <span class="suave chico num">{{ (doc.creado or '')[:16].replace('T', ' ') }}</span>
+    </div>
+  </div>
+  {% if doc.paginas %}<a class="boton" href="/documentos/{{ doc.id }}/pdf">{{ icono("descargar") }} Descargar PDF buscable</a>{% endif %}
+</div>
 
-<h2>Páginas</h2>
-<p class="dato">La categoría corregida a mano sirve para entrenar el clasificador de páginas (Diseño 4.6).</p>
+<div class="seccion">
+  <h2>Páginas</h2>
+  <span class="suave chico">Si la IA se equivocó de categoría, corríjala: sirve para entrenar el clasificador (Diseño 4.6).</span>
+</div>
+{% if paginas %}
 <div class="paginas">
   {% for p in paginas %}
-  <figure id="p{{ p.id }}">
-    <a href="{{ p.ruta_imagen | url_datos }}" target="_blank"><img src="{{ p.ruta_imagen | url_datos }}" alt="Página {{ p.numero }}" loading="lazy"></a>
-    <figcaption>
-      Página {{ p.numero }}{% if p.numero_impreso %} (impresa {{ p.numero_impreso }}){% endif %} · nitidez {{ '%.0f' % (p.calidad or 0) }}<br>
-      IA: {{ NOMBRES_CATEGORIAS.get(p.categoria, p.categoria) }}{% if p.confianza_categoria %} ({{ '%.2f' % p.confianza_categoria }}){% endif %}
-      <form class="linea" method="post" action="/paginas/{{ p.id }}/categoria" style="margin-top:6px">
+  <article class="tarjeta pagina" id="p{{ p.id }}">
+    <a class="pagina-img" href="{{ p.ruta_imagen | url_datos }}" target="_blank" title="Ver la página {{ p.numero }} completa">
+      <img src="{{ p.ruta_imagen | url_datos }}" alt="Página {{ p.numero }}" loading="lazy">
+    </a>
+    <div class="pagina-info">
+      <div class="fila">
+        <b>Página {{ p.numero }}{% if p.numero_impreso %} <span class="suave" style="font-weight:500">· impresa {{ p.numero_impreso }}</span>{% endif %}</b>
+        <span class="suave num" title="Nitidez (varianza del laplaciano)">nitidez {{ '%.0f' % (p.calidad or 0) }}</span>
+      </div>
+      <div class="fila">
+        <span class="insignia {{ 'acento' if p.categoria_manual else '' }}">{{ NOMBRES_CATEGORIAS.get(p.categoria_manual or p.categoria, p.categoria_manual or p.categoria or '—') }}</span>
+        {% if p.categoria_manual %}<span class="suave chico">corregida a mano</span>
+        {% elif p.confianza_categoria %}<span class="suave chico num">confianza {{ '%.2f' % p.confianza_categoria }}</span>{% endif %}
+      </div>
+      <form method="post" action="/paginas/{{ p.id }}/categoria">
         <input type="hidden" name="doc_id" value="{{ doc.id }}">
-        <select name="categoria" onchange="this.form.submit()">
-          <option value="">— corregir —</option>
+        <select name="categoria" onchange="this.form.submit()" aria-label="Corregir la categoría de la página {{ p.numero }}">
+          <option value="">Corregir categoría…</option>
           {% for c in categorias %}<option value="{{ c }}" {% if p.categoria_manual == c %}selected{% endif %}>{{ NOMBRES_CATEGORIAS[c] }}</option>{% endfor %}
         </select>
       </form>
-      {% if p.texto %}<details><summary>Texto</summary><pre style="white-space:pre-wrap;font-size:.8rem">{{ p.texto }}</pre></details>{% endif %}
-    </figcaption>
-  </figure>
+      {% if p.texto %}<details><summary>Texto reconocido</summary><pre>{{ p.texto }}</pre></details>
+      {% else %}<span class="suave chico">Sin texto reconocido</span>{% endif %}
+    </div>
+  </article>
   {% endfor %}
 </div>
+{% else %}
+<section class="tarjeta"><div class="vacio">{{ icono("documento") }}<b>Este documento no tiene páginas</b></div></section>
+{% endif %}
 
 {% if volteos %}
-<h2>Volteos</h2>
-<div class="panel">
-  <table>
-    <tr><th>Comando</th><th>Intento</th><th>Respuesta</th><th>Clase</th><th>Confianza</th><th>Regla de píxeles</th><th>Acción</th></tr>
-    {% for v in volteos %}
-    <tr><td>{{ v.comando }}</td><td>{{ v.intento }}</td><td>{{ v.respuesta }}</td><td>{{ NOMBRES_CLASES.get(v.clase, v.clase) }}</td>
-      <td>{{ '%.2f' % (v.confianza or 0) }} ({{ v.fuente }})</td><td>{{ v.regla_pixeles }}</td><td>{{ v.accion }}</td></tr>
-    {% endfor %}
-  </table>
-</div>
+<div class="seccion"><h2>Volteos</h2><span class="suave chico">{{ volteos | length }} registrados</span></div>
+<section class="tarjeta">
+  <div class="tabla-caja">
+    <table>
+      <thead><tr><th>Comando</th><th class="der">Intento</th><th>Resultado</th><th class="der">Confianza</th><th>Regla de píxeles</th><th>Acción</th><th>Respuesta</th></tr></thead>
+      <tbody>
+      {% for v in volteos %}
+      <tr>
+        <td><code>{{ v.comando }}</code></td>
+        <td class="der num">{{ v.intento }}</td>
+        <td><span class="insignia {{ TONOS_CLASE.get(v.clase, '') }}">{{ NOMBRES_CLASES.get(v.clase, v.clase) }}</span></td>
+        <td class="der num">{{ '%.2f' % (v.confianza or 0) }} <span class="suave chico">{{ v.fuente }}</span></td>
+        <td class="suave">{{ NOMBRES_CLASES.get(v.regla_pixeles, v.regla_pixeles) }}</td>
+        <td>{{ v.accion }}</td>
+        <td class="suave chico"><code>{{ v.respuesta }}</code></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
 {% endif %}
 {% endblock %}

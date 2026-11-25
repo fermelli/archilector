@@ -1,21 +1,34 @@
+{% from "_iconos.html" import icono %}
+{%- set ruta = request.url.path -%}
 <!doctype html>
 <html lang="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f6e5c">
   <title>{% block titulo %}ArchiLector{% endblock %}</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f6e5c'/%3E%3Cpath d='M7 9h5a3 3 0 0 1 3 3v11a2.3 2.3 0 0 0-2.3-2.3H7zM25 9h-5a3 3 0 0 0-3 3v11a2.3 2.3 0 0 1 2.3-2.3H25z' fill='none' stroke='white' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="/estaticos/estilo.css">
 </head>
 <body>
-<header>
-  <strong>ArchiLector</strong>
-  <a href="/">Estado</a>
-  <a href="/documentos">Documentos</a>
-  <a href="/etiquetar">Etiquetar</a>
-  <a href="/calibracion">Calibración</a>
+<header class="barra">
+  <div class="barra-in">
+    <a class="marca" href="/"><span class="marca-logo">{{ icono("libro") }}</span><span>ArchiLector</span></a>
+    <nav class="nav" aria-label="Secciones">
+      {% for href, nombre, ico in [("/", "Estado", "actividad"), ("/documentos", "Documentos", "biblioteca"),
+                                    ("/etiquetar", "Etiquetar", "etiqueta"), ("/calibracion", "Calibración", "ajustes")] %}
+      {%- set activo = (ruta == href) or (href != "/" and ruta.startswith(href)) -%}
+      <a href="{{ href }}" {% if activo %}class="activo" aria-current="page"{% endif %}>{{ icono(ico) }}<span>{{ nombre }}</span></a>
+      {% endfor %}
+    </nav>
+    <div class="barra-estado" title="Estado del robot"><i class="punto neutro" id="barra-punto"></i><span id="barra-texto">Conectando…</span></div>
+  </div>
 </header>
 <main>
 {% block contenido %}{% endblock %}
 </main>
+<div class="tostadas" id="tostadas" aria-live="polite"></div>
+<script src="/estaticos/panel.js"></script>
+{% block guion %}{% endblock %}
 </body>
 </html>

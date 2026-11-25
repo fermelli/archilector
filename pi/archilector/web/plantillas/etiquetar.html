@@ -1,44 +1,81 @@
 {% extends "base.html" %}
+{% from "_iconos.html" import icono %}
 {% block titulo %}Etiquetar · ArchiLector{% endblock %}
+{% set META = 300 %}
+{% set TONOS_CLASE = {"pagina_nueva": "ok", "misma_pagina": "aviso", "dos_hojas": "peligro", "hoja_doblada": "peligro"} %}
 {% block contenido %}
-<h1>Etiquetar pares de volteo</h1>
-<p class="dato">Cada volteo guardó la foto de antes y la de después. Asigne lo que pasó de verdad; con unos 300 pares por clase se entrena el verificador en Google Colab (Diseño 4.3).</p>
-
-<div class="panel">
-  <div class="botones" style="gap:18px">
-    {% for c in clases %}<div><div class="dato">{{ NOMBRES_CLASES[c] }}</div><div class="valor">{{ conteo.get(c, 0) }}</div></div>{% endfor %}
-    <div><div class="dato">Sin etiqueta</div><div class="valor">{{ conteo.get('sin_etiqueta', 0) }}</div></div>
+<div class="cabecera">
+  <div>
+    <h1>Etiquetar volteos</h1>
+    <p class="bajada">Cada volteo guarda la foto de antes y la de después. Indique qué pasó de verdad: con unos {{ META }} pares por
+      clase se entrena el verificador en Google Colab (Diseño 4.3).</p>
   </div>
-  <p class="botones" style="margin-top:12px">
-    <a class="boton sec" href="/etiquetar/verificador.zip">Exportar verificador (.zip)</a>
-    <a class="boton sec" href="/etiquetar/clasificador.zip">Exportar clasificador (.zip)</a>
-  </p>
+  <div class="botones">
+    <a class="boton sec" href="/etiquetar/verificador.zip">{{ icono("descargar") }} Exportar verificador</a>
+    <a class="boton sec" href="/etiquetar/clasificador.zip">{{ icono("descargar") }} Exportar clasificador</a>
+  </div>
+</div>
+
+<div class="contadores" style="margin-bottom:22px">
+  {% for c in clases %}
+  {% set n = conteo.get(c, 0) %}
+  <div class="tarjeta contador">
+    <div class="etiqueta">{{ NOMBRES_CLASES[c] }}</div>
+    <div class="cifra">{{ n }}<small> / {{ META }}</small></div>
+    <div class="pista"><i class="{{ 'ok' if n >= META else '' }}" style="width:{{ [100 * n / META, 100] | min }}%"></i></div>
+  </div>
+  {% endfor %}
+  <div class="tarjeta contador plana">
+    <div class="etiqueta">Sin etiqueta</div>
+    <div class="cifra">{{ conteo.get('sin_etiqueta', 0) }}</div>
+    <div class="suave chico" style="margin-top:8px">pendientes de revisar</div>
+  </div>
 </div>
 
 {% if par %}
-<div class="panel">
-  <p class="dato">Par #{{ par.id }} · libro {{ par.libro }} · {{ meta.get('comando', '') }} intento {{ meta.get('intento', '') }}
-    · la IA dijo <b>{{ NOMBRES_CLASES.get(par.prediccion, par.prediccion) }}</b> · regla de píxeles: {{ par.regla_pixeles }}
-    {% if par.etiqueta %} · etiqueta actual: <b>{{ par.etiqueta }}</b>{% endif %}</p>
-  <div class="par">
-    <figure><img src="{{ (par.ruta ~ '/antes.jpg') | url_datos }}" alt="Antes"><figcaption class="dato">Antes</figcaption></figure>
-    <figure><img src="{{ (par.ruta ~ '/despues.jpg') | url_datos }}" alt="Después"><figcaption class="dato">Después</figcaption></figure>
-    <figure><img src="{{ (par.ruta ~ '/compuesto.jpg') | url_datos }}" alt="Entrada del verificador"><figcaption class="dato">Entrada del verificador (224 × 224)</figcaption></figure>
+<section class="tarjeta" aria-labelledby="t-par">
+  <div class="tarjeta-cab">
+    <h2 id="t-par">Par #{{ par.id }}</h2>
+    <div class="botones" style="align-items:center">
+      <span class="suave chico">La IA dijo</span>
+      <span class="insignia {{ TONOS_CLASE.get(par.prediccion, '') }}">{{ NOMBRES_CLASES.get(par.prediccion, par.prediccion) }}</span>
+      {% if par.etiqueta %}<span class="insignia acento">Etiqueta actual: {{ NOMBRES_CLASES.get(par.etiqueta, par.etiqueta) }}</span>{% endif %}
+    </div>
   </div>
-  <form method="post" action="/etiquetar/{{ par.id }}" class="botones clases" style="margin-top:14px">
-    {% for c in clases %}<button name="etiqueta" value="{{ c }}">{{ loop.index }} · {{ NOMBRES_CLASES[c] }}</button>{% endfor %}
-    <button class="sec" name="etiqueta" value="descartar">Descartar</button>
-  </form>
-  <p class="dato">Atajos de teclado: 1 a 4 para la clase, 0 para descartar.</p>
-</div>
+  <div class="tarjeta-cuerpo">
+    <p class="suave chico" style="margin:0 0 14px">Libro {{ par.libro }} · {{ meta.get('comando', '') }} intento {{ meta.get('intento', '') }}
+      · regla de píxeles: {{ NOMBRES_CLASES.get(par.regla_pixeles, par.regla_pixeles) }}{% if meta.get('camara') %} · cámara {{ meta.get('camara') }}{% endif %}</p>
+    <div class="par">
+      <figure><img src="{{ (par.ruta ~ '/antes.jpg') | url_datos }}" alt="Antes del volteo"><figcaption>Antes</figcaption></figure>
+      <figure><img src="{{ (par.ruta ~ '/despues.jpg') | url_datos }}" alt="Después del volteo"><figcaption>Después</figcaption></figure>
+      <figure><img src="{{ (par.ruta ~ '/compuesto.jpg') | url_datos }}" alt="Entrada del verificador"><figcaption>Lo que ve el verificador (224 × 224)</figcaption></figure>
+    </div>
+    <h3 style="margin-top:22px">¿Qué pasó en este volteo?</h3>
+    <form method="post" action="/etiquetar/{{ par.id }}" class="clases">
+      {% for c in clases %}
+      <button class="sec" name="etiqueta" value="{{ c }}"><span><i class="punto {{ TONOS_CLASE.get(c, 'neutro') }}" style="display:inline-block; margin-right:8px"></i>{{ NOMBRES_CLASES[c] }}</span><kbd>{{ loop.index }}</kbd></button>
+      {% endfor %}
+      <button class="fantasma" name="etiqueta" value="descartar"><span>{{ icono("descartar") }} Descartar</span><kbd>0</kbd></button>
+    </form>
+    <p class="ayuda">Atajos de teclado: 1 a {{ clases | length }} para la clase y 0 para descartar.</p>
+  </div>
+</section>
+{% else %}
+<section class="tarjeta">
+  <div class="vacio" style="padding:48px 16px">{{ icono("listo") }}<b>No hay pares pendientes</b>Se generan solos cada vez que el robot pasa una hoja.</div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block guion %}
+{% if par %}
 <script>
-document.addEventListener('keydown', ev => {
+document.addEventListener('keydown', (ev) => {
+  if (ev.target.closest('input, select, textarea')) return;
   const botones = document.querySelectorAll('form.clases button');
   const i = ev.key === '0' ? botones.length - 1 : parseInt(ev.key, 10) - 1;
   if (i >= 0 && i < botones.length) botones[i].click();
 });
 </script>
-{% else %}
-<div class="panel"><p>No hay pares pendientes. Se generan solos en cada volteo del robot.</p></div>
 {% endif %}
 {% endblock %}

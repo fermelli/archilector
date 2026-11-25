@@ -1,90 +1,136 @@
 {% extends "base.html" %}
+{% from "_iconos.html" import icono %}
 {% block titulo %}Calibración · ArchiLector{% endblock %}
 {% block contenido %}
-<h1>Calibración del mecanismo B</h1>
-<p class="dato">Parámetros de la tabla 5.5 del Documento Técnico. Cada cambio se guarda en la memoria NVS del ESP32. Anote los valores finales en la hoja de calibración.</p>
+<div class="cabecera">
+  <div>
+    <h1>Calibración</h1>
+    <p class="bajada">Cámara, lectura y mecanismo B. Los parámetros se guardan en la memoria NVS del ESP32: anote los valores finales en la hoja de calibración.</p>
+  </div>
+</div>
 
-{% if msg %}<div class="panel"><code>{{ msg }}</code></div>{% endif %}
-{% if not hay_enlace %}<div class="panel mensaje">No hay enlace con el ESP32.</div>{% endif %}
-{% if ocupado %}<div class="panel mensaje">Hay un documento en curso: solo se permiten STATUS y STOP.</div>{% endif %}
+{% if msg %}<div class="aviso-caja info">{{ icono("info") }}<div><code>{{ msg }}</code></div></div>{% endif %}
+{% if not hay_enlace %}<div class="aviso-caja aviso">{{ icono("alerta") }}<div><b>No hay enlace con el ESP32.</b> Las pruebas de movimiento y los parámetros no están disponibles.</div></div>{% endif %}
+{% if ocupado %}<div class="aviso-caja aviso">{{ icono("alerta") }}<div><b>Hay un documento en curso.</b> Solo se permiten STATUS y STOP, y no se puede cambiar de cámara.</div></div>{% endif %}
 
-<div class="panel">
-  <h2 style="margin-top:0">Cámara</h2>
-  <p>Activa: <code>{{ camara.fuente or '—' }}</code>
-    {% if camara.resolucion %} · {{ camara.resolucion[0] }} × {{ camara.resolucion[1] }} px{% endif %}</p>
-  {% if camara.conmutable %}
-  <form method="post" action="/camara/fuente" class="linea">
-    <label>Cambiar a
-      <select name="fuente">
-        {% for o in opciones_camara %}
-        <option value="{{ o.fuente }}" {% if o.fuente == camara.fuente %}selected{% endif %}>{{ o.nombre }}</option>
+<div class="rejilla dos">
+  <section class="tarjeta" aria-labelledby="t-camara">
+    <div class="tarjeta-cab">
+      <h2 id="t-camara">Cámara</h2>
+      <span class="insignia {{ 'ok' if camara.fuente else '' }}"><i class="punto"></i>{{ camara.fuente.split('by-id/usb-')[-1].replace('-video-index0', '') if camara.fuente else 'Sin cámara' }}</span>
+    </div>
+    <div class="tarjeta-cuerpo">
+      {% if camara.resolucion %}<p class="suave chico" style="margin:0 0 14px">Resolución {{ camara.resolucion[0] }} × {{ camara.resolucion[1] }} px</p>{% endif %}
+      {% if camara.conmutable %}
+      <form method="post" action="/camara/fuente" class="en-linea">
+        <label class="campo"><span>Usar la cámara</span>
+          <select name="fuente">
+            {% for o in opciones_camara %}
+            <option value="{{ o.fuente }}" {% if o.fuente == camara.fuente %}selected{% endif %}>{{ o.nombre }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <button class="sec" {% if ocupado %}disabled{% endif %}>Usar</button>
+        <button type="button" class="sec" id="btn-foto" {% if ocupado %}disabled{% endif %}>{{ icono("camara") }} Foto de prueba</button>
+      </form>
+      {% endif %}
+      <div class="vista" id="foto-caja" style="margin-top:14px; aspect-ratio: 4 / 3" hidden>
+        <img id="foto-prueba" alt="Foto de prueba">
+      </div>
+      <p class="ayuda">La elección se recuerda al reiniciar (con <code>camara.fuente: auto</code>). Cada cámara puede tener su
+        propia región del canto en <code>camara.region_canto</code>, y los pares guardados anotan qué cámara los tomó.</p>
+    </div>
+  </section>
+
+  <section class="tarjeta" aria-labelledby="t-claude">
+    <div class="tarjeta-cab">
+      <h2 id="t-claude">Lectura con Claude</h2>
+      {% if not claude %}<span class="insignia">Desactivada</span>
+      {% elif claude.hay_clave %}<span class="insignia ok"><i class="punto"></i>Activa</span>
+      {% else %}<span class="insignia aviso"><i class="punto"></i>Sin clave</span>{% endif %}
+    </div>
+    <div class="tarjeta-cuerpo">
+      {% if claude %}
+      <form method="post" action="/ocr/modelo" class="en-linea">
+        <label class="campo"><span>Modelo</span>
+          <select name="modelo">
+            {% for m in claude.modelos %}
+            <option value="{{ m }}" {% if m == claude.modelo %}selected{% endif %}>{{ m.replace('claude-', 'Claude ').replace('-5-5', ' 5.5').replace('haiku', 'Haiku').replace('sonnet', 'Sonnet').replace('opus', 'Opus') }}{{ ' · económico' if 'haiku' in m else (' · el más preciso' if 'opus' in m else '') }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <button class="sec">Usar</button>
+      </form>
+      <ul class="lista" style="margin-top:16px">
+        <li><span class="nombre">Última página</span><span class="detalle">{{ 'leída por ' ~ claude.ultimo if claude.ultimo != 'local' else 'leída con el OCR local' }}</span></li>
+        <li><span class="nombre">Respaldo</span><span class="detalle">OCR local, si no hay internet o clave</span></li>
+      </ul>
+      {% if not claude.hay_clave %}<p class="ayuda">Ponga <code>ANTHROPIC_API_KEY</code> en <code>pi/.env</code> y reinicie el servicio.</p>{% endif %}
+      {% else %}
+      <p class="suave" style="margin:0">Las páginas se leen con el OCR local. Para leer con Claude, active <code>ocr.claude.activo</code> en
+        <code>config.yaml</code> y ponga la clave en <code>pi/.env</code>.</p>
+      {% endif %}
+    </div>
+  </section>
+</div>
+
+<div class="seccion"><h2>Mecanismo B</h2></div>
+<div class="rejilla dos">
+  <section class="tarjeta" aria-labelledby="t-mov">
+    <div class="tarjeta-cab"><h2 id="t-mov">Pruebas de movimiento</h2></div>
+    <div class="tarjeta-cuerpo">
+      <form method="post" action="/calibracion/comando" class="grupo-control">
+        {% for c, ico in [('PING', 'actividad'), ('STATUS', 'info'), ('HOME', 'volver'), ('TURN', 'siguiente'), ('BACK', 'anterior')] %}
+        <button class="sec" name="comando" value="{{ c }}" {% if not hay_enlace or (ocupado and c not in ('STATUS', 'PING')) %}disabled{% endif %}>{{ icono(ico) }} {{ c }}</button>
         {% endfor %}
-      </select>
-    </label>
-    <button class="sec" {% if ocupado %}disabled{% endif %}>Usar</button>
-    <button type="button" class="sec" id="btn-foto" {% if ocupado %}disabled{% endif %}>Foto de prueba</button>
-  </form>
-  {% endif %}
-  <p class="dato">La elección se recuerda al reiniciar (con <code>camara.fuente: auto</code>). Cada cámara puede tener su
-    propia región del canto en <code>camara.region_canto</code>. Los pares guardados anotan qué cámara los tomó.</p>
-  <img id="foto-prueba" alt="Foto de prueba" style="display:none;max-width:100%;margin-top:10px;border:1px solid #c9ced6">
-  {% if claude %}
-  <form method="post" action="/ocr/modelo" class="linea dato">
-    <label>Lectura con Claude
-      <select name="modelo">
-        {% for m in claude.modelos %}<option value="{{ m }}" {% if m == claude.modelo %}selected{% endif %}>{{ m }}</option>{% endfor %}
-      </select>
-    </label>
-    <button class="sec">Usar</button>
-    {% if not claude.hay_clave %}(sin clave: OCR local){% else %}· última página: {{ claude.ultimo }}{% endif %}
-  </form>
-  {% endif %}
+        <button class="peligro" name="comando" value="STOP" {% if not hay_enlace %}disabled{% endif %}>{{ icono("parada") }} STOP</button>
+      </form>
+      <hr class="separador">
+      <form method="post" action="/calibracion/comando" class="en-linea">
+        <label class="campo" style="flex:1 1 140px"><span>Comando</span>
+          <select name="comando"><option>RETRY</option><option>LIGHT</option><option>BEEP</option></select>
+        </label>
+        <label class="campo" style="flex:1 1 120px"><span>Argumento</span><input name="argumento" type="number" required placeholder="40"></label>
+        <button {% if not hay_enlace or ocupado %}disabled{% endif %}>{{ icono("enviar") }} Enviar</button>
+      </form>
+      <p class="ayuda">RETRY: pasos extra de arco · LIGHT: brillo de 0 a 100 % · BEEP: patrón 1 a 3.</p>
+    </div>
+  </section>
+
+  <section class="tarjeta" aria-labelledby="t-cfg">
+    <div class="tarjeta-cab"><h2 id="t-cfg">Parámetros (CFG)</h2><span class="sub">Tabla 5.5</span></div>
+    <div class="tabla-caja" style="margin-top:12px">
+      <table>
+        <thead><tr><th>Parámetro</th><th class="der">Nuevo valor</th></tr></thead>
+        <tbody>
+        {% for nombre, descripcion in parametros %}
+        <tr>
+          <td><code>{{ nombre }}</code><div class="suave chico" style="margin-top:3px">{{ descripcion }}</div></td>
+          <td class="der">
+            <form method="post" action="/calibracion/cfg" class="en-linea" style="justify-content:flex-end; flex-wrap:nowrap">
+              <input type="hidden" name="parametro" value="{{ nombre }}">
+              <input name="valor" type="number" required style="width:110px" aria-label="Nuevo valor de {{ nombre }}">
+              <button class="sec chico-b" {% if not hay_enlace or ocupado %}disabled{% endif %}>Guardar</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="tarjeta-pie">PASOS_ARCO inicial = avance × 4096 / (π × D), con D el diámetro medido de la goma del rodillo Canon. Se ajusta en la prueba T3.2.</div>
+  </section>
 </div>
+{% endblock %}
+
+{% block guion %}
 <script>
-  const btn = document.getElementById('btn-foto');
-  if (btn) btn.addEventListener('click', () => {
-    const img = document.getElementById('foto-prueba');
-    img.src = '/camara/foto.jpg?t=' + Date.now();
-    img.style.display = 'block';
-  });
+const btn = document.getElementById('btn-foto');
+if (btn) btn.addEventListener('click', () => {
+  const img = document.getElementById('foto-prueba');
+  img.src = '/camara/foto.jpg?t=' + Date.now();
+  document.getElementById('foto-caja').hidden = false;
+  Panel.tostada('Tomando la foto…');
+});
 </script>
-
-<div class="panel">
-  <h2 style="margin-top:0">Pruebas de movimiento</h2>
-  <form method="post" action="/calibracion/comando" class="botones">
-    {% for c in ['PING', 'STATUS', 'HOME', 'TURN', 'BACK'] %}
-    <button class="sec" name="comando" value="{{ c }}">{{ c }}</button>
-    {% endfor %}
-    <button class="peligro" name="comando" value="STOP">STOP</button>
-  </form>
-  <form method="post" action="/calibracion/comando" class="linea" style="margin-top:12px">
-    <label>Comando
-      <select name="comando"><option>RETRY</option><option>LIGHT</option><option>BEEP</option></select>
-    </label>
-    <label>Argumento <input name="argumento" type="number" required style="width:120px" placeholder="40"></label>
-    <button>Enviar</button>
-  </form>
-  <p class="dato">RETRY: pasos extra de arco · LIGHT: brillo 0–100 % · BEEP: patrón 1 a 3.</p>
-</div>
-
-<div class="panel">
-  <h2 style="margin-top:0">Parámetros (CFG)</h2>
-  <table>
-    <tr><th>Parámetro</th><th>Qué ajusta</th><th>Nuevo valor</th></tr>
-    {% for nombre, descripcion in parametros %}
-    <tr>
-      <td><code>{{ nombre }}</code></td>
-      <td>{{ descripcion }}</td>
-      <td>
-        <form method="post" action="/calibracion/cfg" class="linea">
-          <input type="hidden" name="parametro" value="{{ nombre }}">
-          <input name="valor" type="number" required style="width:110px">
-          <button class="sec">Guardar</button>
-        </form>
-      </td>
-    </tr>
-    {% endfor %}
-  </table>
-  <p class="dato">PASOS_ARCO inicial = avance × 4096 / (π × D), con D el diámetro medido de la goma del rodillo Canon. Se ajusta en la prueba T3.2.</p>
-</div>
 {% endblock %}

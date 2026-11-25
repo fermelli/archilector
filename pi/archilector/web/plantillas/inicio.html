@@ -1,92 +1,194 @@
 {% extends "base.html" %}
+{% from "_iconos.html" import icono %}
+{% block titulo %}Estado · ArchiLector{% endblock %}
 {% block contenido %}
-<h1>Estado del robot</h1>
-
-<div class="rejilla">
-  <div class="panel">
-    <div class="dato">Estado</div>
-    <div><span id="estado" class="estado">—</span></div>
-    <p class="mensaje" id="mensaje"></p>
-    <div class="dato">Documento</div>
-    <div class="valor" id="titulo">—</div>
-    <div class="dato" id="detalle"></div>
-  </div>
-  <div class="panel">
-    <div class="dato">Último volteo</div>
-    <div class="valor" id="veredicto">—</div>
-    <div class="dato" id="veredicto_det"></div>
-    <div class="dato" style="margin-top:10px">Verificador: <span id="fuente">—</span> · ESP32: <span id="esp32">—</span> · Cámara: <span id="camara">—</span> · Micrófono: <span id="microfono">—</span></div>
-  </div>
-  <div class="panel">
-    <div class="dato">Volteos registrados</div>
-    <div class="valor">{{ stats.total }}</div>
-    {% if stats.total %}
-    <div class="dato">Correctos: {{ '%.1f' % (100 * stats.tasa_correctos) }} % · Hojas dobles: {{ '%.1f' % (100 * stats.tasa_dobles) }} %</div>
-    <div class="dato">Criterio para seguir con B: ≥ 90 % correctos y ≤ 5 % dobles (Diseño 2.4.5)</div>
-    {% endif %}
+<div class="cabecera">
+  <div>
+    <h1>Estado del robot</h1>
+    <p class="bajada">Siga el documento en curso, controle la lectura y empiece uno nuevo.</p>
   </div>
 </div>
 
-<div class="panel">
-  <h2 style="margin-top:0">Control</h2>
-  <div class="botones">
-    <button onclick="orden('iniciar')">A · Iniciar / seguir</button>
-    <button class="sec" onclick="orden('pausa')">B · Pausa</button>
-    <button class="sec" onclick="orden('repetir')">C · Repetir</button>
-    <button class="sec" onclick="orden('siguiente')">Siguiente</button>
-    <button class="sec" onclick="orden('anterior')">* · Anterior</button>
-    <button class="sec" onclick="orden('confirmar')"># · Confirmar</button>
-    <button class="sec" onclick="orden('terminar')">Terminar documento</button>
-    <button class="peligro" onclick="orden('parar')">D · Parada</button>
+<div class="rejilla principal">
+  <div class="columna">
+
+    <section class="tarjeta" aria-labelledby="t-ahora">
+      <div class="tarjeta-cuerpo">
+        <h3 id="t-ahora">Ahora</h3>
+        <div class="estado-grande">
+          <div class="estado-icono" id="estado-icono"><i class="punto"></i></div>
+          <div style="min-width:0">
+            <div class="estado-nombre" id="estado-nombre">Conectando…</div>
+            <div class="estado-doc" id="estado-doc">—</div>
+          </div>
+        </div>
+        <div class="aviso-caja peligro" id="mensaje" style="margin:18px 0 0" hidden>{{ icono("alerta") }}<div id="mensaje-texto"></div></div>
+        <div class="metricas">
+          <div class="metrica"><div class="etiqueta">Modo</div><div class="valor" id="m-modo">—</div></div>
+          <div class="metrica"><div class="etiqueta">Páginas</div><div class="valor" id="m-paginas">0</div></div>
+          <div class="metrica"><div class="etiqueta">Intento de volteo</div><div class="valor" id="m-intento">—</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tarjeta" aria-labelledby="t-control">
+      <div class="tarjeta-cab"><h2 id="t-control">Control</h2><span class="sub">Igual que el teclado del robot</span></div>
+      <div class="tarjeta-cuerpo">
+        <button class="grande ancho" onclick="Panel.orden('iniciar')">{{ icono("seguir") }} Iniciar lectura / seguir <kbd>A</kbd></button>
+        <div class="grupo-control" style="margin-top:10px">
+          <button class="sec" onclick="Panel.orden('pausa')">{{ icono("pausa") }} Pausa <kbd>B</kbd></button>
+          <button class="sec" onclick="Panel.orden('repetir')">{{ icono("repetir") }} Repetir <kbd>C</kbd></button>
+          <button class="sec" onclick="Panel.orden('anterior')">{{ icono("anterior") }} Anterior <kbd>*</kbd></button>
+          <button class="sec" onclick="Panel.orden('siguiente')">{{ icono("siguiente") }} Siguiente</button>
+          <button class="sec" onclick="Panel.orden('confirmar')">{{ icono("confirmar") }} Confirmar <kbd>#</kbd></button>
+          <button class="sec" onclick="Panel.orden('ayuda')">{{ icono("info") }} Ayuda <kbd>0</kbd></button>
+        </div>
+        <hr class="separador">
+        <div class="botones">
+          <button class="peligro" onclick="Panel.orden('parar')">{{ icono("parada") }} Parada inmediata <kbd>D</kbd></button>
+          <button class="peligro-sec" onclick="if (confirm('¿Terminar el documento en curso? Se generará el PDF con las páginas leídas.')) Panel.orden('terminar')">{{ icono("terminar") }} Terminar documento</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="tarjeta" aria-labelledby="t-nuevo">
+      <div class="tarjeta-cab"><h2 id="t-nuevo">Nuevo documento</h2><span class="insignia" id="nuevo-ocupado" hidden>Hay un documento en curso</span></div>
+      <form class="tarjeta-cuerpo" method="post" action="/control/iniciar" id="form-nuevo">
+        <div class="modos" role="radiogroup" aria-label="Modo">
+          {% set DESCRIPCION = {
+            "lectura": ("lectura", "Lectura", "Lee cada página en voz alta y pasa la hoja solo."),
+            "archivo": ("archivo", "Archivo", "Digitaliza el libro completo en un PDF buscable."),
+            "asistido": ("asistido", "Asistido", "Usted pasa las hojas; el robot fotografía y lee."),
+          } %}
+          {% for m in modos %}
+          {% set ico, nombre, texto = DESCRIPCION.get(m, ("documento", m, "")) %}
+          <label class="modo">
+            <input type="radio" name="modo" value="{{ m }}" {% if loop.first %}checked{% endif %}>
+            <span class="modo-caja"><b>{{ icono(ico) }} {{ nombre }}</b><span>{{ texto }}</span></span>
+          </label>
+          {% endfor %}
+        </div>
+        <div class="campos" style="margin-top:16px">
+          <label class="campo"><span>Título</span><input name="titulo" required placeholder="Libro de actas 1998"></label>
+          <label class="campo"><span>Libro</span><input name="libro" required placeholder="actas-1998"><small>Agrupa los datos de entrenamiento por libro.</small></label>
+          <label class="campo"><span>Máximo de páginas</span><input name="max_paginas" type="number" min="1" inputmode="numeric" placeholder="Sin límite"></label>
+        </div>
+        <div class="botones" style="margin-top:18px">
+          <button id="btn-nuevo">{{ icono("mas") }} Comenzar documento</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <div class="columna">
+    <section class="tarjeta" aria-labelledby="t-pagina">
+      <div class="tarjeta-cab"><h2 id="t-pagina">Última página</h2><a class="chico" id="ultima-enlace" href="#" target="_blank" hidden>Abrir</a></div>
+      <div class="tarjeta-cuerpo">
+        <div class="vista">
+          <img id="ultima" alt="Última página capturada" hidden>
+          <div class="vacio" id="ultima-vacio">{{ icono("imagen") }}<b>Todavía no hay páginas</b>Aparecerá aquí la última página fotografiada.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tarjeta" aria-labelledby="t-volteo">
+      <div class="tarjeta-cab"><h2 id="t-volteo">Último volteo</h2><span class="insignia" id="v-clase">Sin datos</span></div>
+      <div class="tarjeta-cuerpo">
+        <div class="medidor">
+          <div class="medidor-cab"><span class="suave">Confianza</span><b id="v-confianza">—</b></div>
+          <div class="pista"><i id="v-barra" style="width:0"></i></div>
+        </div>
+        <p class="ayuda" id="v-detalle">Se actualiza cada vez que el robot pasa una hoja.</p>
+      </div>
+    </section>
+
+    <section class="tarjeta" aria-labelledby="t-sistema">
+      <div class="tarjeta-cab"><h2 id="t-sistema">Sistema</h2></div>
+      <div class="tarjeta-cuerpo">
+        <ul class="lista">
+          <li><i class="punto neutro" id="s-esp32-p"></i><span class="nombre">ESP32</span><span class="detalle" id="s-esp32">—</span></li>
+          <li><i class="punto neutro" id="s-camara-p"></i><span class="nombre">Cámara</span><span class="detalle" id="s-camara">—</span></li>
+          <li><i class="punto neutro" id="s-texto-p"></i><span class="nombre">Lectura</span><span class="detalle" id="s-texto">—</span></li>
+          <li><i class="punto neutro" id="s-mic-p"></i><span class="nombre">Micrófono</span><span class="detalle" id="s-mic">—</span></li>
+          <li><i class="punto neutro" id="s-verif-p"></i><span class="nombre">Verificador</span><span class="detalle" id="s-verif">—</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="tarjeta" aria-labelledby="t-stats">
+      <div class="tarjeta-cab"><h2 id="t-stats">Volteos registrados</h2><span class="cifra num" style="font-size:1.3rem">{{ stats.total }}</span></div>
+      <div class="tarjeta-cuerpo">
+        {% if stats.total %}
+        {% set correctos = 100 * stats.tasa_correctos %}{% set dobles = 100 * stats.tasa_dobles %}
+        <div class="medidor">
+          <div class="medidor-cab"><span>Correctos <span class="suave chico">· meta ≥ 90 %</span></span><b>{{ '%.1f' % correctos }} %</b></div>
+          <div class="pista"><i class="{{ 'ok' if correctos >= 90 else 'aviso' }}" style="width:{{ correctos }}%"></i><u style="left:90%"></u></div>
+        </div>
+        <div class="medidor">
+          <div class="medidor-cab"><span>Hojas dobles <span class="suave chico">· máximo 5 %</span></span><b>{{ '%.1f' % dobles }} %</b></div>
+          <div class="pista"><i class="{{ 'ok' if dobles <= 5 else 'peligro' }}" style="width:{{ [dobles * 5, 100] | min }}%"></i><u style="left:25%"></u></div>
+        </div>
+        <p class="ayuda">Criterio para seguir con el mecanismo B (Diseño 2.4.5). La barra de hojas dobles va de 0 a 20 %.</p>
+        {% else %}
+        <p class="suave chico" style="margin:0">Cuando el robot pase hojas, aquí verá la tasa de volteos correctos y de hojas dobles.</p>
+        {% endif %}
+      </div>
+    </section>
   </div>
 </div>
+{% endblock %}
 
-<div class="panel">
-  <h2 style="margin-top:0">Nuevo documento</h2>
-  <form class="linea" method="post" action="/control/iniciar">
-    <label>Título <input name="titulo" required placeholder="Libro de actas 1998"></label>
-    <label>Libro (para dividir los datos de entrenamiento) <input name="libro" required placeholder="actas-1998"></label>
-    <label>Modo
-      <select name="modo">
-        {% for m in modos %}<option value="{{ m }}">{{ m }}</option>{% endfor %}
-      </select>
-    </label>
-    <label>Máx. páginas <input name="max_paginas" type="number" min="1" style="width:110px"></label>
-    <button>Iniciar</button>
-  </form>
-</div>
-
-<div class="panel">
-  <div class="dato">Última página capturada</div>
-  <img id="ultima" class="vista" alt="Última página capturada" hidden>
-</div>
-
+{% block guion %}
 <script>
-async function orden(o) {
-  await fetch('/control/' + encodeURIComponent(o), {method: 'POST'});
-  actualizar();
-}
-async function actualizar() {
-  try {
-    const e = await (await fetch('/api/estado')).json();
-    const est = document.getElementById('estado');
-    est.textContent = e.estado.replace('_', ' ');
-    est.className = 'estado ' + e.estado;
-    document.getElementById('mensaje').textContent = e.mensaje || '';
-    document.getElementById('titulo').textContent = e.titulo || '—';
-    document.getElementById('detalle').textContent = e.modo ? `Modo ${e.modo} · ${e.paginas} páginas · intento ${e.intento}` : '';
-    const v = e.ultimo_veredicto || {};
-    document.getElementById('veredicto').textContent = v.clase ? v.clase.replace('_', ' ') : '—';
-    document.getElementById('veredicto_det').textContent = v.clase ? `confianza ${v.confianza} · ${v.fuente} · regla de píxeles: ${v.regla}` : '';
-    document.getElementById('fuente').textContent = e.verificador === 'modelo' ? 'modelo entrenado' : 'regla de píxeles (sin modelo)';
-    document.getElementById('microfono').textContent = e.microfono || 'voz apagada';
-    document.getElementById('camara').textContent = e.camara && e.camara.fuente ? e.camara.fuente + (e.camara.resolucion ? ' (' + e.camara.resolucion.join('×') + ')' : '') : '—';
-    document.getElementById('esp32').textContent = e.esp32 ? (e.esp32.caido ? 'enlace caído' : (e.esp32.firmware || '?') + ' ' + (e.esp32.protocolo || '')) : 'sin enlace';
-    const img = document.getElementById('ultima');
-    if (e.ultima_pagina && img.dataset.src !== e.ultima_pagina) { img.src = e.ultima_pagina; img.dataset.src = e.ultima_pagina; img.hidden = false; }
-  } catch (err) { /* el robot puede estar reiniciando */ }
-}
-actualizar();
-setInterval(actualizar, 1000);
+const $ = (id) => document.getElementById(id);
+function marcar(id, tono, texto) { $(id + "-p").className = "punto " + tono; $(id).textContent = texto; $(id).title = texto; }
+
+Panel.alActualizar((e) => {
+  const [nombre, tono, vivo] = Panel.estado(e.estado);
+  $("estado-icono").className = "estado-icono " + tono;
+  $("estado-icono").firstElementChild.className = "punto" + (vivo ? " vivo" : "");
+  $("estado-nombre").textContent = nombre;
+  $("estado-doc").textContent = e.titulo || "Sin documento en curso";
+  $("mensaje").hidden = !e.mensaje;
+  $("mensaje-texto").textContent = e.mensaje || "";
+  $("m-modo").textContent = e.modo ? (Panel.MODOS[e.modo] || e.modo) : "—";
+  $("m-paginas").textContent = e.paginas || 0;
+  $("m-intento").textContent = e.intento ? e.intento : "—";
+
+  $("btn-nuevo").disabled = !!e.ocupado;
+  $("nuevo-ocupado").hidden = !e.ocupado;
+
+  const v = e.ultimo_veredicto || {};
+  if (v.clase) {
+    const [cn, ct] = Panel.clase(v.clase);
+    $("v-clase").className = "insignia " + ct;
+    $("v-clase").textContent = cn;
+    const c = Math.round((v.confianza || 0) * 100);
+    $("v-confianza").textContent = c + " %";
+    $("v-barra").style.width = c + "%";
+    $("v-barra").className = c >= 80 ? "ok" : "aviso";
+    $("v-detalle").textContent = (v.fuente === "modelo" ? "Decidió el modelo entrenado" : "Decidió la regla de píxeles")
+      + (v.ms ? " en " + Math.round(v.ms) + " ms" : "") + ".";
+  }
+
+  if (!e.esp32) marcar("s-esp32", "neutro", "Sin enlace");
+  else if (e.esp32.caido) marcar("s-esp32", "peligro", "Enlace caído");
+  else marcar("s-esp32", "ok", "Firmware " + (e.esp32.firmware || "?") + " · " + (e.esp32.protocolo || ""));
+  const cam = e.camara || {};
+  marcar("s-camara", cam.fuente ? "ok" : "neutro",
+    cam.fuente ? cam.fuente.replace(/^webcam:.*by-id\/usb-/, "webcam ").replace(/-video-index0$/, "") + (cam.resolucion ? " · " + cam.resolucion.join("×") : "") : "—");
+  if (!e.claude) marcar("s-texto", "neutro", "OCR local");
+  else if (!e.claude.hay_clave) marcar("s-texto", "aviso", "Claude sin clave · OCR local");
+  else marcar("s-texto", "ok", e.claude.modelo.replace("claude-", "Claude ").replace(/-(\d)-(\d)$/, " $1.$2"));
+  marcar("s-mic", e.microfono ? "ok" : "neutro", e.microfono || "Voz apagada");
+  marcar("s-verif", e.verificador === "modelo" ? "ok" : "aviso", e.verificador === "modelo" ? "Modelo entrenado" : "Regla de píxeles (sin modelo)");
+
+  const img = $("ultima");
+  if (e.ultima_pagina && img.dataset.src !== e.ultima_pagina) {
+    img.src = e.ultima_pagina; img.dataset.src = e.ultima_pagina; img.hidden = false;
+    $("ultima-vacio").hidden = true;
+    $("ultima-enlace").href = e.ultima_pagina; $("ultima-enlace").hidden = false;
+  }
+});
 </script>
 {% endblock %}
