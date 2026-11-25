@@ -173,3 +173,69 @@ def test_dos_hojas_por_numeracion_aunque_falte_un_numero(tmp_path):
     o.esperar_fin(20)
     assert sim.ordenes_ejecutadas == ["TURN", "TURN", "BACK"]
     assert libro.pagina_derecha == 5
+
+
+class VozLenta(VozConsola):
+    """Lee cada página en ``espera`` segundos (cortables) y anota qué volteos ya hizo el ESP32 al terminar."""
+
+    def __init__(self, sim, espera=1.0):
+        super().__init__()
+        self.sim, self.espera, self.volteos_al_terminar = sim, espera, []
+
+    def hablar(self, texto, cortar=None):
+        if "No se reconoció" not in texto:
+            return super().hablar(texto, cortar)
+        self.dicho.append(texto)
+        if cortar is not None and cortar.wait(self.espera):
+            return False
+        self.volteos_al_terminar.append(list(self.sim.ordenes_ejecutadas))
+        return True
+
+
+def test_lectura_pasa_la_hoja_mientras_lee(tmp_path):
+    o, sim, *_ = armar(tmp_path, VerificadorGuionado())
+    o.voz = VozLenta(sim)
+    o.iniciar_documento("x", "l", LECTURA, max_paginas=2)
+    o.esperar_fin(20)
+    assert o.voz.volteos_al_terminar[0] == ["TURN"]  # la hoja ya pasó antes de terminar la página 1
+    assert o.publico.paginas == 2 and sim.ordenes_ejecutadas == ["TURN"]
+
+
+def test_lectura_sin_adelantar_pasa_la_hoja_despues(tmp_path):
+    o, sim, *_ = armar(tmp_path, VerificadorGuionado())
+    o.cfg["lectura"]["adelantar"] = False
+    o.voz = VozLenta(sim, espera=0.2)
+    o.iniciar_documento("x", "l", LECTURA, max_paginas=2)
+    o.esperar_fin(20)
+    assert o.voz.volteos_al_terminar[0] == []
+
+
+def test_pausa_durante_la_lectura_adelantada(tmp_path):
+    o, sim, *_ = armar(tmp_path, VerificadorGuionado())
+    o.voz = VozLenta(sim, espera=3.0)
+    o.iniciar_documento("x", "l", LECTURA, max_paginas=2)
+    esperar_estado(o, "leyendo")
+    o.orden("pausa")
+    esperar_estado(o, "pausa")
+    o.voz.espera = 0.2
+    o.orden("iniciar")
+    o.esperar_fin(20)
+    assert sum(d.startswith("Pausa") for d in o.voz.dicho) == 1  # una sola vez, aunque el volteo siguió
+    assert o.publico.paginas == 2 and sim.ordenes_ejecutadas == ["TURN"]
+
+
+def test_tecla_D_a_mitad_del_volteo_adelantado(tmp_path):
+    o, sim, *_ = armar(tmp_path, VerificadorGuionado(), escala=0.2)
+    o.voz = VozLenta(sim, espera=5.0)
+    o.iniciar_documento("x", "l", LECTURA, max_paginas=2)
+    fin = time.monotonic() + 10
+    while sim.estado != "MOVIENDO" and time.monotonic() < fin:  # el volteo empezó mientras habla
+        time.sleep(0.01)
+    assert sim.estado == "MOVIENDO"
+    sim.pulsar_tecla("D")
+    esperar_estado(o, "parada")
+    o.voz.espera = 0.2
+    o.orden("iniciar")
+    o.esperar_fin(30)
+    assert sum(d.startswith("Pausa") for d in o.voz.dicho) == 1
+    assert "HOME" in sim.ordenes_ejecutadas and o.publico.paginas == 2

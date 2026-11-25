@@ -42,6 +42,7 @@ volteo:
 
 lectura:
   avance_automatico: true         # false: espera «siguiente» al terminar cada página
+  adelantar: true                 # pasa la hoja y lee la siguiente mientras habla (sin silencio entre páginas)
   saltar_blancas: true
 
 voz:

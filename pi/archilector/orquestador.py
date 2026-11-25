@@ -113,6 +113,13 @@ class Orquestador:
         self._max_paginas: int | None = None
         # Último número impreso leído: (orden de captura, número impreso)
         self._ref_impreso: tuple[int, int] | None = None
+        # Lectura adelantada: mientras se lee una página, otro hilo pasa la hoja y lee la siguiente.
+        # Ese hilo espera a que la voz quede libre antes de hablar o de atender una tecla.
+        self._voz_libre = threading.Event()
+        self._voz_libre.set()
+        self._adelanto: tuple[threading.Thread, dict] | None = None
+        self._pausas = 0
+        self._pausas_al_adelantar = 0
 
     # =========================================================================
     # Entradas: teclado del ESP32, voz y panel web
@@ -187,10 +194,17 @@ class Orquestador:
             actual = self._analizar(self._capturar())
             while True:
                 self._procesar_pagina(doc_id, modo, actual)
+                ultima = bool(self._max_paginas and self._numero >= self._max_paginas)
                 if modo == LECTURA:
+                    if not ultima and self.enlace is not None and self.cfg["lectura"]["adelantar"]:
+                        self._adelantar(actual)
                     self._leer(actual)  # también la última: el límite solo evita voltear otra hoja
-                if self._max_paginas and self._numero >= self._max_paginas:
+                if ultima:
                     break
+                if self._adelanto:
+                    actual = self._recoger_adelanto()
+                    self._revisar_ordenes_pendientes()
+                    continue
                 self._revisar_ordenes_pendientes()
                 actual = self._esperar_cambio(actual) if modo == ASISTIDO else self._pasar_pagina(actual)
         except FinDocumento:
@@ -203,7 +217,40 @@ class Orquestador:
             log.exception("Error en el ciclo")
             self.publico.mensaje = "Error interno; ver el registro"
         finally:
+            if self._adelanto:  # terminó a mitad de una lectura: el volteo en curso también termina
+                self.ordenes.put("terminar")
+                try:
+                    self._recoger_adelanto()
+                except Exception:
+                    pass
             self._finalizar(doc_id)
+
+    def _adelantar(self, actual: Captura) -> None:
+        resultado: dict = {}
+
+        def trabajo():
+            try:
+                resultado["captura"] = self._pasar_pagina(actual)
+            except BaseException as exc:  # FinDocumento, EnlaceCaido...: se relanzan en el hilo principal
+                resultado["error"] = exc
+
+        self._voz_libre.clear()
+        self._pausas_al_adelantar = self._pausas
+        hilo = threading.Thread(target=trabajo, daemon=True, name="adelanto")
+        self._adelanto = (hilo, resultado)
+        hilo.start()
+
+    def _recoger_adelanto(self) -> Captura:
+        hilo, resultado = self._adelanto
+        self._voz_libre.set()  # ya puede hablar o esperar teclas si lo necesita
+        hilo.join()
+        self._adelanto = None
+        if "error" in resultado:
+            raise resultado["error"]
+        return resultado["captura"]
+
+    def _en_adelanto(self) -> bool:
+        return threading.current_thread().name == "adelanto"
 
     def _preparar_esp32(self, modo: str) -> None:
         if modo == ASISTIDO or self.enlace is None:
@@ -533,7 +580,8 @@ class Orquestador:
                 return o
 
     def _revisar_ordenes_pendientes(self) -> None:
-        o = self._sacar_orden_pendiente()
+        # Mientras se lee en voz alta, las órdenes son de la lectura (repetir, pausa...), no del volteo
+        o = self._sacar_orden_pendiente() if self._voz_libre.is_set() else None
         if o in ("pausa", "parar"):
             self._pausa(o)
         elif o == "terminar":
@@ -560,6 +608,14 @@ class Orquestador:
 
     def _pausa(self, motivo: str) -> None:
         """PAUSA (tecla B) o PARADA (tecla D / STOP): A sigue, # termina el documento."""
+        if self._en_adelanto():
+            self._voz_libre.wait()
+            if self._pausas != self._pausas_al_adelantar:
+                # La lectura ya atendió esta pausa (p. ej. tecla D a mitad del volteo): solo falta el HOME
+                if self._esp_en_parada:
+                    self._home()
+                return
+        self._pausas += 1
         self.publico.estado = "parada" if motivo == "parar" else "pausa"
         self._lcd("PARADA" if motivo == "parar" else "PAUSA", "A=SEGUIR #=FIN")
         if motivo == "parar" and self.enlace is not None and self.publico.modo != ASISTIDO:
@@ -581,6 +637,7 @@ class Orquestador:
     def _alarma(self, linea1: str, linea2: str, mensaje_voz: str) -> None:
         """Se detiene, suena el buzzer, la LCD muestra el error y, en modo
         lectura, avisa por voz. Espera la tecla # (o A)."""
+        self._voz_libre.wait()  # en lectura adelantada, después de terminar la página que suena
         self.publico.estado = "requiere_usuario"
         self.publico.mensaje = mensaje_voz
         self._beep(3)

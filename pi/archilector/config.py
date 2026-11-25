@@ -54,6 +54,7 @@ POR_DEFECTO: dict = {
     },
     "lectura": {
         "avance_automatico": True,  # al terminar de leer pide el volteo
+        "adelantar": True,  # mientras lee una página, pasa la hoja y lee la siguiente (sin silencio entre páginas)
         "saltar_blancas": True,
     },
     "voz": {
