@@ -6,7 +6,7 @@ y NO debe exponerse a internet. Ocupa la camara elegida (la CSI o la webcam USB)
 camara no puede estar a la vez en ``python -m archilector ejecutar``.
 
 Captura la pagina a 2592x1944, la lee con Tesseract (idioma ``spa``, requiere
-``sudo apt install tesseract-ocr tesseract-ocr-spa``) o con RapidOCR, la sintetiza con Piper y
+``sudo apt install tesseract-ocr tesseract-ocr-spa``), con RapidOCR o con Claude (clave en ``pi/.env``), la sintetiza con Piper y
 re-transcribe el audio con Vosk para medir el error de palabras (WER). El audio suena en el
 navegador de quien abre la pagina, no en la Pi.
 
@@ -40,6 +40,11 @@ ap = argparse.ArgumentParser(description="Panel de pruebas de ArchiLector (solo 
 ap.add_argument("--puerto", type=int, default=8889)
 ap.add_argument("--camara", choices=["pi", "webcam"], default="pi", help="CSI (2592x1944) o webcam USB (1280x720)")
 args = ap.parse_args()
+if os.path.exists(f"{RAIZ}/.env"):  # ANTHROPIC_API_KEY para leer con Claude
+    for _l in open(f"{RAIZ}/.env", encoding="utf-8").read().splitlines():
+        _k, _, _v = _l.partition("=")
+        if _k.strip() and not _k.startswith("#"):
+            os.environ.setdefault(_k.strip(), _v.strip())
 
 # ----------------------------------------------------------------------------- camara
 class Salida(io.BufferedIOBase):
@@ -128,6 +133,20 @@ def rapid():
             from archilector.vision.ocr import OCR
             _m["rapid"] = OCR()
         return _m["rapid"]
+
+
+class _SinRespaldo:
+    def leer(self, pagina):
+        raise RuntimeError("Claude no leyó la página (sin clave, sin internet o error de la API: ver el registro)")
+
+
+def claude(modelo):
+    from archilector.vision.ocr_claude import MODELOS, OCRClaude
+
+    with _m_lock:
+        _m.setdefault("claude", OCRClaude(_SinRespaldo()))
+    _m["claude"].modelo = modelo if modelo in MODELOS else MODELOS[0]
+    return _m["claude"]
 
 
 def precargar():
@@ -229,7 +248,7 @@ def trabajo(p):
         if p["ocr"] == "tesseract":
             texto, num = ocr_tesseract(pagina)
         else:
-            r = rapid().leer(pagina)
+            r = (claude(p["ocr"]) if p["ocr"].startswith("claude") else rapid()).leer(pagina)
             texto, num = r.texto, r.numero_pagina
         res["ocr_seg"] = round(time.time() - t, 2)
         paso("OCR " + p["ocr"], t)
@@ -319,7 +338,7 @@ pre{white-space:pre-wrap;background:var(--bg);border:1px solid var(--bd);border-
  <div class="card"><h2>Cámara en vivo</h2><img class="live" src="/s.mjpg" alt="cámara">
   <div class="row mut">La foto para el OCR se toma a 2592×1944; aquí ves una vista de 1280×960.</div></div>
  <div class="card" style="margin-top:14px"><h2>Ajustes</h2>
-  <div class="row"><label>OCR <select id="ocr"><option value="tesseract">Tesseract (español)</option><option value="rapidocr">RapidOCR (PP-OCRv4)</option></select></label>
+  <div class="row"><label>OCR <select id="ocr"><option value="tesseract">Tesseract (español)</option><option value="rapidocr">RapidOCR (PP-OCRv4)</option><option value="claude-haiku-5-5">Claude Haiku 5.5</option><option value="claude-sonnet-5-5">Claude Sonnet 5.5</option><option value="claude-opus-5-5">Claude Opus 5.5</option></select></label>
    <label>Velocidad de voz <input id="vel" type="range" min="0.7" max="1.5" step="0.05" value="1.0" oninput="velv.textContent=this.value"> <b id="velv">1.0</b></label></div>
   <div class="row"><label>Página <select id="modo" onchange="man.style.display=this.value=='manual'?'flex':'none'"><option value="manual">Recorte manual</option><option value="proyecto">Preproceso del proyecto</option><option value="ninguno">Imagen completa</option></select></label></div>
   <div class="row" id="man"><label>izq % <input type="number" id="x0" value="23"></label><label>arriba % <input type="number" id="y0" value="0"></label><label>der % <input type="number" id="x1" value="78"></label><label>abajo % <input type="number" id="y1" value="97"></label></div>
