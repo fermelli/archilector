@@ -190,8 +190,13 @@ class Orquestador:
     def _ejecutar(self, doc_id: int, modo: str) -> None:
         try:
             self._preparar_esp32(modo)
-            self._decir({LECTURA: "Modo lectura.", ARCHIVO: "Modo archivo.", ASISTIDO: "Modo asistido."}[modo])
+            # El saludo suena mientras se toma y se lee la primera página (Claude tarda unos 10 s)
+            saludo = {LECTURA: "Modo lectura. Leyendo la primera página.", ARCHIVO: "Modo archivo.",
+                      ASISTIDO: "Modo asistido."}[modo]
+            aviso = threading.Thread(target=self._decir, args=(saludo,), daemon=True, name="saludo")
+            aviso.start()
             actual = self._analizar(self._capturar())
+            aviso.join()
             while True:
                 self._procesar_pagina(doc_id, modo, actual)
                 ultima = bool(self._max_paginas and self._numero >= self._max_paginas)

@@ -79,7 +79,7 @@ sudo systemctl start archilector                 # panel en http://<pi>.local:80
 ```bash
 cd pi
 python -m venv .venv && .venv/Scripts/pip install -e .[dev]     # en Linux: .venv/bin/pip
-.venv/Scripts/python -m pytest                                    # 42 pruebas
+.venv/Scripts/python -m pytest                                    # 73 pruebas
 .venv/Scripts/python -m archilector ejecutar --puerto sim:// --camara sim --sin-voz
 ```
 
@@ -212,6 +212,12 @@ Mientras no haya modelos, la Pi usa la regla de píxeles y la regla de palabras 
 ## Pendiente de validar con hardware
 
 Compilado y probado en un PC con el simulador: el firmware compila sin advertencias en sus dos entornos y
-las 42 pruebas de la Pi pasan (protocolo, TC.1–TC.6, cada clase del verificador, modos, PDF y panel web).
+las 73 pruebas de la Pi pasan (protocolo, TC.1–TC.6, cada clase del verificador, modos, lectura adelantada,
+lectura con Claude, voz, PDF y panel web).
+
+Probado en la Raspberry Pi 4, con el ESP32 simulado: captura con Picamera2 (CSI) y con la webcam GW600,
+lectura con Claude y respaldo del OCR local, Piper (0,54 veces el tiempo real a 1,8 GHz; con la fuente
+débil la CPU baja a 600 MHz y pasa a 1,3), y comandos de voz con Vosk y el micrófono de la webcam.
+
 Falta lo que solo se puede medir en el robot: tiempos reales, ángulos, `PASOS_ARCO`, el sentido del rodillo,
-`BACK`, la captura con Picamera2 y con la webcam en la Pi, Piper y Vosk en la Pi (también con el micrófono de la webcam), y el entrenamiento con datos propios.
+`BACK`, la prueba T6.4 con los servos en marcha y el entrenamiento con datos propios.

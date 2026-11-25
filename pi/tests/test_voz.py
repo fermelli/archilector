@@ -1,9 +1,10 @@
-"""Elección del micrófono por nombre y recuperación de la escucha, sin hardware ni Vosk."""
+"""Elección del micrófono, recuperación de la escucha y síntesis adelantada, sin hardware, Vosk ni Piper."""
 import io
 import json
+import threading
 import time
 
-from archilector.voz import stt
+from archilector.voz import stt, tts
 
 # /proc/asound/cards de una Pi 4 con un micrófono USB y una webcam con micrófono
 TARJETAS = {
@@ -97,3 +98,69 @@ def test_escucha_se_relanza_con_otro_microfono(tmp_path, monkeypatch):
     assert ordenes[1][1:3] == ["-D", "plughw:CARD=Device,DEV=0"]
     assert comandos[:2] == ["siguiente", "siguiente"]
     assert not e._hilo.is_alive()
+
+
+# --- Voz: Piper sintetiza por delante de lo que suena (sin Piper ni aplay) -------------------------------------
+
+class SalidaFalsa:
+    """Imita a aplay: anota lo que se escribe y cuándo se vacía el búfer (flush = empieza a sonar)."""
+
+    def __init__(self):
+        self.eventos, self.cerrado, self.matado = [], False, False
+        self.stdin = self
+
+    def write(self, b):
+        self.eventos.append(b)
+
+    def flush(self):
+        self.eventos.append("flush")
+
+    def close(self):
+        self.cerrado = True
+
+    def poll(self):
+        return 0 if (self.cerrado or self.matado) else None
+
+    def kill(self):
+        self.matado = True
+
+
+def voz_falsa(segundos_por_oracion, demora=0.05):
+    """1 s de audio = 2 bytes x 1000 muestras; cada oración «dice» su número como relleno."""
+    v = tts.VozPiper.__new__(tts.VozPiper)
+    v.frecuencia, v.volumen, v.velocidad, v._proceso = 1000, 100, 1.0, None
+    v._lock, v._lock_piper = threading.Lock(), threading.Lock()
+    v.salida = SalidaFalsa()
+    v._abrir_salida = lambda: v.salida
+    duraciones = iter(segundos_por_oracion)
+
+    def sintetizar(oracion):
+        time.sleep(demora)
+        return bytes([len(oracion) % 256]) * int(2 * 1000 * next(duraciones))
+
+    v._sintetizar = sintetizar
+    return v
+
+
+def test_junta_audio_antes_de_sonar_si_una_oracion_corta_precede_a_una_larga():
+    v = voz_falsa([0.5, 6.0, 1.0])
+    assert v.hablar("Corta. Esta oración es bastante más larga que la anterior. Fin.")
+    antes_de_sonar = v.salida.eventos[:v.salida.eventos.index("flush")]
+    assert sum(map(len, antes_de_sonar)) >= tts.PREVIO_S * 2 * 1000  # no empezó con solo 0,5 s
+    audio = b"".join(e for e in v.salida.eventos if e != "flush")
+    assert len(audio) == 2 * 1000 * 7.5 and v.salida.cerrado  # todo, en orden y completo
+
+
+def test_texto_corto_suena_entero():
+    v = voz_falsa([0.4])
+    assert v.hablar("Hola.")
+    assert v.salida.eventos == [bytes([5]) * 800, "flush"]
+
+
+def test_cortar_mientras_sintetiza():
+    v = voz_falsa([0.5] * 50, demora=0.1)
+    cortar = threading.Event()
+    threading.Timer(0.25, cortar.set).start()
+    t = time.monotonic()
+    assert v.hablar(" ".join(["Una oración."] * 50), cortar) is False
+    assert time.monotonic() - t < 1 and v.salida.matado

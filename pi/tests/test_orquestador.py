@@ -55,6 +55,14 @@ def esperar_estado(o, estado, timeout=10.0):
     raise AssertionError(f"no llegó a {estado!r}; está en {o.publico.estado!r}")
 
 
+def esperar(condicion, timeout=5.0):
+    fin = time.monotonic() + timeout
+    while not condicion():
+        if time.monotonic() > fin:
+            raise AssertionError("la condición no se cumplió a tiempo")
+        time.sleep(0.01)
+
+
 def test_archivo_sin_fallas_genera_pdf(tmp_path):
     o, sim, libro, db = armar(tmp_path, VerificadorGuionado())
     doc = o.iniciar_documento("Actas 1998", "actas", ARCHIVO, max_paginas=3)
@@ -79,8 +87,9 @@ def test_tras_dos_reintentos_se_detiene_y_pide_ayuda(tmp_path):
     o, sim, *_ = armar(tmp_path, VerificadorGuionado("misma_pagina", "misma_pagina", "misma_pagina"))
     o.iniciar_documento("x", "l", LECTURA, max_paginas=2)
     esperar_estado(o, "requiere_usuario")
-    assert sim.lcd[0] == "NO PASA LA HOJA" and sim.pitidos[-1] == 3
-    assert any("Pásela a mano" in d for d in o.voz.dicho)  # en lectura avisa por voz
+    # el estado se publica antes de escribir la LCD y de hablar: se espera a que aparezcan
+    esperar(lambda: sim.lcd[0] == "NO PASA LA HOJA" and sim.pitidos and sim.pitidos[-1] == 3)
+    esperar(lambda: any("Pásela a mano" in d for d in o.voz.dicho))  # en lectura avisa por voz
     o.orden("confirmar")
     o.esperar_fin(20)
     assert sim.ordenes_ejecutadas == ["TURN", "RETRY,40", "RETRY,40"]
@@ -100,7 +109,7 @@ def test_hoja_doblada_espera_numeral(tmp_path):
     o, sim, *_ = armar(tmp_path, VerificadorGuionado("hoja_doblada"))
     o.iniciar_documento("x", "l", ARCHIVO, max_paginas=2)
     esperar_estado(o, "requiere_usuario")
-    assert sim.lcd == ["REVISE LA HOJA", "#=CONTINUAR"]
+    esperar(lambda: sim.lcd == ["REVISE LA HOJA", "#=CONTINUAR"])
     o.orden("confirmar")
     o.esperar_fin(20)
     assert o.publico.paginas == 2
@@ -239,3 +248,31 @@ def test_tecla_D_a_mitad_del_volteo_adelantado(tmp_path):
     o.esperar_fin(30)
     assert sum(d.startswith("Pausa") for d in o.voz.dicho) == 1
     assert "HOME" in sim.ordenes_ejecutadas and o.publico.paginas == 2
+
+
+def test_el_saludo_suena_mientras_se_lee_la_primera_pagina(tmp_path):
+    class VozSaludo(VozConsola):
+        en_saludo = False
+
+        def hablar(self, texto, cortar=None):
+            if texto.startswith("Modo lectura"):
+                self.en_saludo = True
+                time.sleep(0.5)
+                self.en_saludo = False
+            return super().hablar(texto, cortar)
+
+    class OCRMira(OCRNulo):
+        def __init__(self, voz):
+            self.voz, self.durante_saludo = voz, []
+
+        def leer(self, pagina):
+            self.durante_saludo.append(self.voz.en_saludo)
+            return super().leer(pagina)
+
+    o, *_ = armar(tmp_path, VerificadorGuionado())
+    o.voz = VozSaludo()
+    o.ocr = OCRMira(o.voz)
+    o.iniciar_documento("x", "l", LECTURA, max_paginas=1)
+    o.esperar_fin(20)
+    assert o.ocr.durante_saludo[0] is True  # la primera página se leyó con el saludo sonando
+    assert o.voz.dicho[:2] == ["Modo lectura.", "Leyendo la primera página."]

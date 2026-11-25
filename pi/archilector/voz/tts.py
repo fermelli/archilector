@@ -1,12 +1,14 @@
 """Lectura en voz alta con Piper (Hansen, 2023), sin internet.
 
-El texto se sintetiza oración por oración y se reproduce con ``aplay`` por el
-jack de 3,5 mm (amplificador PAM8403). Entre oraciones se revisa si el usuario
-pidió pausa, repetir o siguiente, para poder cortar la lectura.
+El texto se sintetiza oración por oración en otro hilo, por delante de lo que suena,
+y se reproduce con ``aplay`` por el jack de 3,5 mm (amplificador PAM8403). Antes de
+empezar se juntan unos segundos de audio para que no haya cortes. Entre oraciones se
+revisa si el usuario pidió pausa, repetir o siguiente, para poder cortar la lectura.
 """
 from __future__ import annotations
 
 import logging
+import queue
 import re
 import shutil
 import subprocess
@@ -19,6 +21,11 @@ import numpy as np
 log = logging.getLogger(__name__)
 
 _ORACIONES = re.compile(r"(?<=[.!?;:])\s+|\n{2,}")
+PREVIO_S = 3.0  # audio que se junta antes de empezar a sonar
+
+
+class _Cortado(Exception):
+    pass
 
 
 def dividir_oraciones(texto: str) -> list[str]:
@@ -76,6 +83,7 @@ class VozPiper(Voz):
         self.velocidad = velocidad
         self._proceso: subprocess.Popen | None = None
         self._lock = threading.Lock()
+        self._lock_piper = threading.Lock()
         if not shutil.which("aplay"):
             raise RuntimeError("no se encontró aplay (paquete alsa-utils)")
 
@@ -92,21 +100,53 @@ class VozPiper(Voz):
         except ImportError:  # piper-tts 1.2
             return b"".join(self._voz.synthesize_stream_raw(oracion, length_scale=self.velocidad))
 
+    def _abrir_salida(self) -> subprocess.Popen:
+        return subprocess.Popen(
+            ["aplay", "-q", "-r", str(self.frecuencia), "-f", "S16_LE", "-t", "raw", "-c", "1", "-"],
+            stdin=subprocess.PIPE,
+        )
+
     def hablar(self, texto: str, cortar: threading.Event | None = None) -> bool:
+        cortado = lambda: cortar is not None and cortar.is_set()  # noqa: E731
+        # Piper sintetiza en otro hilo, siempre por delante de lo que suena: si después de una
+        # oración corta viene una larga, aplay no se queda sin audio («underrun») a mitad de frase.
+        cola: queue.Queue[bytes | None] = queue.Queue()
+        fin = threading.Event()
+
+        def producir():
+            try:
+                for oracion in dividir_oraciones(texto) or [texto]:
+                    if fin.is_set() or cortado():
+                        break
+                    with self._lock_piper:  # si se cortó y empezó otra lectura, no sintetizar dos a la vez
+                        audio = np.frombuffer(self._sintetizar(oracion), dtype=np.int16)
+                    cola.put((audio.astype(np.float32) * (self.volumen / 100.0)).astype(np.int16).tobytes())
+            finally:
+                cola.put(None)
+
+        threading.Thread(target=producir, daemon=True, name="piper").start()
         with self._lock:
-            self._proceso = subprocess.Popen(
-                ["aplay", "-q", "-r", str(self.frecuencia), "-f", "S16_LE", "-t", "raw", "-c", "1", "-"],
-                stdin=subprocess.PIPE,
-            )
+            self._proceso = self._abrir_salida()
         try:
-            for oracion in dividir_oraciones(texto) or [texto]:
-                if cortar is not None and cortar.is_set():
-                    self.detener()
-                    return False
-                audio = np.frombuffer(self._sintetizar(oracion), dtype=np.int16)
-                audio = (audio.astype(np.float32) * (self.volumen / 100.0)).astype(np.int16)
-                self._proceso.stdin.write(audio.tobytes())
+            # Antes de empezar a sonar se juntan PREVIO_S segundos de audio (o el texto entero si es corto)
+            pendiente, juntado, terminado = [], 0, False
+            while juntado < PREVIO_S * 2 * self.frecuencia:
+                bloque = self._tomar(cola, cortado)
+                if bloque is None:
+                    terminado = True
+                    break
+                pendiente.append(bloque)
+                juntado += len(bloque)
+            while True:
+                for bloque in pendiente:
+                    self._proceso.stdin.write(bloque)
                 self._proceso.stdin.flush()
+                if terminado:
+                    break
+                bloque = self._tomar(cola, cortado)
+                if bloque is None:
+                    break
+                pendiente = [bloque]
             self._proceso.stdin.close()
             # Esperar a que termine de sonar, atento a una interrupción
             while self._proceso.poll() is None:
@@ -115,8 +155,23 @@ class VozPiper(Voz):
                     return False
                 time.sleep(0.05)
             return True
+        except _Cortado:
+            self.detener()
+            return False
         except (BrokenPipeError, OSError):
             return False
+        finally:
+            fin.set()
+
+    @staticmethod
+    def _tomar(cola: queue.Queue, cortado) -> bytes | None:
+        while True:
+            if cortado():
+                raise _Cortado
+            try:
+                return cola.get(timeout=0.05)
+            except queue.Empty:
+                continue
 
     def detener(self) -> None:
         with self._lock:
