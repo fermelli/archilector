@@ -16,3 +16,6 @@ firmware/esp32/.vscode/
 
 # Office
 ~$*
+
+# Secretos (ANTHROPIC_API_KEY)
+pi/.env

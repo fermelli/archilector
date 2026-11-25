@@ -154,7 +154,17 @@ class OCRHibrido:
 
 
 def crear(cfg_ocr: dict):
-    """Elige el motor según ``ocr.motor``: ``rapidocr`` (por defecto), ``tesseract`` o ``hibrido``."""
+    """Elige el motor según ``ocr.motor``; con ``ocr.claude.activo`` lo envuelve: Claude lee y el local respalda."""
+    local = _crear_local(cfg_ocr)
+    claude = cfg_ocr.get("claude") or {}
+    if claude.get("activo") and cfg_ocr.get("activo", True):
+        from .ocr_claude import MODELOS, OCRClaude
+
+        return OCRClaude(local, claude.get("modelo") or MODELOS[0])
+    return local
+
+
+def _crear_local(cfg_ocr: dict):
     if not cfg_ocr.get("activo", True):
         return OCRNulo()
     motor = cfg_ocr.get("motor", "rapidocr")

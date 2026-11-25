@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import sys
 import threading
 import time
@@ -249,6 +250,11 @@ def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO,
                         format="%(asctime)s %(levelname)-7s %(name)s: %(message)s", datefmt="%H:%M:%S")
     cfg = configuracion.cargar(args.config)
+    if Path(".env").exists():  # secretos (ANTHROPIC_API_KEY): fuera del repositorio, ver .gitignore
+        for linea in Path(".env").read_text(encoding="utf-8").splitlines():
+            clave, _, valor = linea.partition("=")
+            if clave.strip() and not clave.startswith("#"):
+                os.environ.setdefault(clave.strip(), valor.strip())
     return {"ejecutar": cmd_ejecutar, "prueba-enlace": cmd_prueba_enlace, "consola": cmd_consola,
             "pdf": cmd_pdf}[args.comando](args, cfg)
 

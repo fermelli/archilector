@@ -38,6 +38,8 @@ POR_DEFECTO: dict = {
         "min_palabras_confiables": 12,  # menos que esto (y poca confianza) = no hay página legible
         "conf_media_aceptable": 75,  # ...salvo pocas palabras muy seguras (portadas)
         "umbral_respaldo": 0.70,  # híbrido: bajo esta confianza media se pide opinión a RapidOCR
+        # Claude (API) lee cada página y el motor local queda de respaldo; clave en pi/.env
+        "claude": {"activo": False, "modelo": "claude-haiku-5-5"},
     },
     "ia": {
         "modelo_verificador": "modelos/verificador.tflite",

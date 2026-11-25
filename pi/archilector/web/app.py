@@ -99,6 +99,7 @@ def crear_app(orquestador, db, enlace, cfg: dict, escucha=None) -> FastAPI:
         } if enlace else None
         e["verificador"] = orquestador.verificador.fuente
         e["camara"] = _info_camara()
+        e["claude"] = _info_claude()
         e["microfono"] = escucha.descripcion_microfono if escucha else None
         return JSONResponse(e)
 
@@ -221,7 +222,24 @@ def crear_app(orquestador, db, enlace, cfg: dict, escucha=None) -> FastAPI:
         opciones = camara.opciones() if hasattr(camara, "opciones") else []
         return pagina("calibracion.html", request, parametros=PARAMETROS_CFG, msg=msg,
                       ocupado=orquestador.ocupado, hay_enlace=enlace is not None,
-                      camara=_info_camara(), opciones_camara=opciones)
+                      camara=_info_camara(), opciones_camara=opciones, claude=_info_claude())
+
+    def _info_claude() -> dict | None:
+        from ..vision.ocr_claude import MODELOS
+
+        o = orquestador.ocr
+        if not hasattr(o, "hay_clave"):
+            return None  # ocr.claude.activo: false
+        return {"modelo": o.modelo, "modelos": MODELOS, "hay_clave": o.hay_clave, "ultimo": o.ultimo}
+
+    @app.post("/ocr/modelo")
+    def ocr_modelo(modelo: str = Form(...)):
+        from ..vision.ocr_claude import MODELOS
+
+        if _info_claude() is None or modelo not in MODELOS:
+            raise HTTPException(400, "modelo desconocido o Claude desactivado")
+        orquestador.ocr.modelo = modelo
+        return RedirectResponse(f"/calibracion?msg={quote('Lectura con ' + modelo)}", status_code=303)
 
     def _enviar(*cmd) -> str:
         if enlace is None:

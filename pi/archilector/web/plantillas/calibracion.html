@@ -28,6 +28,17 @@
   <p class="dato">La elección se recuerda al reiniciar (con <code>camara.fuente: auto</code>). Cada cámara puede tener su
     propia región del canto en <code>camara.region_canto</code>. Los pares guardados anotan qué cámara los tomó.</p>
   <img id="foto-prueba" alt="Foto de prueba" style="display:none;max-width:100%;margin-top:10px;border:1px solid #c9ced6">
+  {% if claude %}
+  <form method="post" action="/ocr/modelo" class="linea dato">
+    <label>Lectura con Claude
+      <select name="modelo">
+        {% for m in claude.modelos %}<option value="{{ m }}" {% if m == claude.modelo %}selected{% endif %}>{{ m }}</option>{% endfor %}
+      </select>
+    </label>
+    <button class="sec">Usar</button>
+    {% if not claude.hay_clave %}(sin clave: OCR local){% else %}· última página: {{ claude.ultimo }}{% endif %}
+  </form>
+  {% endif %}
 </div>
 <script>
   const btn = document.getElementById('btn-foto');

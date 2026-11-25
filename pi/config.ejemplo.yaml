@@ -21,6 +21,9 @@ ocr:
                                   # requiere: sudo apt install tesseract-ocr tesseract-ocr-spa
   # min_palabras_confiables: 12   # menos palabras seguras que esto = "no hay página legible"
   # umbral_respaldo: 0.70         # confianza media bajo la cual el híbrido consulta a RapidOCR
+  claude:                         # Claude lee cada página; sin internet o sin clave, el motor de arriba
+    activo: false                 # requiere: pip install anthropic y ANTHROPIC_API_KEY en pi/.env
+    modelo: claude-haiku-5-5      # claude-haiku-5-5 | claude-sonnet-5-5 | claude-opus-5-5 (también en Calibración)
 
 vision:
   lado_pagina: derecha            # una cara por volteo (alcance 1.4 del Diseño)
