@@ -3,7 +3,7 @@
 * ``/``             estado en vivo y control del documento en curso
 * ``/documentos``   documentos guardados, búsqueda en el texto y descarga del PDF
 * ``/etiquetar``    etiquetado de los pares antes/después para entrenar el verificador
-* ``/calibracion``  parámetros de la tabla 5.5 (CFG) y pruebas de movimiento
+* ``/calibracion``  parámetros de la tabla 5.5 (CFG), pruebas de movimiento y cámara activa
 """
 from __future__ import annotations
 
@@ -16,8 +16,9 @@ from dataclasses import asdict
 from urllib.parse import quote
 from pathlib import Path
 
+import cv2
 from fastapi import FastAPI, Form, HTTPException, Request
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -75,6 +76,12 @@ def crear_app(orquestador, db, enlace, cfg: dict) -> FastAPI:
     def pagina(nombre: str, request: Request, **ctx) -> HTMLResponse:
         return plantillas.TemplateResponse(request, nombre, {"request": request, **ctx})
 
+    def _info_camara() -> dict:
+        c = orquestador.camara
+        res = getattr(c, "resolucion", None)
+        return {"fuente": getattr(c, "fuente", None), "resolucion": list(res) if res else None,
+                "conmutable": hasattr(c, "cambiar")}
+
     # --- estado y control ------------------------------------------------------
     @app.get("/", response_class=HTMLResponse)
     def inicio(request: Request):
@@ -91,6 +98,7 @@ def crear_app(orquestador, db, enlace, cfg: dict) -> FastAPI:
             "caido": getattr(enlace, "caido", None),
         } if enlace else None
         e["verificador"] = orquestador.verificador.fuente
+        e["camara"] = _info_camara()
         return JSONResponse(e)
 
     @app.post("/control/iniciar")
@@ -208,8 +216,11 @@ def crear_app(orquestador, db, enlace, cfg: dict) -> FastAPI:
     # --- calibración -------------------------------------------------------------
     @app.get("/calibracion", response_class=HTMLResponse)
     def calibracion(request: Request, msg: str = ""):
+        camara = orquestador.camara
+        opciones = camara.opciones() if hasattr(camara, "opciones") else []
         return pagina("calibracion.html", request, parametros=PARAMETROS_CFG, msg=msg,
-                      ocupado=orquestador.ocupado, hay_enlace=enlace is not None)
+                      ocupado=orquestador.ocupado, hay_enlace=enlace is not None,
+                      camara=_info_camara(), opciones_camara=opciones)
 
     def _enviar(*cmd) -> str:
         if enlace is None:
@@ -235,5 +246,38 @@ def crear_app(orquestador, db, enlace, cfg: dict) -> FastAPI:
             raise HTTPException(400, "comando no permitido")
         args = [a for a in [argumento.strip()] if a]
         return RedirectResponse(f"/calibracion?msg={quote(_enviar(comando, *args))}", status_code=303)
+
+    # --- cámara --------------------------------------------------------------------
+    @app.post("/camara/fuente")
+    def camara_fuente(fuente: str = Form(...)):
+        camara = orquestador.camara
+        if not hasattr(camara, "cambiar"):
+            raise HTTPException(409, "esta cámara no se puede cambiar en caliente")
+        if orquestador.ocupado:
+            # Las fotos «antes» y «después» de un volteo deben ser de la misma cámara
+            raise HTTPException(409, "hay un documento en curso")
+        try:
+            cambio = camara.cambiar(fuente.strip())
+            msg = f"Cámara activa: {camara.fuente}" if cambio else f"{camara.fuente} ya era la cámara activa"
+        except Exception as exc:  # la cámara nueva no abrió: sigue la anterior
+            log.warning("No se pudo cambiar a la cámara %s: %s", fuente, exc)
+            msg = f"No se pudo abrir {fuente} ({exc}); sigue {camara.fuente}"
+        return RedirectResponse(f"/calibracion?msg={quote(msg)}", status_code=303)
+
+    @app.get("/camara/foto.jpg")
+    def camara_foto():
+        if orquestador.ocupado:
+            raise HTTPException(409, "hay un documento en curso")
+        try:
+            img = orquestador.camara.capturar()
+        except Exception as exc:
+            raise HTTPException(503, f"la cámara no entregó imagen: {exc}") from exc
+        if img.shape[1] > 1280:
+            esc = 1280 / img.shape[1]
+            img = cv2.resize(img, None, fx=esc, fy=esc, interpolation=cv2.INTER_AREA)
+        ok, jpg = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 85])
+        if not ok:
+            raise HTTPException(500, "no se pudo codificar la foto")
+        return Response(jpg.tobytes(), media_type="image/jpeg", headers={"Cache-Control": "no-store"})
 
     return app

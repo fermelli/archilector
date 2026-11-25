@@ -13,9 +13,12 @@ POR_DEFECTO: dict = {
         "latido": True,
     },
     "camara": {
-        "fuente": "pi",  # pi | sim | carpeta:<ruta> | webcam:<n>
-        "ancho": 2592,
-        "alto": 1944,
+        "fuente": "auto",  # auto | pi | webcam[:<n>|:<ruta>] | sim | carpeta:<ruta>
+        "pi": {"ancho": 2592, "alto": 1944},  # cámara V1.3 por CSI
+        "webcam": {"ancho": 1280, "alto": 720, "asentar_s": 0.5},  # Redragon GW600: 720p
+        # Canto de las hojas pasadas por cámara, si quedan encuadradas distinto:
+        # {"pi": [...], "webcam": [...]} (si falta, se usa vision.region_canto)
+        "region_canto": {},
         "luz_captura": 100,  # % de la tira LED al fotografiar
         "luz_reposo": 30,
         "espera_luz": 0.3,  # s para que la luz se estabilice
@@ -49,6 +52,9 @@ POR_DEFECTO: dict = {
         "volumen": 70,
         "velocidad": 1.0,  # length_scale de Piper: >1 más lento
         "escuchar": True,
+        # Dispositivo ALSA del micrófono (arecord -L), p. ej. "plughw:CARD=Device,DEV=0".
+        # Fijarlo si hay una webcam con micrófono: con dos micrófonos USB el orden puede cambiar.
+        "microfono": None,
     },
     "web": {"host": "0.0.0.0", "puerto": 8000},
     "simulacion": {"hojas": 20, "escala_tiempo": 1.0, "prob_fallas": {}},

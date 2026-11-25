@@ -9,6 +9,36 @@
 {% if ocupado %}<div class="panel mensaje">Hay un documento en curso: solo se permiten STATUS y STOP.</div>{% endif %}
 
 <div class="panel">
+  <h2 style="margin-top:0">Cámara</h2>
+  <p>Activa: <code>{{ camara.fuente or '—' }}</code>
+    {% if camara.resolucion %} · {{ camara.resolucion[0] }} × {{ camara.resolucion[1] }} px{% endif %}</p>
+  {% if camara.conmutable %}
+  <form method="post" action="/camara/fuente" class="linea">
+    <label>Cambiar a
+      <select name="fuente">
+        {% for o in opciones_camara %}
+        <option value="{{ o.fuente }}" {% if o.fuente == camara.fuente %}selected{% endif %}>{{ o.nombre }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button class="sec" {% if ocupado %}disabled{% endif %}>Usar</button>
+    <button type="button" class="sec" id="btn-foto" {% if ocupado %}disabled{% endif %}>Foto de prueba</button>
+  </form>
+  {% endif %}
+  <p class="dato">La elección se recuerda al reiniciar (con <code>camara.fuente: auto</code>). Cada cámara puede tener su
+    propia región del canto en <code>camara.region_canto</code>. Los pares guardados anotan qué cámara los tomó.</p>
+  <img id="foto-prueba" alt="Foto de prueba" style="display:none;max-width:100%;margin-top:10px;border:1px solid #c9ced6">
+</div>
+<script>
+  const btn = document.getElementById('btn-foto');
+  if (btn) btn.addEventListener('click', () => {
+    const img = document.getElementById('foto-prueba');
+    img.src = '/camara/foto.jpg?t=' + Date.now();
+    img.style.display = 'block';
+  });
+</script>
+
+<div class="panel">
   <h2 style="margin-top:0">Pruebas de movimiento</h2>
   <form method="post" action="/calibracion/comando" class="botones">
     {% for c in ['PING', 'STATUS', 'HOME', 'TURN', 'BACK'] %}

@@ -30,7 +30,8 @@ FRECUENCIA = 16000
 
 
 class Escucha:
-    def __init__(self, modelo: str, al_comando: Callable[[str], None], hablando: Callable[[], bool] = lambda: False):
+    def __init__(self, modelo: str, al_comando: Callable[[str], None], hablando: Callable[[], bool] = lambda: False,
+                 microfono: str | None = None):
         from vosk import KaldiRecognizer, Model, SetLogLevel
 
         SetLogLevel(-1)
@@ -40,16 +41,17 @@ class Escucha:
         self._reconocedor = KaldiRecognizer(Model(modelo), FRECUENCIA, gramatica)
         self.al_comando = al_comando
         self.hablando = hablando
+        self.microfono = microfono  # dispositivo ALSA; None = el predeterminado
         self._activo = threading.Event()
         self._proceso: subprocess.Popen | None = None
         self._hilo: threading.Thread | None = None
 
     def iniciar(self) -> None:
         self._activo.set()
-        self._proceso = subprocess.Popen(
-            ["arecord", "-q", "-f", "S16_LE", "-r", str(FRECUENCIA), "-c", "1", "-t", "raw"],
-            stdout=subprocess.PIPE,
-        )
+        orden = ["arecord", "-q", "-f", "S16_LE", "-r", str(FRECUENCIA), "-c", "1", "-t", "raw"]
+        if self.microfono:
+            orden[1:1] = ["-D", self.microfono]
+        self._proceso = subprocess.Popen(orden, stdout=subprocess.PIPE)
         self._hilo = threading.Thread(target=self._escuchar, daemon=True, name="vosk")
         self._hilo.start()
         log.info("Escucha de comandos por voz activa")
@@ -81,7 +83,7 @@ def crear(cfg_voz: dict, al_comando, hablando) -> Escucha | None:
     if not (cfg_voz.get("activa", True) and cfg_voz.get("escuchar", True)):
         return None
     try:
-        return Escucha(cfg_voz["vosk_modelo"], al_comando, hablando)
+        return Escucha(cfg_voz["vosk_modelo"], al_comando, hablando, cfg_voz.get("microfono"))
     except Exception as exc:
         log.warning("Vosk no disponible (%s): solo teclado y panel web", exc)
         return None

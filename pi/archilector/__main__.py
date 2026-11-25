@@ -50,9 +50,14 @@ def construir(cfg: dict, puerto: str, fuente_camara: str, sin_voz: bool):
         sim = cfg["simulacion"]
         libro = LibroSimulado(hojas=sim["hojas"], prob_fallas=sim["prob_fallas"])
 
-    camara = cam.crear(fuente_camara, libro, cfg["camara"]["ancho"], cfg["camara"]["alto"])
     ia = cfg["ia"]
     verificador = Verificador(ia["modelo_verificador"], ia["umbral_regla_pixeles"], cfg["vision"]["region_canto"])
+
+    def al_cambiar_camara(fuente: str) -> None:
+        # Cada cámara queda encuadrada distinto: el recorte del canto es propio de cada una
+        verificador.region_canto = tuple(cam.region_canto(cfg, fuente))
+
+    camara = cam.crear(fuente_camara, libro, cfg["camara"], datos, al_cambiar_camara)
     clasificador = Clasificador(ia["modelo_clasificador"])
     ocr = OCR() if cfg["ocr"]["activo"] else OCRNulo()
     db = BaseDatos(datos / "archilector.db")
@@ -223,7 +228,7 @@ def main(argv: list[str] | None = None) -> int:
 
     e = sub.add_parser("ejecutar", help="robot completo con panel web")
     e.add_argument("--puerto", help="/dev/archilector-esp32, sim:// o ninguno (modo asistido sin ESP32)")
-    e.add_argument("--camara", help="pi, sim, carpeta:<ruta> o webcam:<n>")
+    e.add_argument("--camara", help="auto, pi, webcam[:<n>|:<ruta>], sim o carpeta:<ruta>")
     e.add_argument("--sin-voz", action="store_true", help="la voz se escribe en el registro")
     e.add_argument("--web-puerto", type=int)
 

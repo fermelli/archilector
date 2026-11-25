@@ -412,7 +412,8 @@ class Orquestador:
             self._libro, antes.foto, foto_despues, v.imagen_compuesta,
             {"comando": ",".join(map(str, cmd)), "intento": intento, "prediccion": v.clase,
              "confianza": v.confianza, "fuente": v.fuente, "regla_pixeles": v.regla,
-             "fraccion_cambio": v.fraccion_cambio, "duracion_ms": respuesta.duracion_ms},
+             "fraccion_cambio": v.fraccion_cambio, "duracion_ms": respuesta.duracion_ms,
+             "camara": getattr(self.camara, "fuente", None)},
         ) if self.registro else None
         if ruta_par:
             self.db.registrar_par(str(ruta_par), self._libro, v.clase, v.regla)

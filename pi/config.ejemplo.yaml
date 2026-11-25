@@ -7,7 +7,11 @@ enlace:
   puerto: /dev/archilector-esp32  # regla udev (deploy/99-archilector.rules); "sim://" para simular
 
 camara:
-  fuente: pi                      # pi | sim | carpeta:<ruta> | webcam:<n>
+  fuente: auto                    # auto | pi | webcam[:<n>|:<ruta>] | sim | carpeta:<ruta>
+                                  # auto: la última elegida en el panel; si no, la CSI; si no, la webcam
+  pi: {ancho: 2592, alto: 1944}   # cámara V1.3 por CSI
+  webcam: {ancho: 1280, alto: 720, asentar_s: 0.5}   # Redragon GW600 (720p); asentar_s: espera tras la luz
+  # region_canto: {webcam: [0.05, 0.2, 0.2, 0.8]}   # si la webcam encuadra distinto que la CSI
   luz_captura: 100                # % de la tira LED al fotografiar (figura 8.2)
   luz_reposo: 30
 
@@ -34,6 +38,7 @@ voz:
   piper_modelo: modelos/voz/es_ES-davefx-medium.onnx
   vosk_modelo: modelos/vosk-model-small-es-0.42
   volumen: 70
+  # microfono: plughw:CARD=Device,DEV=0   # fijarlo si la webcam también trae micrófono (arecord -L)
 
 web:
   puerto: 8000

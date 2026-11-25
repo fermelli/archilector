@@ -79,7 +79,7 @@ sudo systemctl start archilector                 # panel en http://<pi>.local:80
 ```bash
 cd pi
 python -m venv .venv && .venv/Scripts/pip install -e .[dev]     # en Linux: .venv/bin/pip
-.venv/Scripts/python -m pytest                                    # 33 pruebas
+.venv/Scripts/python -m pytest                                    # 38 pruebas
 .venv/Scripts/python -m archilector ejecutar --puerto sim:// --camara sim --sin-voz
 ```
 
@@ -90,11 +90,26 @@ simulado que el simulador "voltea". Se pueden provocar fallas en `config.yaml`:
 simulacion: {escala_tiempo: 0.2, prob_fallas: {no_pasa: 0.15, dos_hojas: 0.1, doblada: 0.05}}
 ```
 
+### Cámara
+
+| Fuente | Qué es |
+|---|---|
+| `auto` (por defecto) | La última elegida en el panel; si no, la cámara CSI; si no, la primera webcam |
+| `pi` | Cámara V1.3 por CSI con Picamera2, 2592 × 1944 |
+| `webcam`, `webcam:<n>` o `webcam:<ruta>` | Webcam USB (UVC) con OpenCV; en la Pi se identifica por `/dev/v4l/by-id/usb-…` |
+| `sim`, `carpeta:<ruta>` | Libro simulado o imágenes de una carpeta, para desarrollo |
+
+Se elige en `config.yaml` (`camara.fuente`), con `--camara` o en **Panel → Calibración → Cámara**, que
+además permite cambiarla sin reiniciar y sacar una foto de prueba. Cada cámara puede tener su propia
+región del canto (`camara.region_canto`) y cada par guardado anota qué cámara lo tomó. La resolución de
+la webcam se fija en `camara.webcam` (1280 × 720 para la Redragon GW600). Ver la
+[guía de armado](docs/armado/README.md#cámara-alternativa-webcam-usb) sobre qué esperar de una webcam de 720p.
+
 ### Comandos
 
 | Comando | Uso |
 |---|---|
-| `python -m archilector ejecutar` | Robot completo + panel web (opciones `--puerto`, `--camara`, `--sin-voz`) |
+| `python -m archilector ejecutar` | Robot completo + panel web (opciones `--puerto`, `--camara auto\|pi\|webcam`, `--sin-voz`) |
 | `python -m archilector ejecutar --puerto ninguno` | Modo asistido sin ESP32 (plan B, Diseño 2.4.8) |
 | `python -m archilector prueba-enlace` | Pruebas T2.1 y TC.1–TC.6 (TC.4 es manual) |
 | `python -m archilector consola` | Comandos a mano: `TURN`, `RETRY 40`, `CFG PASOS_ARCO 1100`, `LCD 1 HOLA` |
@@ -125,7 +140,8 @@ Durante el documento: A seguir · B pausa · C repetir · D parada inmediata · 
   hojas dobles (criterio para mantener B: ≥ 90 % y ≤ 5 %, Diseño 2.4.5).
 * **Documentos:** búsqueda en el texto (SQLite FTS5), páginas, volteos y descarga del PDF buscable.
 * **Etiquetar:** cada volteo guarda su par antes/después; se etiqueta con un clic (o teclas 1–4) y se exporta un ZIP para Colab.
-* **Calibración:** parámetros de la tabla 5.5 por `CFG` y botones HOME, TURN, RETRY, BACK, STOP, LIGHT, BEEP.
+* **Calibración:** parámetros de la tabla 5.5 por `CFG`, botones HOME, TURN, RETRY, BACK, STOP, LIGHT, BEEP,
+  y elección de la cámara con foto de prueba.
 
 ---
 
@@ -157,6 +173,6 @@ Mientras no haya modelos, la Pi usa la regla de píxeles y la regla de palabras 
 ## Pendiente de validar con hardware
 
 Compilado y probado en un PC con el simulador: el firmware compila sin advertencias en sus dos entornos y
-las 33 pruebas de la Pi pasan (protocolo, TC.1–TC.6, cada clase del verificador, modos, PDF y panel web).
+las 38 pruebas de la Pi pasan (protocolo, TC.1–TC.6, cada clase del verificador, modos, PDF y panel web).
 Falta lo que solo se puede medir en el robot: tiempos reales, ángulos, `PASOS_ARCO`, el sentido del rodillo,
-`BACK`, la captura con Picamera2, Piper y Vosk en la Pi, y el entrenamiento con datos propios.
+`BACK`, la captura con Picamera2 y con la webcam en la Pi, Piper y Vosk en la Pi, y el entrenamiento con datos propios.

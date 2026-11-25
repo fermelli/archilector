@@ -15,7 +15,7 @@
     <div class="dato">Último volteo</div>
     <div class="valor" id="veredicto">—</div>
     <div class="dato" id="veredicto_det"></div>
-    <div class="dato" style="margin-top:10px">Verificador: <span id="fuente">—</span> · ESP32: <span id="esp32">—</span></div>
+    <div class="dato" style="margin-top:10px">Verificador: <span id="fuente">—</span> · ESP32: <span id="esp32">—</span> · Cámara: <span id="camara">—</span></div>
   </div>
   <div class="panel">
     <div class="dato">Volteos registrados</div>
@@ -79,6 +79,7 @@ async function actualizar() {
     document.getElementById('veredicto').textContent = v.clase ? v.clase.replace('_', ' ') : '—';
     document.getElementById('veredicto_det').textContent = v.clase ? `confianza ${v.confianza} · ${v.fuente} · regla de píxeles: ${v.regla}` : '';
     document.getElementById('fuente').textContent = e.verificador === 'modelo' ? 'modelo entrenado' : 'regla de píxeles (sin modelo)';
+    document.getElementById('camara').textContent = e.camara && e.camara.fuente ? e.camara.fuente + (e.camara.resolucion ? ' (' + e.camara.resolucion.join('×') + ')' : '') : '—';
     document.getElementById('esp32').textContent = e.esp32 ? (e.esp32.caido ? 'enlace caído' : (e.esp32.firmware || '?') + ' ' + (e.esp32.protocolo || '')) : 'sin enlace';
     const img = document.getElementById('ultima');
     if (e.ultima_pagina && img.dataset.src !== e.ultima_pagina) { img.src = e.ultima_pagina; img.dataset.src = e.ultima_pagina; img.hidden = false; }

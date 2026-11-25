@@ -41,6 +41,7 @@ Estado según la tabla 2 del Documento de Diseño: **D** = disponible en el inve
 | microSD 32 GB clase A1 | 1 | C si no hay | Raspberry Pi OS Lite de 64 bits |
 | Disipadores + ventilador de 30 mm para la Pi | 1 | C | Prueba T5.1 (bajo 80 °C) |
 | Cámara oficial V1.3 + cinta CSI de 15 cm | 1 | D | Foto de la página |
+| Webcam USB (opcional; p. ej. Redragon GW600, 720p) | 1 | Opcional | Cámara de respaldo, se elige desde el panel (sección 5) |
 | ESP32 DevKit (ESP32-WROOM-32) | 1 | D (2 en el kit) | Tiempo real del volteo |
 | Motor 28BYJ-48 + módulo ULN2003 | 1 | D | Girar los rodillos |
 | Servo MG996R (con bocina metálica) | 1 | C | Girar los brazos |
@@ -302,6 +303,31 @@ la LCD debe mostrar «SIN ENLACE».
 | T6.3 Audio | Leer una página | Voz clara al 70 %, sin zumbido de motores |
 | T6.4 Micrófono | Decir «continuar» con los servos moviéndose | Se reconoce 8 de 10 veces |
 
+### Cámara alternativa: webcam USB
+
+El software trabaja con la cámara V1.3 o con una webcam USB, y se cambia entre ellas desde
+**Panel → Calibración → Cámara** sin reiniciar. Con `camara.fuente: auto` (valor por defecto) usa la última
+elegida en el panel; si no está conectada, la V1.3; si tampoco, la primera webcam.
+
+1. Conectar la webcam a un USB de la Pi y fijarla en la viga con el lente hacia abajo, a la par de la V1.3
+   (cinta doble faz, abrazadera o un soporte impreso). Pasar el cable por la viga, lejos del giro del brazo.
+2. En **Calibración → Cámara** elegirla y pulsar **Foto de prueba**: debe verse el libro completo.
+3. Repetir T4.2 a T4.4 con la webcam. Si encuadra distinto, ajustar su propia región del canto en
+   `config.yaml` (`camara.region_canto: {webcam: [x0, y0, x1, y1]}`).
+4. No cambiar de cámara en medio de un documento: el panel no lo permite.
+
+**Qué esperar de la Redragon GW600.** Es de 720p (1280 × 720, ~0,9 MP) con foco fijo desde unos 50 cm.
+A 350 mm da unos 80 ppp sobre el libro y queda más cerca que su distancia de foco; la V1.3 da unos
+185 ppp. Sirve como respaldo o para probar en un PC, pero el OCR será peor. Para mejorar de verdad la
+imagen haría falta una webcam de 1080p o más **con autofoco**.
+
+La GW600 trae micrófono propio: con ella y el micrófono USB conectados, la Pi ve dos micrófonos y el
+predeterminado puede cambiar. Listar los dispositivos con `arecord -L` y fijar el del micrófono USB en
+`config.yaml` (`voz.microfono: plughw:CARD=...,DEV=0`); repetir T6.4.
+
+Los pares de entrenamiento guardan en `meta.json` qué cámara los tomó: el verificador entrenado con
+una cámara puede rendir peor con la otra, así que conviene entrenar con la que se vaya a usar.
+
 Si `/dev/archilector-esp32` no aparece, ejecutar `lsusb`, anotar el VID:PID del puente USB del DevKit
 y agregarlo a `deploy/99-archilector.rules`.
 
@@ -400,6 +426,9 @@ Una fila por prueba, aunque falle. Una prueba repetida es una fila nueva.
 | La hoja no pasa | Poca presión o poco arco | Bajar `ANG_CONTACTO` unos grados, subir `PASOS_ARCO`, limpiar la goma con alcohol isopropílico |
 | Pasan dos hojas | Demasiada presión o papel satinado | Subir `ANG_CONTACTO`, preacondicionar el libro, limpiar la goma |
 | El brazo se traba (FAIL,E04) | Roce o cable tenso | Revisar la holgura de C03 y que la varilla gire libre |
+| La foto de la V1.3 sale borrosa | El lente viene enfocado para ~1 m | Girar el lente con la herramienta que trae (o una pinza fina) en pasos pequeños hasta que T4.3 pase a 350 mm |
+| La webcam no aparece en el panel | No es UVC o falta el enlace USB | `ls /dev/v4l/by-id/` debe mostrar `usb-…-video-index0`; probar otro puerto o cable |
+| La foto de la webcam sale oscura | La exposición no alcanza a seguir a la luz LED | Subir `camara.webcam.asentar_s` a 1,0 s |
 
 ---
 
