@@ -22,6 +22,7 @@ class LineaOCR:
 class ResultadoOCR:
     lineas: list[LineaOCR] = field(default_factory=list)
     numero_pagina: int | None = None
+    categoria: str | None = None  # tipo de página, si el motor lo sabe (Claude)
 
     @property
     def texto(self) -> str:

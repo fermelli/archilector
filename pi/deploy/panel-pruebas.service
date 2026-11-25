@@ -1,0 +1,20 @@
+[Unit]
+# Panel de pruebas (cámara en vivo, OCR, voz): solo red local, sin autenticación.
+# Usa la webcam para no quitarle la cámara CSI al servicio archilector.
+# Se instala igual que archilector.service, cambiando usuario y carpeta (ver deploy/instalar.sh).
+Description=ArchiLector - panel de pruebas (puerto 8889)
+After=network.target sound.target
+
+[Service]
+Type=simple
+User=archilector
+Group=archilector
+SupplementaryGroups=video audio
+WorkingDirectory=/home/archilector/ArchiLector/pi
+ExecStart=/home/archilector/ArchiLector/pi/.venv/bin/python herramientas/panel_pruebas.py --camara webcam
+Restart=on-failure
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

@@ -23,15 +23,17 @@ PAUSA_S = 120  # tras un error de red no se insiste en cada página
 SISTEMA = ("Transcribes fotos de páginas de libros y documentos en español para leerlas en voz alta. "
            "Copia el texto tal cual, en orden de lectura, con acentos, ñ, ¿ y ¡; no corrijas ni inventes. "
            "Devuelve el número de página impreso aparte y no lo incluyas en las líneas. "
-           "Si la foto no muestra una página con texto, es_pagina es false.")
+           "categoria: texto (texto corrido), formulario_tabla, portada_indice (portada o índice) o blanco. "
+           "Si la foto no muestra una página (la sala, una mano), es_pagina es false.")
 ESQUEMA = {
     "type": "object",
     "properties": {
         "es_pagina": {"type": "boolean"},
         "numero_pagina": {"type": ["integer", "null"]},
         "lineas": {"type": "array", "items": {"type": "string"}},
+        "categoria": {"type": "string", "enum": ["texto", "formulario_tabla", "portada_indice", "blanco"]},
     },
-    "required": ["es_pagina", "numero_pagina", "lineas"],
+    "required": ["es_pagina", "numero_pagina", "lineas", "categoria"],
     "additionalProperties": False,
 }
 
@@ -43,14 +45,14 @@ def _jpeg_b64(img: np.ndarray, lado_max: int = 1568) -> str:
     return base64.standard_b64encode(cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 85])[1]).decode()
 
 
-def _a_resultado(lineas: list[str], numero, alto: int, ancho: int) -> ResultadoOCR:
+def _a_resultado(lineas: list[str], numero, alto: int, ancho: int, categoria: str | None = None) -> ResultadoOCR:
     """Claude no da coordenadas: franjas iguales para que el PDF siga siendo buscable."""
     lineas = [t for t in lineas if t.strip()]
     y0, paso = alto * 0.06, alto * 0.88 / max(len(lineas), 1)
     res = [LineaOCR([[ancho * .06, y0 + i * paso], [ancho * .94, y0 + i * paso],
                      [ancho * .94, y0 + (i + 1) * paso], [ancho * .06, y0 + (i + 1) * paso]], t, 0.95)
            for i, t in enumerate(lineas)]
-    return ResultadoOCR(res, numero if isinstance(numero, int) else numero_impreso(res, alto))
+    return ResultadoOCR(res, numero if isinstance(numero, int) else numero_impreso(res, alto), categoria)
 
 
 class OCRClaude:
@@ -90,8 +92,8 @@ class OCRClaude:
         if m.stop_reason != "end_turn":
             raise RuntimeError(f"respuesta incompleta ({m.stop_reason})")
         d = json.loads(next(b.text for b in m.content if b.type == "text"))
-        log.info("Claude (%s) leyó %d líneas; %d+%d tokens", self.modelo, len(d["lineas"]),
+        log.info("Claude (%s) leyó %d líneas (%s); %d+%d tokens", self.modelo, len(d["lineas"]), d.get("categoria"),
                  m.usage.input_tokens, m.usage.output_tokens)
         if not d["es_pagina"]:
             return ResultadoOCR()
-        return _a_resultado(d["lineas"], d["numero_pagina"], *pagina.shape[:2])
+        return _a_resultado(d["lineas"], d["numero_pagina"], *pagina.shape[:2], d.get("categoria"))

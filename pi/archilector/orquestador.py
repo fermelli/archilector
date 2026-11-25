@@ -298,7 +298,7 @@ class Orquestador:
         self._numero += 1
         n = self._numero
         texto = c.ocr.texto
-        cat = self.clasificador.clasificar(c.corregida.pagina, texto)
+        cat = self.clasificador.clasificar(c.corregida.pagina, texto, c.ocr.categoria)
         carpeta = self.datos / "documentos" / str(doc_id)
         carpeta.mkdir(parents=True, exist_ok=True)
         ruta_img = carpeta / f"pagina_{n:04d}.jpg"
@@ -313,8 +313,8 @@ class Orquestador:
         if c.numero_impreso is not None:
             self._ref_impreso = (n, c.numero_impreso)
         impreso = f" (impresa {c.numero_impreso})" if c.numero_impreso else ""
-        log.info("Página %d%s: %s, %d caracteres, nitidez %.0f", n, impreso, cat.categoria, len(texto),
-                 c.corregida.nitidez)
+        log.info("Página %d%s: %s (%s), %d caracteres, nitidez %.0f", n, impreso, cat.categoria, cat.fuente,
+                 len(texto), c.corregida.nitidez)
         if modo == ARCHIVO:
             self._lcd("ARCHIVANDO", f"PAG {n:03d}")
         elif modo == ASISTIDO:

@@ -7,6 +7,7 @@ import cv2
 import numpy as np
 from fastapi.testclient import TestClient
 
+from archilector.ia.clasificador import Clasificador
 from archilector.vision.ocr import ResultadoOCR
 from archilector.vision.ocr_claude import OCRClaude
 from archilector.vision.ocr_tesseract import crear
@@ -45,9 +46,11 @@ PAGINA = np.full((1944, 2592, 3), 255, np.uint8)
 
 
 def test_claude_lee_la_pagina():
-    c = ClienteFalso({"es_pagina": True, "numero_pagina": 23, "lineas": ["Capítulo I", "", "Había una vez…"]})
+    c = ClienteFalso({"es_pagina": True, "numero_pagina": 23, "lineas": ["Capítulo I", "", "Había una vez…"],
+                      "categoria": "texto"})
     o = OCRClaude(Local(), cliente=c)
     r = o.leer(PAGINA)
+    assert r.categoria == "texto"
     assert r.texto == "Capítulo I\nHabía una vez…" and r.numero_pagina == 23
     assert all(0 <= x <= 2592 and 0 <= y <= 1944 for l in r.lineas for x, y in l.caja)
     assert o.ultimo == "claude-haiku-5-5"
@@ -100,3 +103,11 @@ def test_panel_cambia_el_modelo(tmp_path):
 def test_crear_envuelve_el_motor_local():
     assert isinstance(crear({"motor": "rapidocr", "claude": {"activo": True, "modelo": "claude-sonnet-5-5"}}), OCRClaude)
     assert not isinstance(crear({"motor": "rapidocr", "claude": {"activo": False}}), OCRClaude)
+
+
+def test_el_clasificador_usa_la_categoria_de_claude():
+    blanca = np.full((400, 300, 3), 255, np.uint8)
+    c = Clasificador(None).clasificar(blanca, "", "formulario_tabla")
+    assert (c.categoria, c.fuente) == ("formulario_tabla", "claude")
+    assert Clasificador(None).clasificar(blanca, "", "otra").fuente == "regla"  # sin sugerencia válida, la regla
+    assert Clasificador(None).clasificar(blanca, "").categoria == "blanco"

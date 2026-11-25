@@ -81,8 +81,11 @@ class Clasificador:
         self.modelo = cargar_si_existe(ruta_modelo) if ruta_modelo else None
         self.categorias = (self.modelo.etiquetas if self.modelo and self.modelo.etiquetas else CATEGORIAS)
 
-    def clasificar(self, pagina_bgr: np.ndarray, texto: str = "") -> Categoria:
+    def clasificar(self, pagina_bgr: np.ndarray, texto: str = "", sugerida: str | None = None) -> Categoria:
+        """``sugerida``: la categoría que dio Claude al leer la página; se usa si no hay modelo entrenado."""
         if self.modelo is None:
+            if sugerida in CATEGORIAS:
+                return Categoria(sugerida, 0.9, "claude")
             return regla(pagina_bgr, texto)
         rgb = cv2.cvtColor(cv2.resize(pagina_bgr, (self.modelo.ancho, self.modelo.alto)), cv2.COLOR_BGR2RGB)
         p = self.modelo.predecir(rgb)

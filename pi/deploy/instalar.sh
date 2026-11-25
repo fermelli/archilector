@@ -51,9 +51,11 @@ echo "==> Regla udev: /dev/archilector-esp32"
 sudo cp deploy/99-archilector.rules /etc/udev/rules.d/
 sudo udevadm control --reload && sudo udevadm trigger
 
-echo "==> Servicio systemd"
-sed "s#/home/archilector/ArchiLector/pi#${CARPETA}#g; s#User=archilector#User=${USUARIO}#; s#Group=archilector#Group=${USUARIO}#" \
-    deploy/archilector.service | sudo tee /etc/systemd/system/archilector.service >/dev/null
+echo "==> Servicios systemd (archilector y, sin habilitar, panel-pruebas)"
+for servicio in archilector panel-pruebas; do
+    sed "s#/home/archilector/ArchiLector/pi#${CARPETA}#g; s#User=archilector#User=${USUARIO}#; s#Group=archilector#Group=${USUARIO}#" \
+        "deploy/${servicio}.service" | sudo tee "/etc/systemd/system/${servicio}.service" >/dev/null
+done
 sudo chown -R "$USUARIO" "$CARPETA"
 sudo systemctl daemon-reload
 sudo systemctl enable archilector
@@ -67,4 +69,5 @@ Listo. Pasos siguientes:
   4. Arranque el servicio:       sudo systemctl start archilector
   5. Panel web:                  http://$(hostname).local:8000
   Registro en vivo:              journalctl -u archilector -f
+  Panel de pruebas (webcam):     sudo systemctl enable --now panel-pruebas   → http://$(hostname).local:8889
 EOF
