@@ -2,17 +2,19 @@
 """Panel de pruebas de ArchiLector: camara en vivo + OCR + voz + metricas.
 
 Solo para la Raspberry Pi y para la red local del laboratorio: NO tiene autenticacion
-y NO debe exponerse a internet. Ocupa la camara, asi que no se puede ejecutar a la vez
-que ``python -m archilector ejecutar`` con camara real.
+y NO debe exponerse a internet. Ocupa la camara elegida (la CSI o la webcam USB), asi que esa
+camara no puede estar a la vez en ``python -m archilector ejecutar``.
 
 Captura la pagina a 2592x1944, la lee con Tesseract (idioma ``spa``, requiere
 ``sudo apt install tesseract-ocr tesseract-ocr-spa``) o con RapidOCR, la sintetiza con Piper y
 re-transcribe el audio con Vosk para medir el error de palabras (WER). El audio suena en el
 navegador de quien abre la pagina, no en la Pi.
 
-    cd pi && .venv/bin/python herramientas/panel_pruebas.py [--puerto 8889]
+    cd pi && .venv/bin/python herramientas/panel_pruebas.py [--puerto 8889] [--camara pi|webcam]
 """
+import argparse
 import difflib
+import glob
 import io
 import json
 import os
@@ -29,14 +31,15 @@ from socketserver import ThreadingMixIn
 
 import cv2
 import numpy as np
-from picamera2 import Picamera2
-from picamera2.encoders import MJPEGEncoder
-from picamera2.outputs import FileOutput
-
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # carpeta pi/
 PIPER = f"{RAIZ}/modelos/voz/es_ES-davefx-medium.onnx"
 VOSK = f"{RAIZ}/modelos/vosk-model-small-es-0.42"
 sys.path.insert(0, RAIZ)
+
+ap = argparse.ArgumentParser(description="Panel de pruebas de ArchiLector (solo LAN, sin autenticacion)")
+ap.add_argument("--puerto", type=int, default=8889)
+ap.add_argument("--camara", choices=["pi", "webcam"], default="pi", help="CSI (2592x1944) o webcam USB (1280x720)")
+args = ap.parse_args()
 
 # ----------------------------------------------------------------------------- camara
 class Salida(io.BufferedIOBase):
@@ -52,13 +55,50 @@ class Salida(io.BufferedIOBase):
         return len(buf)
 
 
+class Webcam:
+    """Webcam USB con OpenCV: misma interfaz que Picamera2 para el panel (capture_array y video en vivo)."""
+
+    def __init__(self, salida, ancho=1280, alto=720):
+        rutas = sorted(glob.glob("/dev/v4l/by-id/usb-*-video-index0")) or [0]
+        self.cap = cv2.VideoCapture(rutas[0], cv2.CAP_V4L2)
+        if not self.cap.isOpened():
+            raise SystemExit(f"no se pudo abrir la webcam {rutas[0]} (¿la usa ArchiLector?)")
+        self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, ancho)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, alto)
+        self.ultimo, self.salida = None, salida
+        print(f"Webcam {rutas[0]}", flush=True)
+        threading.Thread(target=self._leer, daemon=True).start()
+
+    def _leer(self):
+        while True:
+            ok, f = self.cap.read()
+            if not ok:
+                time.sleep(0.1)
+                continue
+            self.ultimo = f
+            self.salida.write(cv2.imencode(".jpg", f, [cv2.IMWRITE_JPEG_QUALITY, 80])[1].tobytes())
+
+    def capture_array(self, _nombre="main"):
+        while self.ultimo is None:
+            time.sleep(0.05)
+        return self.ultimo.copy()
+
+
 salida = Salida()
-cam = Picamera2()
-cam.configure(cam.create_video_configuration(
-    main={"size": (2592, 1944), "format": "RGB888"},
-    lores={"size": (1280, 960), "format": "YUV420"},
-    controls={"FrameRate": 15}, buffer_count=4))
-cam.start_recording(MJPEGEncoder(), FileOutput(salida), name="lores")
+if args.camara == "webcam":
+    cam, RES = Webcam(salida), "1280×720 (webcam)"
+else:
+    from picamera2 import Picamera2
+    from picamera2.encoders import MJPEGEncoder
+    from picamera2.outputs import FileOutput
+
+    cam, RES = Picamera2(), "2592×1944 (CSI)"
+    cam.configure(cam.create_video_configuration(
+        main={"size": (2592, 1944), "format": "RGB888"},
+        lores={"size": (1280, 960), "format": "YUV420"},
+        controls={"FrameRate": 15}, buffer_count=4))
+    cam.start_recording(MJPEGEncoder(), FileOutput(salida), name="lores")
 
 # ----------------------------------------------------------------------------- modelos (carga diferida)
 _m = {}
@@ -163,7 +203,7 @@ def paso(nombre, t0):
 def trabajo(p):
     try:
         res = {}
-        t = time.time(); estado["fase"] = "Capturando foto 2592×1944"
+        t = time.time(); estado["fase"] = f"Capturando foto {RES}"
         frame = cam.capture_array("main")  # BGR
         paso("Captura", t)
 
@@ -379,11 +419,6 @@ class S(ThreadingMixIn, server.HTTPServer):
 
 
 if __name__ == "__main__":
-    import argparse
-
-    ap = argparse.ArgumentParser(description="Panel de pruebas de ArchiLector (solo LAN, sin autenticacion)")
-    ap.add_argument("--puerto", type=int, default=8889)
-    args = ap.parse_args()
     threading.Thread(target=precargar, daemon=True).start()
     print(f"Panel de pruebas en http://0.0.0.0:{args.puerto}  (solo red local, sin autenticacion)", flush=True)
     S(("0.0.0.0", args.puerto), H).serve_forever()
