@@ -52,8 +52,9 @@ POR_DEFECTO: dict = {
         "volumen": 70,
         "velocidad": 1.0,  # length_scale de Piper: >1 más lento
         "escuchar": True,
-        # Dispositivo ALSA del micrófono (arecord -L), p. ej. "plughw:CARD=Device,DEV=0".
-        # Fijarlo si hay una webcam con micrófono: con dos micrófonos USB el orden puede cambiar.
+        # Micrófono: None (predeterminado), un dispositivo ALSA ("plughw:CARD=Camera,DEV=0")
+        # o fragmentos del nombre de la tarjeta en orden de preferencia, p. ej. ["GW600", "USB"]
+        # (ver arecord -l). Si se desconecta, la escucha pasa al siguiente en unos 3 s.
         "microfono": None,
     },
     "web": {"host": "0.0.0.0", "puerto": 8000},

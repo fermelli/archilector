@@ -93,7 +93,7 @@ def cmd_ejecutar(args, cfg) -> int:
     log.info("Verificador: %s", "modelo entrenado" if orq.verificador.modelo else "regla de píxeles (sin modelo)")
     threading.Thread(target=orq._decir, args=("ArchiLector listo. Pulse A para leer o numeral para archivar.",),
                      daemon=True).start()
-    app = crear_app(orq, db, enlace, cfg)
+    app = crear_app(orq, db, enlace, cfg, escucha=escucha)
     host, port = cfg["web"]["host"], args.web_puerto or cfg["web"]["puerto"]
     log.info("Panel web en http://%s:%s", "localhost" if host == "0.0.0.0" else host, port)
     uvicorn.run(app, host=host, port=port, log_level="warning")

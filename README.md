@@ -79,7 +79,7 @@ sudo systemctl start archilector                 # panel en http://<pi>.local:80
 ```bash
 cd pi
 python -m venv .venv && .venv/Scripts/pip install -e .[dev]     # en Linux: .venv/bin/pip
-.venv/Scripts/python -m pytest                                    # 38 pruebas
+.venv/Scripts/python -m pytest                                    # 42 pruebas
 .venv/Scripts/python -m archilector ejecutar --puerto sim:// --camara sim --sin-voz
 ```
 
@@ -133,6 +133,9 @@ si salta de más (o no avanza) se corrige la clase, aunque las páginas intermed
 Durante el documento: A seguir · B pausa · C repetir · D parada inmediata · \* página anterior ·
 \# confirmar · 1/2 volumen · 4/6 velocidad de la voz · 0 ayuda. En pausa, **#** termina el documento.
 **Voz:** «siguiente», «repite», «pausa», «continuar», «anterior», «parar», «ayuda».
+El micrófono se elige en `voz.microfono` por fragmentos del nombre en orden de preferencia, p. ej.
+`[GW600, USB]` para usar el de la webcam y, si no está, el micrófono USB; si se desconecta, la escucha
+pasa al siguiente sola (ver la [guía de armado](docs/armado/README.md#cámara-alternativa-webcam-usb)).
 
 ### Panel web
 
@@ -173,6 +176,6 @@ Mientras no haya modelos, la Pi usa la regla de píxeles y la regla de palabras 
 ## Pendiente de validar con hardware
 
 Compilado y probado en un PC con el simulador: el firmware compila sin advertencias en sus dos entornos y
-las 38 pruebas de la Pi pasan (protocolo, TC.1–TC.6, cada clase del verificador, modos, PDF y panel web).
+las 42 pruebas de la Pi pasan (protocolo, TC.1–TC.6, cada clase del verificador, modos, PDF y panel web).
 Falta lo que solo se puede medir en el robot: tiempos reales, ángulos, `PASOS_ARCO`, el sentido del rodillo,
-`BACK`, la captura con Picamera2 y con la webcam en la Pi, Piper y Vosk en la Pi, y el entrenamiento con datos propios.
+`BACK`, la captura con Picamera2 y con la webcam en la Pi, Piper y Vosk en la Pi (también con el micrófono de la webcam), y el entrenamiento con datos propios.

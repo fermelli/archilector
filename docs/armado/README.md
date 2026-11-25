@@ -321,9 +321,25 @@ A 350 mm da unos 80 ppp sobre el libro y queda más cerca que su distancia de fo
 185 ppp. Sirve como respaldo o para probar en un PC, pero el OCR será peor. Para mejorar de verdad la
 imagen haría falta una webcam de 1080p o más **con autofoco**.
 
-La GW600 trae micrófono propio: con ella y el micrófono USB conectados, la Pi ve dos micrófonos y el
-predeterminado puede cambiar. Listar los dispositivos con `arecord -L` y fijar el del micrófono USB en
-`config.yaml` (`voz.microfono: plughw:CARD=...,DEV=0`); repetir T6.4.
+**Micrófono de la webcam para los comandos de voz.** La GW600 trae micrófono doble y puede reemplazar
+al micrófono USB, o quedar como primera opción con el USB de respaldo:
+
+1. Con la webcam conectada, ver el nombre de su tarjeta de sonido: `arecord -l` (o `cat /proc/asound/cards`).
+2. Poner en `config.yaml` fragmentos de los nombres en orden de preferencia, por ejemplo:
+
+   ```yaml
+   voz:
+     microfono: [GW600, USB]   # la webcam primero; si no está, el micrófono USB
+   ```
+
+   Se busca el fragmento en el nombre de las tarjetas que graban, así que basta una parte que solo tenga
+   esa tarjeta. También se acepta un dispositivo exacto (`plughw:CARD=...,DEV=0`).
+3. Reiniciar el servicio. El panel muestra **Micrófono: plughw:CARD=…** en la página de inicio.
+4. Repetir **T6.4** (decir «continuar» con los servos moviéndose: 8 de 10). La webcam queda en la viga,
+   cerca del ventilador de la Pi y del MG996R; si no pasa, poner el micrófono USB primero en la lista.
+
+Si se desconecta la webcam, la escucha pasa al siguiente micrófono de la lista en unos 3 s, y vuelve
+sola cuando se la reconecta (al soltar el micrófono, `arecord` termina y se busca de nuevo).
 
 Los pares de entrenamiento guardan en `meta.json` qué cámara los tomó: el verificador entrenado con
 una cámara puede rendir peor con la otra, así que conviene entrenar con la que se vaya a usar.
@@ -428,6 +444,7 @@ Una fila por prueba, aunque falle. Una prueba repetida es una fila nueva.
 | El brazo se traba (FAIL,E04) | Roce o cable tenso | Revisar la holgura de C03 y que la varilla gire libre |
 | La foto de la V1.3 sale borrosa | El lente viene enfocado para ~1 m | Girar el lente con la herramienta que trae (o una pinza fina) en pasos pequeños hasta que T4.3 pase a 350 mm |
 | La webcam no aparece en el panel | No es UVC o falta el enlace USB | `ls /dev/v4l/by-id/` debe mostrar `usb-…-video-index0`; probar otro puerto o cable |
+| Los comandos de voz no responden | Micrófono equivocado o sin conectar | Ver en el panel qué micrófono usa; revisar `voz.microfono` con `arecord -l` |
 | La foto de la webcam sale oscura | La exposición no alcanza a seguir a la luz LED | Subir `camara.webcam.asentar_s` a 1,0 s |
 
 ---

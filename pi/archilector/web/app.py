@@ -54,7 +54,7 @@ NOMBRES_CLASES = {
 }
 
 
-def crear_app(orquestador, db, enlace, cfg: dict) -> FastAPI:
+def crear_app(orquestador, db, enlace, cfg: dict, escucha=None) -> FastAPI:
     datos = Path(cfg["datos"]).resolve()
     datos.mkdir(parents=True, exist_ok=True)
     app = FastAPI(title="ArchiLector", docs_url=None, redoc_url=None)
@@ -99,6 +99,7 @@ def crear_app(orquestador, db, enlace, cfg: dict) -> FastAPI:
         } if enlace else None
         e["verificador"] = orquestador.verificador.fuente
         e["camara"] = _info_camara()
+        e["microfono"] = escucha.descripcion_microfono if escucha else None
         return JSONResponse(e)
 
     @app.post("/control/iniciar")
