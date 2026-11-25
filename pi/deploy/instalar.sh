@@ -26,6 +26,12 @@ python3 -m venv --system-site-packages .venv
 .venv/bin/pip install --upgrade pip
 .venv/bin/pip install -e .[pi]
 
+# picamera2 (paquete de apt) usa simplejpeg, compilado contra numpy 1.x. Sin este paso pip
+# deja numpy 2.x y OpenCV 5 en el venv y la cámara falla con
+# "numpy.dtype size changed, may indicate binary incompatibility".
+# Probado en la Pi 4 (Bookworm, Python 3.11): CamaraPi captura 2592x1944 y `pip check` queda limpio.
+.venv/bin/pip install "numpy<2" "opencv-python==4.10.0.84" "opencv-python-headless==4.10.0.84" "ml-dtypes<0.5"
+
 echo "==> Modelos de voz (Piper y Vosk) en español"
 mkdir -p modelos/voz
 if [ ! -f modelos/voz/es_ES-davefx-medium.onnx ]; then
