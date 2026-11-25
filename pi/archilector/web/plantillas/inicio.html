@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block contenido %}
+<h1>Estado del robot</h1>
+
+<div class="rejilla">
+  <div class="panel">
+    <div class="dato">Estado</div>
+    <div><span id="estado" class="estado">—</span></div>
+    <p class="mensaje" id="mensaje"></p>
+    <div class="dato">Documento</div>
+    <div class="valor" id="titulo">—</div>
+    <div class="dato" id="detalle"></div>
+  </div>
+  <div class="panel">
+    <div class="dato">Último volteo</div>
+    <div class="valor" id="veredicto">—</div>
+    <div class="dato" id="veredicto_det"></div>
+    <div class="dato" style="margin-top:10px">Verificador: <span id="fuente">—</span> · ESP32: <span id="esp32">—</span></div>
+  </div>
+  <div class="panel">
+    <div class="dato">Volteos registrados</div>
+    <div class="valor">{{ stats.total }}</div>
+    {% if stats.total %}
+    <div class="dato">Correctos: {{ '%.1f' % (100 * stats.tasa_correctos) }} % · Hojas dobles: {{ '%.1f' % (100 * stats.tasa_dobles) }} %</div>
+    <div class="dato">Criterio para seguir con B: ≥ 90 % correctos y ≤ 5 % dobles (Diseño 2.4.5)</div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="panel">
+  <h2 style="margin-top:0">Control</h2>
+  <div class="botones">
+    <button onclick="orden('iniciar')">A · Iniciar / seguir</button>
+    <button class="sec" onclick="orden('pausa')">B · Pausa</button>
+    <button class="sec" onclick="orden('repetir')">C · Repetir</button>
+    <button class="sec" onclick="orden('siguiente')">Siguiente</button>
+    <button class="sec" onclick="orden('anterior')">* · Anterior</button>
+    <button class="sec" onclick="orden('confirmar')"># · Confirmar</button>
+    <button class="sec" onclick="orden('terminar')">Terminar documento</button>
+    <button class="peligro" onclick="orden('parar')">D · Parada</button>
+  </div>
+</div>
+
+<div class="panel">
+  <h2 style="margin-top:0">Nuevo documento</h2>
+  <form class="linea" method="post" action="/control/iniciar">
+    <label>Título <input name="titulo" required placeholder="Libro de actas 1998"></label>
+    <label>Libro (para dividir los datos de entrenamiento) <input name="libro" required placeholder="actas-1998"></label>
+    <label>Modo
+      <select name="modo">
+        {% for m in modos %}<option value="{{ m }}">{{ m }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Máx. páginas <input name="max_paginas" type="number" min="1" style="width:110px"></label>
+    <button>Iniciar</button>
+  </form>
+</div>
+
+<div class="panel">
+  <div class="dato">Última página capturada</div>
+  <img id="ultima" class="vista" alt="Última página capturada" hidden>
+</div>
+
+<script>
+async function orden(o) {
+  await fetch('/control/' + encodeURIComponent(o), {method: 'POST'});
+  actualizar();
+}
+async function actualizar() {
+  try {
+    const e = await (await fetch('/api/estado')).json();
+    const est = document.getElementById('estado');
+    est.textContent = e.estado.replace('_', ' ');
+    est.className = 'estado ' + e.estado;
+    document.getElementById('mensaje').textContent = e.mensaje || '';
+    document.getElementById('titulo').textContent = e.titulo || '—';
+    document.getElementById('detalle').textContent = e.modo ? `Modo ${e.modo} · ${e.paginas} páginas · intento ${e.intento}` : '';
+    const v = e.ultimo_veredicto || {};
+    document.getElementById('veredicto').textContent = v.clase ? v.clase.replace('_', ' ') : '—';
+    document.getElementById('veredicto_det').textContent = v.clase ? `confianza ${v.confianza} · ${v.fuente} · regla de píxeles: ${v.regla}` : '';
+    document.getElementById('fuente').textContent = e.verificador === 'modelo' ? 'modelo entrenado' : 'regla de píxeles (sin modelo)';
+    document.getElementById('esp32').textContent = e.esp32 ? (e.esp32.caido ? 'enlace caído' : (e.esp32.firmware || '?') + ' ' + (e.esp32.protocolo || '')) : 'sin enlace';
+    const img = document.getElementById('ultima');
+    if (e.ultima_pagina && img.dataset.src !== e.ultima_pagina) { img.src = e.ultima_pagina; img.dataset.src = e.ultima_pagina; img.hidden = false; }
+  } catch (err) { /* el robot puede estar reiniciando */ }
+}
+actualizar();
+setInterval(actualizar, 1000);
+</script>
+{% endblock %}

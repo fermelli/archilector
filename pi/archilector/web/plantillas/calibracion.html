@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block titulo %}Calibración · ArchiLector{% endblock %}
+{% block contenido %}
+<h1>Calibración del mecanismo B</h1>
+<p class="dato">Parámetros de la tabla 5.5 del Documento Técnico. Cada cambio se guarda en la memoria NVS del ESP32. Anote los valores finales en la hoja de calibración.</p>
+
+{% if msg %}<div class="panel"><code>{{ msg }}</code></div>{% endif %}
+{% if not hay_enlace %}<div class="panel mensaje">No hay enlace con el ESP32.</div>{% endif %}
+{% if ocupado %}<div class="panel mensaje">Hay un documento en curso: solo se permiten STATUS y STOP.</div>{% endif %}
+
+<div class="panel">
+  <h2 style="margin-top:0">Pruebas de movimiento</h2>
+  <form method="post" action="/calibracion/comando" class="botones">
+    {% for c in ['PING', 'STATUS', 'HOME', 'TURN', 'BACK'] %}
+    <button class="sec" name="comando" value="{{ c }}">{{ c }}</button>
+    {% endfor %}
+    <button class="peligro" name="comando" value="STOP">STOP</button>
+  </form>
+  <form method="post" action="/calibracion/comando" class="linea" style="margin-top:12px">
+    <label>Comando
+      <select name="comando"><option>RETRY</option><option>LIGHT</option><option>BEEP</option></select>
+    </label>
+    <label>Argumento <input name="argumento" type="number" required style="width:120px" placeholder="40"></label>
+    <button>Enviar</button>
+  </form>
+  <p class="dato">RETRY: pasos extra de arco · LIGHT: brillo 0–100 % · BEEP: patrón 1 a 3.</p>
+</div>
+
+<div class="panel">
+  <h2 style="margin-top:0">Parámetros (CFG)</h2>
+  <table>
+    <tr><th>Parámetro</th><th>Qué ajusta</th><th>Nuevo valor</th></tr>
+    {% for nombre, descripcion in parametros %}
+    <tr>
+      <td><code>{{ nombre }}</code></td>
+      <td>{{ descripcion }}</td>
+      <td>
+        <form method="post" action="/calibracion/cfg" class="linea">
+          <input type="hidden" name="parametro" value="{{ nombre }}">
+          <input name="valor" type="number" required style="width:110px">
+          <button class="sec">Guardar</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  <p class="dato">PASOS_ARCO inicial = avance × 4096 / (π × D), con D el diámetro medido de la goma del rodillo Canon. Se ajusta en la prueba T3.2.</p>
+</div>
+{% endblock %}

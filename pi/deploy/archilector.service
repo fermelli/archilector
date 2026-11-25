@@ -1,0 +1,18 @@
+[Unit]
+Description=ArchiLector - robot lector y digitalizador
+After=network.target sound.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=archilector
+Group=archilector
+SupplementaryGroups=dialout video audio
+WorkingDirectory=/home/archilector/ArchiLector/pi
+ExecStart=/home/archilector/ArchiLector/pi/.venv/bin/python -m archilector --config config.yaml ejecutar
+Restart=on-failure
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

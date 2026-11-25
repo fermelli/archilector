@@ -1,0 +1,42 @@
+:root {
+  --fondo: #f6f7f9; --panel: #ffffff; --texto: #1d2330; --suave: #5b6472; --borde: #d9dde4;
+  --acento: #1f5fbf; --ok: #1d7a3e; --alerta: #b3261e; --aviso: #9a6700;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--fondo); color: var(--texto); }
+header { background: var(--texto); color: #fff; padding: 12px 20px; display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+header strong { font-size: 1.1rem; }
+header a { color: #cfd8e6; text-decoration: none; }
+header a:hover, header a.activo { color: #fff; }
+main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 60px; }
+h1 { font-size: 1.4rem; margin: 0 0 16px; }
+h2 { font-size: 1.1rem; margin: 24px 0 10px; }
+.panel { background: var(--panel); border: 1px solid var(--borde); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+.rejilla { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.dato { color: var(--suave); font-size: .85rem; }
+.valor { font-size: 1.25rem; font-weight: 600; }
+.estado { display: inline-block; padding: 3px 10px; border-radius: 999px; background: #e7ecf5; font-weight: 600; }
+.estado.requiere_usuario, .estado.parada { background: #fbe4e2; color: var(--alerta); }
+.estado.volteando, .estado.leyendo { background: #e2f2e7; color: var(--ok); }
+.mensaje { color: var(--alerta); font-weight: 600; }
+form.linea { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; }
+label { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; color: var(--suave); }
+input, select { font: inherit; padding: 7px 9px; border: 1px solid var(--borde); border-radius: 6px; background: #fff; color: var(--texto); }
+button, .boton { font: inherit; padding: 8px 14px; border-radius: 6px; border: 1px solid var(--acento); background: var(--acento); color: #fff; cursor: pointer; text-decoration: none; display: inline-block; }
+button.sec, .boton.sec { background: #fff; color: var(--acento); }
+button.peligro { background: var(--alerta); border-color: var(--alerta); }
+button:disabled { opacity: .5; cursor: not-allowed; }
+.botones { display: flex; flex-wrap: wrap; gap: 8px; }
+table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+th { color: var(--suave); font-weight: 600; }
+.paginas { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.paginas figure { margin: 0; background: var(--panel); border: 1px solid var(--borde); border-radius: 8px; padding: 8px; }
+.paginas img { width: 100%; border-radius: 4px; }
+.paginas figcaption { font-size: .8rem; color: var(--suave); margin-top: 6px; }
+.par { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.par img { width: 100%; border: 1px solid var(--borde); border-radius: 6px; }
+.clases button { min-width: 140px; }
+img.vista { max-width: 100%; max-height: 360px; border-radius: 6px; border: 1px solid var(--borde); }
+mark, .frag b { background: #fff2b3; }
+@media (max-width: 600px) { header { gap: 12px; } .clases button { min-width: 0; flex: 1 1 45%; } }

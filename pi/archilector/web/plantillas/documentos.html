@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block titulo %}Documentos · ArchiLector{% endblock %}
+{% block contenido %}
+<h1>Documentos</h1>
+
+<div class="panel">
+  <form class="linea" method="get">
+    <label style="flex:1">Buscar en el texto reconocido <input name="q" value="{{ q }}" placeholder="palabra o frase"></label>
+    <button>Buscar</button>
+  </form>
+  {% if q %}
+  <h2>Resultados para «{{ q }}»</h2>
+  {% if resultados %}
+  <table>
+    <tr><th>Documento</th><th>Página</th><th>Fragmento</th></tr>
+    {% for r in resultados %}
+    <tr><td><a href="/documentos/{{ r.documento_id }}#p{{ r.id }}">{{ r.titulo }}</a></td><td>{{ r.numero }}</td><td class="frag">{{ r.fragmento }}</td></tr>
+    {% endfor %}
+  </table>
+  {% else %}<p class="dato">Sin resultados.</p>{% endif %}
+  {% endif %}
+</div>
+
+<div class="panel">
+  <table>
+    <tr><th>#</th><th>Título</th><th>Libro</th><th>Modo</th><th>Páginas</th><th>Creado</th><th>PDF</th></tr>
+    {% for d in documentos %}
+    <tr>
+      <td>{{ d.id }}</td>
+      <td><a href="/documentos/{{ d.id }}">{{ d.titulo }}</a></td>
+      <td>{{ d.libro }}</td>
+      <td>{{ d.modo }}</td>
+      <td>{{ d.paginas }}</td>
+      <td>{{ d.creado }}</td>
+      <td>{% if d.paginas %}<a href="/documentos/{{ d.id }}/pdf">Descargar</a>{% endif %}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" class="dato">Todavía no hay documentos.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+.pytest_cache/
+
+# Datos y modelos generados en el robot
+pi/datos/
+pi/modelos/
+pi/config.yaml
+
+# PlatformIO
+firmware/esp32/.pio/
+firmware/esp32/.vscode/
+
+# Office
+~$*

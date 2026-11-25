@@ -1,0 +1,39 @@
+# ArchiLector · configuración (se copia a config.yaml). Solo hace falta poner
+# lo que cambia; el resto toma los valores de archilector/config.py.
+
+datos: datos                      # imágenes, PDF, pares de entrenamiento y base de datos
+
+enlace:
+  puerto: /dev/archilector-esp32  # regla udev (deploy/99-archilector.rules); "sim://" para simular
+
+camara:
+  fuente: pi                      # pi | sim | carpeta:<ruta> | webcam:<n>
+  luz_captura: 100                # % de la tira LED al fotografiar (figura 8.2)
+  luz_reposo: 30
+
+vision:
+  lado_pagina: derecha            # una cara por volteo (alcance 1.4 del Diseño)
+  region_canto: [0.0, 0.2, 0.15, 0.8]   # canto de las hojas pasadas en la foto: ajustar tras el montaje
+  paso_numeracion: 2
+
+ia:
+  modelo_verificador: modelos/verificador.tflite    # se copian desde Colab
+  modelo_clasificador: modelos/clasificador.tflite
+  umbral_confianza: 0.80          # sección 4.5; ajustar con los datos de validación
+  umbral_regla_pixeles: 0.03      # respaldo sin modelo; calibrar con los pares reales
+
+volteo:
+  reintentos: 2
+  pasos_extra_retry: 40
+
+lectura:
+  avance_automatico: true         # false: espera «siguiente» al terminar cada página
+  saltar_blancas: true
+
+voz:
+  piper_modelo: modelos/voz/es_ES-davefx-medium.onnx
+  vosk_modelo: modelos/vosk-model-small-es-0.42
+  volumen: 70
+
+web:
+  puerto: 8000

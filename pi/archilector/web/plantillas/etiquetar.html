@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block titulo %}Etiquetar · ArchiLector{% endblock %}
+{% block contenido %}
+<h1>Etiquetar pares de volteo</h1>
+<p class="dato">Cada volteo guardó la foto de antes y la de después. Asigne lo que pasó de verdad; con unos 300 pares por clase se entrena el verificador en Google Colab (Diseño 4.3).</p>
+
+<div class="panel">
+  <div class="botones" style="gap:18px">
+    {% for c in clases %}<div><div class="dato">{{ NOMBRES_CLASES[c] }}</div><div class="valor">{{ conteo.get(c, 0) }}</div></div>{% endfor %}
+    <div><div class="dato">Sin etiqueta</div><div class="valor">{{ conteo.get('sin_etiqueta', 0) }}</div></div>
+  </div>
+  <p class="botones" style="margin-top:12px">
+    <a class="boton sec" href="/etiquetar/verificador.zip">Exportar verificador (.zip)</a>
+    <a class="boton sec" href="/etiquetar/clasificador.zip">Exportar clasificador (.zip)</a>
+  </p>
+</div>
+
+{% if par %}
+<div class="panel">
+  <p class="dato">Par #{{ par.id }} · libro {{ par.libro }} · {{ meta.get('comando', '') }} intento {{ meta.get('intento', '') }}
+    · la IA dijo <b>{{ NOMBRES_CLASES.get(par.prediccion, par.prediccion) }}</b> · regla de píxeles: {{ par.regla_pixeles }}
+    {% if par.etiqueta %} · etiqueta actual: <b>{{ par.etiqueta }}</b>{% endif %}</p>
+  <div class="par">
+    <figure><img src="{{ (par.ruta ~ '/antes.jpg') | url_datos }}" alt="Antes"><figcaption class="dato">Antes</figcaption></figure>
+    <figure><img src="{{ (par.ruta ~ '/despues.jpg') | url_datos }}" alt="Después"><figcaption class="dato">Después</figcaption></figure>
+    <figure><img src="{{ (par.ruta ~ '/compuesto.jpg') | url_datos }}" alt="Entrada del verificador"><figcaption class="dato">Entrada del verificador (224 × 224)</figcaption></figure>
+  </div>
+  <form method="post" action="/etiquetar/{{ par.id }}" class="botones clases" style="margin-top:14px">
+    {% for c in clases %}<button name="etiqueta" value="{{ c }}">{{ loop.index }} · {{ NOMBRES_CLASES[c] }}</button>{% endfor %}
+    <button class="sec" name="etiqueta" value="descartar">Descartar</button>
+  </form>
+  <p class="dato">Atajos de teclado: 1 a 4 para la clase, 0 para descartar.</p>
+</div>
+<script>
+document.addEventListener('keydown', ev => {
+  const botones = document.querySelectorAll('form.clases button');
+  const i = ev.key === '0' ? botones.length - 1 : parseInt(ev.key, 10) - 1;
+  if (i >= 0 && i < botones.length) botones[i].click();
+});
+</script>
+{% else %}
+<div class="panel"><p>No hay pares pendientes. Se generan solos en cada volteo del robot.</p></div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "archilector"
+version = "2.2.0"
+description = "ArchiLector: robot que pasa páginas, las digitaliza como PDF buscable y las lee en voz alta"
+requires-python = ">=3.10"
+dependencies = [
+    "pyserial>=3.5",
+    "numpy>=1.24",
+    "opencv-python-headless>=4.8",
+    "pillow>=10",
+    "reportlab>=4.0",
+    "pyyaml>=6",
+    "fastapi>=0.110",
+    "uvicorn>=0.27",
+    "jinja2>=3.1",
+    "python-multipart>=0.0.9",
+    "rapidocr-onnxruntime>=1.3",
+]
+
+[project.optional-dependencies]
+# Solo en la Raspberry Pi: inferencia TFLite y voz
+pi = [
+    "ai-edge-litert>=1.0",
+    "piper-tts>=1.2",
+    "vosk>=0.3.45",
+]
+dev = ["pytest>=8", "httpx>=0.27"]
+
+[project.scripts]
+archilector = "archilector.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["archilector*"]
+
+[tool.setuptools.package-data]
+"archilector.web" = ["plantillas/*.html", "estaticos/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

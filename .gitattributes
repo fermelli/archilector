@@ -1,0 +1,6 @@
+# Archivos que se ejecutan en la Raspberry Pi: siempre con fin de línea LF
+*.sh       text eol=lf
+*.service  text eol=lf
+*.rules    text eol=lf
+*.py       text eol=lf
+*.yaml     text eol=lf
