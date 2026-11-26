@@ -393,4 +393,38 @@ textarea { min-height: 84px; resize: vertical; line-height: 1.5; }
   .modos, .campos { grid-template-columns: 1fr; }
   .tostadas { left: 14px; right: 14px; }
 }
+/* --- control manual ------------------------------------------------------ */
+.angulo { display: grid; gap: 12px; }
+.angulo-fila { display: flex; align-items: center; gap: 14px; }
+.angulo-fila input[type=range] { flex: 1; min-width: 0; }
+.lectura-valor { font-family: var(--mono); font-size: 1.6rem; font-weight: 600; min-width: 4.2ch; text-align: right; font-variant-numeric: tabular-nums; }
+.atajos { display: flex; flex-wrap: wrap; gap: 6px; }
+.atajos button { flex: 1 1 0; min-width: 56px; justify-content: center; font-variant-numeric: tabular-nums; }
+.atajos.acciones button { flex: 1 1 auto; white-space: nowrap; }
+.atajos.tres { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.atajos.tres button { white-space: nowrap; }
+.pines { font-family: var(--mono); font-size: .8rem; color: var(--suave); }
+.registro { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; font-family: var(--mono); font-size: .82rem; max-height: 260px; overflow-y: auto; }
+.registro li { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; padding: 6px 4px; border-bottom: 1px solid var(--borde); }
+.registro li:last-child { border-bottom: 0; }
+.registro .hora { color: var(--tenue); }
+.registro .resp { grid-column: 2; color: var(--suave); }
+.registro li.ok .resp { color: var(--ok); }
+.registro li.mal .resp { color: var(--peligro); }
+.registro-vacio { color: var(--suave); font-size: .9rem; margin: 0; }
+.opciones { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.interruptor { display: inline-flex; align-items: center; gap: 8px; font-size: .9rem; cursor: pointer; }
+.interruptor input { width: 18px; height: 18px; min-height: 0; accent-color: var(--acento); margin: 0; }
+.giro { margin: -4px 0 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.atajos.cuatro { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.atajos.cuatro button, .atajos.fino button { white-space: nowrap; }
+.emular { display: grid; gap: 10px; padding: 14px; border: 1px solid var(--borde); border-radius: var(--radio); background: var(--superficie-2); }
+.emular-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.emular h3 { margin: 0; font-size: 1rem; }
+.pos-fila { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pos-fila .lectura-valor { font-size: 1.3rem; min-width: 3.6ch; text-align: left; }
+.pos-fila .fijar0 { margin-left: auto; }
+.calibrar-giro summary { cursor: pointer; font-weight: 600; font-size: .9rem; }
+.calibrar-giro .campos { margin-top: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.parada-grande { width: 100%; justify-content: center; min-height: 52px; font-size: 1.05rem; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }

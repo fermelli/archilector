@@ -20,7 +20,8 @@ static bool leerEntero(const char* s, long& valor) {
 static void nak(uint8_t seq, uint8_t codigo) { enviarf(seq, "NAK,E%02u", codigo); }
 
 static bool esMovimiento(const char* cmd) {
-  return !strcmp(cmd, "HOME") || !strcmp(cmd, "TURN") || !strcmp(cmd, "RETRY") || !strcmp(cmd, "BACK");
+  return !strcmp(cmd, "HOME") || !strcmp(cmd, "TURN") || !strcmp(cmd, "RETRY") || !strcmp(cmd, "BACK") ||
+         !strcmp(cmd, "MOVE") || !strcmp(cmd, "SPIN");
 }
 
 static void ordenMovimiento(const Trama& t) {
@@ -40,6 +41,30 @@ static void ordenMovimiento(const Trama& t) {
         return nak(t.seq, E05_RANGO);
       o.tipo = ORDEN_RETRY;
       o.extra = (int32_t)extra;
+    } else if (!strcmp(t.cmd, "MOVE")) {
+      // Control manual de una pieza: MOVE,B,<0-180> · MOVE,R,<0-180> · MOVE,M,<±medios pasos>
+      long valor = 0;
+      if (t.nargs != 2 || strlen(t.args[0]) != 1 || !leerEntero(t.args[1], valor)) return nak(t.seq, E05_RANGO);
+      char p = t.args[0][0];
+      bool ok = (p == 'B' || p == 'R') ? (valor >= 0 && valor <= 180)
+              : (p == 'M')             ? (valor >= -MOVE_PASOS_MAX && valor <= MOVE_PASOS_MAX)
+                                       : false;
+      if (!ok) return nak(t.seq, E05_RANGO);
+      o.tipo = ORDEN_MOVER;
+      o.pieza = p;
+      o.extra = (int32_t)valor;
+    } else if (!strcmp(t.cmd, "SPIN")) {
+      // Servo de 360° en el brazo: SPIN,<señal 0-180>,<ms>,<quieto 0-180>. Gira con esa señal
+      // durante ms (cronometrado aquí, no en la red) y vuelve a la señal de quieto.
+      long senal = 0, ms = 0, quieto = 0;
+      if (t.nargs != 3 || !leerEntero(t.args[0], senal) || !leerEntero(t.args[1], ms) ||
+          !leerEntero(t.args[2], quieto) || senal < 0 || senal > 180 || ms < 1 || ms > SPIN_MS_MAX ||
+          quieto < 0 || quieto > 180)
+        return nak(t.seq, E05_RANGO);
+      o.tipo = ORDEN_GIRO;
+      o.extra = (int32_t)senal;
+      o.ms = (int32_t)ms;
+      o.quieto = (int32_t)quieto;
     } else {
       // BACK necesita girar el rodillo en reversa: imposible si tiene embrague (T3.0)
       if (cal.embrague) return nak(t.seq, E05_RANGO);
@@ -92,6 +117,19 @@ static void procesar(const Trama& t) {
     long p;
     if (t.nargs != 1 || !leerEntero(t.args[0], p) || p < 1 || p > 3) return nak(t.seq, E05_RANGO);
     buzzerPatron((uint8_t)p);
+    return enviar(t.seq, "ACK");
+  }
+  if (!strcmp(c, "FREE")) {
+    // Corta los pulsos de un servo: un servo de 360° se detiene; uno de 180° queda suelto.
+    // Se acepta también en PARADA (es una acción de seguridad), no durante un movimiento.
+    // Con un segundo argumento (FREE,B,92) deja el servo fijo en esa señal, sin rampa: es como se
+    // detiene un servo de 360° que, sin pulsos, sigue con la última orden.
+    if (t.nargs < 1 || t.nargs > 2 || strlen(t.args[0]) != 1 || (t.args[0][0] != 'B' && t.args[0][0] != 'R'))
+      return nak(t.seq, E05_RANGO);
+    long senal = -1;
+    if (t.nargs == 2 && (!leerEntero(t.args[1], senal) || senal < 0 || senal > 180)) return nak(t.seq, E05_RANGO);
+    if (estadoActual() == MOVIENDO) return nak(t.seq, E03_OCUPADO);
+    servoSoltar(t.args[0][0], (int)senal);
     return enviar(t.seq, "ACK");
   }
   if (!strcmp(c, "CFG")) {

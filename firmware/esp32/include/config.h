@@ -5,7 +5,7 @@
 // ---------------------------------------------------------------------------
 // Versiones (sección 10.3): PING responde PONG,<firmware>,<protocolo>
 // ---------------------------------------------------------------------------
-#define FW_VERSION    "2.2.0"
+#define FW_VERSION    "2.3.0"
 #define PROTO_VERSION "P1"
 
 // ---------------------------------------------------------------------------
@@ -47,6 +47,9 @@ static const uint8_t PIN_COLUMNAS[4] = {34, 35, 36, 39};  // solo entrada, pull-
 
 // Rangos de argumentos
 #define RETRY_EXTRA_MAX    2000    // pasos extra de arco aceptados por RETRY
+#define MOVE_PASOS_MAX     4096    // MOVE,M: hasta una vuelta del rodillo por orden (medios pasos)
+#define T_MAX_MANUAL_MS    28000   // tope de una orden MOVE (el límite real se calcula por orden)
+#define SPIN_MS_MAX        10000   // SPIN: giro máximo por orden del servo de 360° del brazo
 
 // Motor 28BYJ-48 en medio paso: 4096 pasos por vuelta del eje de salida
 #define PASOS_POR_VUELTA   4096

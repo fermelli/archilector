@@ -91,3 +91,14 @@ def test_panel_web(tmp_path):
     assert r.status_code == 303 and sim.cal["PASOS_ARCO"] == 1100
     cliente.post("/calibracion/comando", data={"comando": "LIGHT", "argumento": "50"})
     assert sim.luz == 50
+
+    # Control manual: cada pieza por separado, con respuesta JSON
+    assert "Control manual" in cliente.get("/manual").text
+    r = cliente.post("/manual/comando", data={"comando": "MOVE", "pieza": "B", "valor": "60"}).json()
+    assert r["ok"] and r["respuesta"].startswith("DONE") and sim.angulos["B"] == 60
+    r = cliente.post("/manual/comando", data={"comando": "MOVE", "pieza": "M", "valor": "9999"}).json()
+    assert not r["ok"] and r["respuesta"] == "NAK E05"
+    r = cliente.post("/manual/comando", data={"comando": "SPIN", "valor": "60", "ms": "300", "quieto": "91"}).json()
+    assert r["ok"] and sim.angulos["B"] == 91
+    assert cliente.post("/manual/comando", data={"comando": "TURN"}).status_code == 400
+    assert cliente.post("/manual/comando", data={"comando": "STATUS"}).json()["respuesta"].startswith("STATE")

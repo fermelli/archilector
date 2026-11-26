@@ -64,12 +64,42 @@ static uint8_t rampaServo(uint8_t pin, uint8_t canal, float& actual, int destino
   return E_NINGUNO;
 }
 
+// Servo sin pulsos (FREE): queda suelto. La próxima orden lo lleva directo al destino,
+// sin rampa desde el último ángulo (en un servo de 360° esa rampa sería un giro).
+static volatile bool brazoSuelto = false;
+static volatile bool barraSuelta = false;
+
+static uint8_t moverServo(uint8_t pin, uint8_t canal, float& actual, volatile bool& suelto, int destino,
+                          int velocidad, const Contexto& c) {
+  if (suelto) {
+    suelto = false;
+    actual = (float)destino;
+    escribirServo(pin, canal, actual);
+    return revisar(c);
+  }
+  return rampaServo(pin, canal, actual, destino, velocidad, c);
+}
+
 static uint8_t moverBrazo(int destino, const Contexto& c) {
-  return rampaServo(PIN_SERVO_BRAZO, CANAL_BRAZO, angBrazo, destino, cal.velGiro, c);
+  return moverServo(PIN_SERVO_BRAZO, CANAL_BRAZO, angBrazo, brazoSuelto, destino, cal.velGiro, c);
 }
 
 static uint8_t moverBarra(int destino, const Contexto& c) {
-  return rampaServo(PIN_SERVO_BARRA, CANAL_BARRA, angBarra, destino, cal.velBarra, c);
+  return moverServo(PIN_SERVO_BARRA, CANAL_BARRA, angBarra, barraSuelta, destino, cal.velBarra, c);
+}
+
+void servoSoltar(char pieza, int senal) {
+  const bool brazo = pieza == 'B';
+  const uint8_t pin = brazo ? PIN_SERVO_BRAZO : PIN_SERVO_BARRA;
+  const uint8_t canal = brazo ? CANAL_BRAZO : CANAL_BARRA;
+  if (senal < 0) {
+    (brazo ? brazoSuelto : barraSuelta) = true;
+    pwmEscribir(pin, canal, 0);
+    return;
+  }
+  (brazo ? brazoSuelto : barraSuelta) = false;
+  (brazo ? angBrazo : angBarra) = (float)senal;
+  escribirServo(pin, canal, (float)senal);
 }
 
 static void aplicarFase() {
@@ -163,6 +193,41 @@ static uint8_t secuenciaRegreso(const Contexto& c) {
   return E_NINGUNO;
 }
 
+// MOVE (control manual desde el panel): mueve una sola pieza y la deja ahí
+static uint8_t secuenciaManual(char pieza, int32_t valor, const Contexto& c) {
+  if (pieza == 'B') return moverBrazo(valor, c);
+  if (pieza == 'R') return moverBarra(valor, c);
+  uint8_t r = girarRodillo(valor < 0 ? -valor : valor, valor < 0 ? -1 : 1, c);
+  motorApagar();
+  return r;
+}
+
+// SPIN: el brazo con un servo de 360° gira con una señal fija un tiempo exacto y vuelve al quieto.
+// Si llega STOP en medio, también vuelve al quieto antes de salir.
+static uint8_t secuenciaGiro(const Orden& o, const Contexto& c) {
+  brazoSuelto = false;
+  angBrazo = (float)o.extra;
+  escribirServo(PIN_SERVO_BRAZO, CANAL_BRAZO, angBrazo);
+  uint8_t r = pausa((uint32_t)o.ms, c);
+  angBrazo = (float)o.quieto;
+  escribirServo(PIN_SERVO_BRAZO, CANAL_BRAZO, angBrazo);
+  return r;
+}
+
+// Tiempo máximo de una orden MOVE: lo que tarda a la velocidad calibrada + 1,5 s
+static uint32_t limiteManual(const Orden& o) {
+  float s;
+  if (o.pieza == 'B') {
+    s = fabsf(angBrazo - o.extra) / cal.velGiro;
+  } else if (o.pieza == 'R') {
+    s = fabsf(angBarra - o.extra) / cal.velBarra;
+  } else {
+    s = (float)labs(o.extra) / cal.velRodillo;
+  }
+  uint32_t ms = (uint32_t)(s * 1000) + 1500;
+  return ms > T_MAX_MANUAL_MS ? T_MAX_MANUAL_MS : ms;
+}
+
 void movimientoIniciar() {
   for (int i = 0; i < 4; i++) {
     pinMode(PIN_MOTOR[i], OUTPUT);
@@ -188,13 +253,19 @@ void movimientoTarea(void*) {
   for (;;) {
     if (xQueueReceive(colaOrdenes, &o, portMAX_DELAY) != pdTRUE) continue;
 
-    Contexto c{millis(), o.tipo == ORDEN_HOME ? (uint32_t)T_MAX_HOME_MS : (uint32_t)T_MAX_VOLTEO_MS};
+    uint32_t limite = o.tipo == ORDEN_HOME    ? (uint32_t)T_MAX_HOME_MS
+                    : o.tipo == ORDEN_MOVER   ? limiteManual(o)
+                    : o.tipo == ORDEN_GIRO    ? (uint32_t)o.ms + 1500
+                                              : (uint32_t)T_MAX_VOLTEO_MS;
+    Contexto c{millis(), limite};
     uint8_t r = E_NINGUNO;
     switch (o.tipo) {
       case ORDEN_HOME: r = secuenciaHome(c); break;
       case ORDEN_TURN: r = secuenciaVolteo(0, c); break;
       case ORDEN_RETRY: r = secuenciaVolteo(o.extra, c); break;
       case ORDEN_BACK: r = secuenciaRegreso(c); break;
+      case ORDEN_MOVER: r = secuenciaManual(o.pieza, o.extra, c); break;
+      case ORDEN_GIRO: r = secuenciaGiro(o, c); break;
     }
     motorApagar();
     if (r == E_NINGUNO && g_abortar) r = E06_PARADA;  // STOP llegó justo al terminar

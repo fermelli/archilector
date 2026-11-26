@@ -14,7 +14,12 @@ from dataclasses import dataclass, field
 TRAMA_MAX = 64
 MAX_ARGS = 3
 
-COMANDOS_MOVIMIENTO = frozenset({"HOME", "TURN", "RETRY", "BACK"})
+COMANDOS_MOVIMIENTO = frozenset({"HOME", "TURN", "RETRY", "BACK", "MOVE", "SPIN"})
+
+# MOVE (firmware 2.3.0): control manual de una sola pieza desde el panel
+PIEZAS_MOVE = {"B": "brazo", "R": "barra", "M": "motor del rodillo"}
+MOVE_PASOS_MAX = 4096  # medios pasos: una vuelta del rodillo por orden
+SPIN_MS_MAX = 10000  # SPIN: giro por tiempo del servo de 360° del brazo
 
 # Tiempos máximos de la tabla 8.3 (segundos)
 TIEMPO_MAXIMO = {
@@ -24,6 +29,9 @@ TIEMPO_MAXIMO = {
     "TURN": 10.0,
     "RETRY": 10.0,
     "BACK": 10.0,
+    "MOVE": 28.0,  # tope; el ESP32 calcula el límite de cada orden según la velocidad calibrada
+    "SPIN": 11.5,  # hasta 10 s de giro + margen
+    "FREE": 0.05,  # corta los pulsos de un servo (firmware 2.3.0)
     "LIGHT": 0.05,
     "LCD": 0.05,
     "BEEP": 0.05,

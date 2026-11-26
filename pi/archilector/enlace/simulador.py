@@ -15,7 +15,7 @@ import time
 
 from . import protocolo as P
 
-VERSION_FIRMWARE = "2.2.0-sim"
+VERSION_FIRMWARE = "2.3.0-sim"
 
 CALIBRACION_INICIAL = {
     "ANG_REPOSO": 90,
@@ -58,6 +58,8 @@ class SimuladorESP32:
         self.escala = escala_tiempo
         self.t_vigilancia = t_vigilancia
         self.cal = dict(CALIBRACION_INICIAL)
+        self.angulos = {"B": self.cal["ANG_REPOSO"], "R": self.cal["BARRA_CERRADA"]}  # para MOVE
+        self.sueltos: set[str] = set()  # servos sin pulsos (FREE)
         self.estado = "ARRANQUE"
         self.error = 0
         self.luz = 0
@@ -186,6 +188,18 @@ class SimuladorESP32:
                 return self._enviar(t.seq, "NAK,E05")
             self.pitidos.append(p)
             return self._enviar(t.seq, "ACK")
+        if c == "FREE":
+            senal = _entero(t.args, 1) if len(t.args) == 2 else -1
+            if not 1 <= len(t.args) <= 2 or t.args[0] not in ("B", "R") or senal is None or not -1 <= senal <= 180:
+                return self._enviar(t.seq, "NAK,E05")
+            if self.estado == "MOVIENDO":
+                return self._enviar(t.seq, "NAK,E03")
+            if senal < 0:
+                self.sueltos.add(t.args[0])
+            else:  # FREE,B,92: fijo en la señal de quieto
+                self.sueltos.discard(t.args[0])
+                self.angulos[t.args[0]] = senal
+            return self._enviar(t.seq, "ACK")
         if c == "CFG":
             if self.estado == "MOVIENDO":
                 return self._enviar(t.seq, "NAK,E03")
@@ -207,6 +221,29 @@ class SimuladorESP32:
             if t.cmd != "HOME":
                 if self.estado in ("PARADA", "FALLA"):
                     return self._enviar(t.seq, "NAK,E06")
+                if t.cmd == "SPIN":
+                    senal, ms, quieto = (_entero(t.args, i) for i in range(3))
+                    if (len(t.args) != 3 or None in (senal, ms, quieto) or not 0 <= senal <= 180
+                            or not 1 <= ms <= P.SPIN_MS_MAX or not 0 <= quieto <= 180):
+                        return self._enviar(t.seq, "NAK,E05")
+                    self._abortar.clear()
+                    self.estado = "MOVIENDO"
+                    self._enviar(t.seq, "ACK")
+                    self.ordenes_ejecutadas.append(f"SPIN,{senal},{ms},{quieto}")
+                    threading.Thread(target=self._girar, args=(t.seq, ms, quieto), daemon=True).start()
+                    return
+                if t.cmd == "MOVE":
+                    pieza, valor = (t.args[0] if t.args else ""), _entero(t.args, 1)
+                    rango = (0, 180) if pieza in ("B", "R") else (-P.MOVE_PASOS_MAX, P.MOVE_PASOS_MAX)
+                    if (len(t.args) != 2 or pieza not in P.PIEZAS_MOVE or valor is None
+                            or not rango[0] <= valor <= rango[1]):
+                        return self._enviar(t.seq, "NAK,E05")
+                    self._abortar.clear()
+                    self.estado = "MOVIENDO"
+                    self._enviar(t.seq, "ACK")
+                    self.ordenes_ejecutadas.append(f"MOVE,{pieza},{valor}")
+                    threading.Thread(target=self._mover_pieza, args=(t.seq, pieza, valor), daemon=True).start()
+                    return
                 if t.cmd == "RETRY":
                     extra = _entero(t.args, 0)
                     if len(t.args) != 1 or extra is None or not 0 <= extra <= 2000:
@@ -274,6 +311,45 @@ class SimuladorESP32:
             self.lcd = ["LISTO", "A=INICIAR"]
         duracion_ms = int((time.monotonic() - inicio) * 1000 / max(self.escala, 1e-6))
         self._enviar(seq, f"DONE,{duracion_ms}")
+
+    def _girar(self, seq: int, ms: int, quieto: int) -> None:
+        """SPIN: el servo de 360° gira ``ms`` y vuelve a la señal de quieto."""
+        inicio = time.monotonic()
+        try:
+            self._esperar(ms / 1000, inicio, ms / 1000 + 1.5)
+        except _Parada:
+            self.angulos["B"] = quieto
+            self._enviar(seq, "FAIL,E06")
+            return
+        with self._lock:
+            self.angulos["B"] = quieto
+            self.sueltos.discard("B")
+            self.estado, self.error = "REPOSO", 0
+        self._enviar(seq, f"DONE,{ms}")
+
+    def _mover_pieza(self, seq: int, pieza: str, valor: int) -> None:
+        """MOVE: una sola pieza, con el tiempo que tardaría a la velocidad calibrada."""
+        c = self.cal
+        if pieza == "M":
+            segundos = abs(valor) / c["VEL_RODILLO"]
+        else:
+            actual = self.angulos[pieza]
+            segundos = abs(valor - actual) / (c["VEL_GIRO"] if pieza == "B" else c["VEL_BARRA"])
+        inicio = time.monotonic()
+        try:
+            self._esperar(segundos, inicio, min(segundos + 1.5, P.TIEMPO_MAXIMO["MOVE"]))
+        except _Parada:
+            self._enviar(seq, "FAIL,E06")
+            return
+        with self._lock:
+            if self._abortar.is_set():
+                self._enviar(seq, "FAIL,E06")
+                return
+            if pieza != "M":
+                self.angulos[pieza] = valor
+                self.sueltos.discard(pieza)
+            self.estado, self.error = "REPOSO", 0
+        self._enviar(seq, f"DONE,{int(segundos * 1000)}")
 
     # --- parada y vigilancia ------------------------------------------------
     def _entrar_parada(self, linea1: str, notificar: bool) -> None:

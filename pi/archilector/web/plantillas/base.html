@@ -16,7 +16,8 @@
     <a class="marca" href="/"><span class="marca-logo">{{ icono("libro") }}</span><span>ArchiLector</span></a>
     <nav class="nav" aria-label="Secciones">
       {% for href, nombre, ico in [("/", "Estado", "actividad"), ("/documentos", "Documentos", "biblioteca"),
-                                    ("/etiquetar", "Etiquetar", "etiqueta"), ("/calibracion", "Calibración", "ajustes")] %}
+                                    ("/etiquetar", "Etiquetar", "etiqueta"), ("/manual", "Control manual", "chip"),
+                                    ("/calibracion", "Calibración", "ajustes")] %}
       {%- set activo = (ruta == href) or (href != "/" and ruta.startswith(href)) -%}
       <a href="{{ href }}" {% if activo %}class="activo" aria-current="page"{% endif %}>{{ icono(ico) }}<span>{{ nombre }}</span></a>
       {% endfor %}

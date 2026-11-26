@@ -132,6 +132,36 @@ def test_retry_y_cfg(enlace, sim):
     assert sim.ordenes_ejecutadas[-1] == "RETRY,40"
 
 
+def test_move_controla_cada_pieza(enlace, sim):
+    """MOVE (firmware 2.3.0): brazo y barra a un ángulo, rodillo unos pasos en cada sentido."""
+    assert enlace.comando("MOVE", "B", 45).cmd == "DONE"
+    assert sim.angulos["B"] == 45
+    assert enlace.comando("MOVE", "R", 70).cmd == "DONE"
+    assert sim.angulos["R"] == 70
+    assert enlace.comando("MOVE", "M", -512).cmd == "DONE"
+    assert sim.ordenes_ejecutadas[-3:] == ["MOVE,B,45", "MOVE,R,70", "MOVE,M,-512"]
+    for malos in (("X", 10), ("B", 181), ("R", -1), ("M", 5000)):
+        with pytest.raises(RechazoESP32) as exc:
+            enlace.comando("MOVE", *malos)
+        assert exc.value.codigo == "E05"
+    # SPIN: giro por tiempo del servo de 360° y vuelta al quieto
+    r = enlace.comando("SPIN", 120, 400, 92)
+    assert r.cmd == "DONE" and sim.angulos["B"] == 92 and sim.ordenes_ejecutadas[-1] == "SPIN,120,400,92"
+    for malos in ((200, 400, 90), (120, 0, 90), (120, 20000, 90), (120, 400, 181)):
+        with pytest.raises(RechazoESP32):
+            enlace.comando("SPIN", *malos)
+    assert enlace.comando("FREE", "B", 93).cmd == "ACK" and sim.angulos["B"] == 93
+    assert enlace.comando("FREE", "B").cmd == "ACK" and "B" in sim.sueltos
+    assert enlace.comando("MOVE", "B", 80).ok and "B" not in sim.sueltos
+    with pytest.raises(RechazoESP32):
+        enlace.comando("FREE", "M")
+    enlace.comando("STOP")
+    assert enlace.comando("FREE", "B").cmd == "ACK"  # FREE sirve también en PARADA
+    with pytest.raises(RechazoESP32) as exc:  # en PARADA hace falta HOME antes de mover
+        enlace.comando("MOVE", "B", 90)
+    assert exc.value.codigo == "E06"
+
+
 class Desenchufable:
     """Puerto que deja de funcionar al «desenchufarlo», como el USB del ESP32."""
 

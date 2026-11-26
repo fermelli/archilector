@@ -22,7 +22,8 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from ..enlace.esp32 import ErrorEnlace
+from ..enlace import protocolo as P
+from ..enlace.esp32 import ErrorEnlace, RechazoESP32
 from ..ia.clasificador import CATEGORIAS, NOMBRES
 from ..ia.verificador import CLASES
 from ..orquestador import MODOS
@@ -265,6 +266,54 @@ def crear_app(orquestador, db, enlace, cfg: dict, escucha=None) -> FastAPI:
             raise HTTPException(400, "comando no permitido")
         args = [a for a in [argumento.strip()] if a]
         return RedirectResponse(f"/calibracion?msg={quote(_enviar(comando, *args))}", status_code=303)
+
+    # --- control manual de cada componente -----------------------------------------
+    @app.get("/manual", response_class=HTMLResponse)
+    def manual(request: Request):
+        return pagina("manual.html", request, hay_enlace=enlace is not None, ocupado=orquestador.ocupado)
+
+    @app.post("/manual/comando")
+    def manual_comando(comando: str = Form(...), pieza: str = Form(""), valor: str = Form(""),
+                       ms: str = Form(""), quieto: str = Form("")):
+        """Una orden del panel de control manual; responde JSON para no recargar la página."""
+        permitidos = {"PING", "STATUS", "HOME", "STOP", "BEEP", "MOVE", "FREE", "SPIN"}
+        if comando not in permitidos:
+            raise HTTPException(400, "comando no permitido")
+        if enlace is None:
+            raise HTTPException(409, "no hay enlace con el ESP32")
+        if orquestador.ocupado and comando not in ("STATUS", "STOP", "PING", "FREE"):
+            raise HTTPException(409, "hay un documento en curso: termínelo antes de mover piezas a mano")
+        args: list[object] = []
+        if comando in ("MOVE", "FREE"):
+            if pieza not in P.PIEZAS_MOVE or (comando == "FREE" and pieza == "M"):
+                raise HTTPException(400, "pieza desconocida")
+            args.append(pieza)
+        if comando == "FREE" and valor.strip():  # FREE,B,<señal de quieto>
+            try:
+                args.append(int(valor))
+            except ValueError:
+                raise HTTPException(400, "señal no numérica") from None
+        if comando in ("MOVE", "BEEP", "SPIN"):
+            try:
+                args.append(int(valor))
+                if comando == "SPIN":  # señal, duración y señal de quieto del servo de 360°
+                    args += [int(ms), int(quieto)]
+            except ValueError:
+                raise HTTPException(400, "falta un valor numérico") from None
+        texto = " ".join(map(str, [comando, *args]))
+        try:
+            r = enlace.comando(comando, *args)
+        except RechazoESP32 as exc:
+            ayuda = {"E02": "el ESP32 no conoce este comando: grabe el firmware 2.3.0",
+                     "E03": "el ESP32 todavía se está moviendo",
+                     "E05": "valor fuera de rango",
+                     "E06": "el ESP32 está en PARADA: use «Volver a reposo»"}.get(exc.codigo, "")
+            return JSONResponse({"ok": False, "orden": texto, "respuesta": f"NAK {exc.codigo}", "ayuda": ayuda})
+        except ErrorEnlace as exc:
+            return JSONResponse({"ok": False, "orden": texto, "respuesta": str(exc), "ayuda": ""})
+        return JSONResponse({"ok": r.ok, "orden": texto, "respuesta": " ".join([r.cmd, ",".join(r.args)]).strip(),
+                             "ms": round(r.latencia * 1000), "firmware": getattr(enlace, "version_firmware", None),
+                             "ayuda": P.CODIGOS_ERROR.get(r.codigo, "") if r.codigo else ""})
 
     # --- cámara --------------------------------------------------------------------
     @app.post("/camara/fuente")
