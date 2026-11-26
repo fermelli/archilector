@@ -69,7 +69,7 @@ Estado según la tabla 2 del Documento de Diseño: **D** = disponible en el inve
 | Jack hembra de panel 5,5 × 2,1 mm | 1 | Entrada de la fuente |
 | Interruptor de palanca | 1 | Corta solo los actuadores |
 | Portafusible + fusible de 4 A | 1 | En serie con +5 V |
-| Bornera de barra de 2 filas × 6 posiciones | 1 | +5 V y GND |
+| Bornera de barra de 2 filas × 6 posiciones (o una alternativa: ver «Sin bornera» en B1) | 1 | +5 V y GND |
 | Capacitor electrolítico 2200 µF, ≥ 10 V | 1 | Transitorios de los servos |
 | Cable AWG 18 rojo y negro (1 m) y AWG 20–22 en colores (3 m) | — | Fuente y ramales |
 | Resistencia de 2,2 Ω 15 W | 1 | Solo para la prueba T1.3 |
@@ -233,6 +233,24 @@ en 4,9–5,0 V y la Pi avisa baja tensión) y el ESP32 sigue alimentado por el U
 Si la tensión oscila o la fuente se apaga sola con poca carga (pasa con fuentes viejas), agregar una
 resistencia de 10 Ω 5 W entre +5 V y GND. **El fusible es obligatorio**: con 20 A disponibles, un corto
 calienta los cables antes de que la fuente se proteja. No abrir la fuente: adentro hay tensión de red.
+
+### B1 (alternativa). Sin bornera
+
+La bornera solo es el **punto de unión** del +5 V y del GND: ahí llegan la fuente, el capacitor de 2200 µF
+y los cables a las cargas. Cualquiera de estas opciones cumple la misma función (de mejor a más improvisada):
+
+| Opción | Cómo | Ojo con |
+|---|---|---|
+| Empalmes de palanca tipo Wago 221 | Uno de 5 vías para +5 V y otro para GND; sin soldar | Pelar 11 mm; el capacitor se suelda a dos cables cortos |
+| Regleta de empalme de tornillos | La de instalaciones eléctricas, cortada en tramos: una fila para +5 V y otra para GND | Apretar bien; marcar +5 V en rojo |
+| Placa adaptadora ATX («breakout») | Sus bornes de +5 V y GND hacen de bornera (con la fuente ATX) | Igual va el fusible de 3 A en el +5 V |
+| Directo a la placa de control | La fuente (por el fusible) entra a la única entrada de +5 V y GND de la placa (C02 y C15); el capacitor se suelda ahí | Si el ESP32 va en la placa, la tierra común ya queda hecha |
+| Empalme soldado con termocontraíble | Retorcer, soldar y aislar | Cada cambio obliga a cortar y soldar de nuevo |
+
+Para **probar solo el SG90** alcanza con: rojo del SG90 → +5 V de la fuente **por un fusible** (sirve un
+portafusible de línea de auto), marrón → GND de la fuente **y además** un cable de ese GND a un GND del ESP32,
+naranja → GPIO 19. Para eso sirve una protoboard (el SG90 consume poco); **para el MG996R no**: sus picos de
+hasta 2,5 A calientan los rieles de la protoboard. Ahí usar Wago, regleta o la placa de control.
 
 ### B2. Placa de control (Técnico 4.4 y 4.5)
 
