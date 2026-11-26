@@ -64,7 +64,7 @@
         {% endfor %}
       </div>
       <div class="atajos">
-        {% for a in [0, 45, 90, 135, 180] %}
+        {% for a in ([0, 45, 90, 150, 180] if pieza == "B" else [0, 45, 90, 135, 180]) %}
         <button class="sec chico-b atajo" data-angulo="{{ a }}">{{ a }}°</button>
         {% endfor %}
       </div>
