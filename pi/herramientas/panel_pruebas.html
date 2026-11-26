@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f6e5c">
+  <title>Pruebas · ArchiLector</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f6e5c'/%3E%3Cpath d='M7 9h5a3 3 0 0 1 3 3v11a2.3 2.3 0 0 0-2.3-2.3H7zM25 9h-5a3 3 0 0 0-3 3v11a2.3 2.3 0 0 1 2.3-2.3H25z' fill='none' stroke='white' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/estaticos/estilo.css">
+</head>
+<body>
+<header class="barra">
+  <div class="barra-in">
+    <a class="marca" href="/"><span class="marca-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span><span>ArchiLector</span></a>
+    <nav class="nav" aria-label="Paneles">
+      <a class="activo" href="/" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span>Panel de pruebas</span></a>
+      <a id="enlace-robot" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span>Panel del robot</span></a>
+    </nav>
+    <div class="barra-estado"><i class="punto neutro" id="barra-punto"></i><span id="barra-texto">Listo</span></div>
+  </div>
+</header>
+
+<main>
+  <div class="cabecera">
+    <div>
+      <h1>Panel de pruebas</h1>
+      <p class="bajada">Saque una foto, léala con el OCR que elija y escuche la voz. Mide cuánto tarda cada paso y qué tan bien sale.</p>
+    </div>
+    <div class="botones" id="chips"></div>
+  </div>
+
+  <div class="rejilla principal">
+    <div class="columna">
+      <section class="tarjeta" aria-labelledby="t-camara">
+        <div class="tarjeta-cab"><h2 id="t-camara">Cámara en vivo</h2><span class="insignia ok"><i class="punto vivo"></i>En vivo</span></div>
+        <div class="tarjeta-cuerpo">
+          <div class="vista" style="aspect-ratio: 4 / 3; max-height: 400px; margin: 0 auto"><img class="vivo-img" src="/s.mjpg" alt="Vista en vivo de la cámara"></div>
+          <p class="ayuda" id="nota-camara">La foto para el OCR se toma a la resolución completa de la cámara.</p>
+          <button class="grande ancho" id="go" style="margin-top:16px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            Capturar y leer en voz alta
+          </button>
+        </div>
+      </section>
+
+      <section class="tarjeta" aria-labelledby="t-ajustes">
+        <div class="tarjeta-cab"><h2 id="t-ajustes">Ajustes de la prueba</h2></div>
+        <div class="tarjeta-cuerpo">
+          <div class="campos">
+            <label class="campo"><span>Leer con</span>
+              <select id="ocr">
+                <optgroup label="En la Pi, sin internet">
+                  <option value="tesseract">Tesseract (español)</option>
+                  <option value="rapidocr">RapidOCR (PP-OCRv4)</option>
+                </optgroup>
+                <optgroup label="Claude (necesita internet)">
+                  <option value="claude-haiku-5-5">Claude Haiku 5.5 · económico</option>
+                  <option value="claude-sonnet-5-5">Claude Sonnet 5.5</option>
+                  <option value="claude-opus-5-5">Claude Opus 5.5 · el más preciso</option>
+                </optgroup>
+              </select>
+            </label>
+            <label class="campo"><span>Qué parte de la foto leer</span>
+              <select id="modo">
+                <option value="manual">Recorte manual</option>
+                <option value="proyecto">Detectar la página (preproceso)</option>
+                <option value="ninguno">La foto completa</option>
+              </select>
+            </label>
+          </div>
+
+          <div id="man" style="margin-top:14px">
+            <div class="etiqueta" style="margin-bottom:6px">Recorte, en % de la foto</div>
+            <div class="campos" style="grid-template-columns: repeat(4, minmax(0, 1fr)); gap:8px">
+              <label class="campo"><small>Izquierda</small><input type="number" id="x0" value="23" min="0" max="100"></label>
+              <label class="campo"><small>Arriba</small><input type="number" id="y0" value="0" min="0" max="100"></label>
+              <label class="campo"><small>Derecha</small><input type="number" id="x1" value="78" min="0" max="100"></label>
+              <label class="campo"><small>Abajo</small><input type="number" id="y1" value="97" min="0" max="100"></label>
+            </div>
+          </div>
+
+          <label class="campo" style="margin-top:14px"><span>Velocidad de la voz <b id="velv" class="num" style="color:var(--acento-texto)">1.00×</b></span>
+            <input id="vel" type="range" min="0.7" max="1.5" step="0.05" value="1.0" aria-describedby="vel-ayuda">
+            <small id="vel-ayuda">Menos de 1 habla más rápido; más de 1, más lento.</small>
+          </label>
+
+          <label class="campo" style="margin-top:14px"><span>Texto correcto de la página <span class="suave" style="font-weight:500">(opcional)</span></span>
+            <textarea id="ref" placeholder="Pegue aquí el texto real de la página para medir el error del OCR."></textarea>
+          </label>
+
+        </div>
+      </section>
+    </div>
+
+    <div class="columna">
+      <section class="tarjeta" aria-labelledby="t-progreso">
+        <div class="tarjeta-cab"><h2 id="t-progreso">Progreso</h2><span class="insignia" id="fase">Sin ejecutar</span></div>
+        <div class="tarjeta-cuerpo">
+          <ul class="pasos" id="pasos"></ul>
+          <div class="aviso-caja peligro" id="err" style="margin:14px 0 0" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            <div id="err-texto"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tarjeta" aria-labelledby="t-metricas">
+        <div class="tarjeta-cab"><h2 id="t-metricas">Métricas</h2><span class="sub" id="m-motor"></span></div>
+        <div class="tarjeta-cuerpo">
+          <div class="mosaico" id="kpis"><div class="vacio" style="grid-column:1/-1; padding:16px">Haga una prueba para ver los tiempos y la calidad.</div></div>
+        </div>
+      </section>
+
+      <section class="tarjeta" aria-labelledby="t-voz">
+        <div class="tarjeta-cab"><h2 id="t-voz">Voz</h2><span class="sub">Suena en esta computadora</span></div>
+        <div class="tarjeta-cuerpo">
+          <audio id="aud" controls></audio>
+          <p class="ayuda" id="vosk" hidden></p>
+        </div>
+      </section>
+
+      <section class="tarjeta" aria-labelledby="t-lectura">
+        <div class="tarjeta-cab"><h2 id="t-lectura">Lo que se leyó</h2></div>
+        <div class="tarjeta-cuerpo">
+          <div class="vista" style="aspect-ratio: 3 / 4; margin-bottom:14px" id="pg-caja">
+            <img id="pg" alt="Imagen que leyó el OCR" hidden>
+            <div class="vacio" id="pg-vacio"><b>Sin imagen todavía</b>Aquí aparece la parte de la foto que se leyó.</div>
+          </div>
+          <details open><summary>Texto reconocido</summary><pre id="txt">—</pre></details>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+<div class="tostadas" id="tostadas" aria-live="polite"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const PASOS = [["Captura", "Captura"], ["Preparar página", "Preparar la página"], ["OCR", "Leer el texto"],
+               ["Síntesis de voz", "Sintetizar la voz"], ["Verificar con Vosk", "Verificar con Vosk"]];
+const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+let timer = null, ultimo = null, lecturaMostrada = null;
+
+$("enlace-robot").href = location.protocol + "//" + location.hostname + ":8000/";
+$("modo").addEventListener("change", (e) => { $("man").hidden = e.target.value !== "manual"; });
+$("vel").addEventListener("input", (e) => { $("velv").textContent = (+e.target.value).toFixed(2) + "×"; });
+$("go").addEventListener("click", lanzar);
+
+function insignia(texto, tono) {
+  const s = document.createElement("span");
+  s.className = "insignia " + (tono || "");
+  s.innerHTML = '<i class="punto"></i>';
+  s.append(texto);
+  return s;
+}
+
+fetch("/api/info").then((r) => r.json()).then((i) => {
+  $("chips").replaceChildren(
+    insignia("Cámara: " + i.camara, "ok"),
+    insignia(i.mic ? "Micrófono detectado" : "Sin micrófono", i.mic ? "ok" : ""),
+    insignia(i.modelos ? "Piper y Vosk listos" : "Cargando Piper y Vosk…", i.modelos ? "ok" : "aviso"),
+    insignia(i.clave ? "Claude con clave" : "Claude sin clave", i.clave ? "ok" : "aviso"),
+  );
+  $("nota-camara").textContent = "Vista reducida de " + i.camara + ". La foto para el OCR se toma a la resolución completa.";
+}).catch(() => {});
+
+function pintarPasos(e) {
+  const hechos = e.pasos || [];
+  $("pasos").replaceChildren(...PASOS.map(([clave, nombre], i) => {
+    const li = document.createElement("li");
+    const hecho = hechos.find((p) => p.nombre.startsWith(clave));
+    const actual = !hecho && e.corriendo && i === hechos.length;
+    li.className = hecho ? "hecho" : actual ? "actual" : "pendiente";
+    li.innerHTML = '<span class="marca-paso">' + (hecho ? CHECK : "") + "</span>";
+    const n = document.createElement("span");
+    n.textContent = hecho && clave === "OCR" ? hecho.nombre.replace("OCR ", "Leer el texto · ") : nombre;
+    li.append(n);
+    const t = document.createElement("span");
+    t.className = "tiempo";
+    t.textContent = hecho ? hecho.seg.toFixed(1) + " s" : actual ? "…" : "";
+    li.append(t);
+    return li;
+  }));
+}
+pintarPasos({ pasos: [] });
+
+function barra(tono, texto) {
+  $("barra-punto").className = "punto " + tono;
+  $("barra-texto").textContent = texto;
+}
+
+async function lanzar() {
+  const b = { ocr: $("ocr").value, vel: +$("vel").value, modo: $("modo").value, x0: $("x0").value, y0: $("y0").value,
+              x1: $("x1").value, y1: $("y1").value, referencia: $("ref").value };
+  let j;
+  try { j = await (await fetch("/api/leer", { method: "POST", body: JSON.stringify(b) })).json(); }
+  catch (e) { return mostrarError("No se pudo conectar con la Pi."); }
+  if (!j.ok) return mostrarError(j.error);
+  $("go").disabled = true; $("err").hidden = true; $("aud").pause(); ultimo = null;
+  barra("info vivo", "Probando…");
+  clearInterval(timer); timer = setInterval(consultar, 400); consultar();
+}
+consultar();  // al abrir la página: la última prueba, o la que está en curso
+
+function mostrarError(texto) {
+  $("err-texto").textContent = texto; $("err").hidden = false;
+  barra("peligro", "Error");
+}
+
+async function consultar() {
+  let e;
+  try { e = await (await fetch("/api/estado", { cache: "no-store" })).json(); } catch (err) { return; }
+  pintarPasos(e);
+  if (e.lectura && e.lectura !== lecturaMostrada && !(e.resultado && e.resultado === ultimo)) mostrarLectura(e.lectura);
+  if (e.corriendo && !timer) { timer = setInterval(consultar, 400); $("go").disabled = true; barra("info vivo", "Probando…"); }
+  $("fase").textContent = e.fase || "Sin ejecutar";
+  $("fase").className = "insignia " + (e.corriendo ? "info" : e.error ? "peligro" : e.resultado ? "ok" : "");
+  if (e.corriendo) return;
+  clearInterval(timer); timer = null; $("go").disabled = false;
+  if (e.error) return mostrarError(e.error);
+  barra("ok", "Listo");
+  if (e.resultado && e.resultado !== ultimo) { ultimo = e.resultado; mostrar(e.resultado); }
+}
+
+function tesela(valor, nota, tono) {
+  const d = document.createElement("div");
+  d.className = "tesela";
+  d.innerHTML = '<div class="valor ' + (tono || "") + '"></div><div class="nota"></div>';
+  d.firstChild.textContent = valor; d.lastChild.textContent = nota;
+  return d;
+}
+
+function mostrarLectura(l) {
+  lecturaMostrada = l;
+  $("pg").src = "/api/imagen.jpg?" + Date.now(); $("pg").hidden = false; $("pg-vacio").hidden = true;
+  $("txt").textContent = l.ocr_texto || "—";
+}
+
+function mostrar(r) {
+  mostrarLectura(r);
+  $("aud").src = "/api/audio.wav?" + Date.now(); $("aud").play().catch(() => {});
+  $("m-motor").textContent = r.motor;
+  const pct = (x) => (x * 100).toFixed(1) + " %";
+  const teselas = [
+    tesela(r.total_seg + " s", "ciclo completo"),
+    tesela(r.ocr_seg + " s", "leer el texto"),
+    tesela(r.sintesis_seg + " s", "sintetizar la voz"),
+    tesela(r.factor_tiempo_real + "×", "factor de tiempo real (< 1 = más rápido que hablar)", r.factor_tiempo_real < 1 ? "ok" : "aviso"),
+    tesela(r.audio_seg + " s", "duración del audio"),
+    tesela(r.n_palabras, "palabras"),
+    tesela(r.palabras_por_min, "palabras por minuto"),
+    tesela(pct(r.wer_voz), "error de palabras de la voz (Vosk)", r.wer_voz < 0.15 ? "ok" : "aviso"),
+    tesela(r.numero_pagina ?? "—", "número de página leído"),
+    tesela(r.nitidez, "nitidez (laplaciano)"),
+  ];
+  if (r.similitud_ocr !== undefined) {
+    teselas.unshift(tesela(pct(r.wer_ocr), "error de palabras del OCR", r.wer_ocr < 0.1 ? "ok" : "aviso"),
+                    tesela(pct(r.similitud_ocr), "parecido con su texto", r.similitud_ocr > 0.9 ? "ok" : "aviso"));
+  }
+  $("kpis").replaceChildren(...teselas);
+  $("vosk").hidden = false; $("vosk").textContent = "Vosk entendió: «" + (r.vosk_texto || "") + "»";
+}
+</script>
+</body>
+</html>

@@ -10,7 +10,9 @@ Captura la pagina a 2592x1944, la lee con Tesseract (idioma ``spa``, requiere
 re-transcribe el audio con Vosk para medir el error de palabras (WER). El audio suena en el
 navegador de quien abre la pagina, no en la Pi.
 
-    cd pi && .venv/bin/python herramientas/panel_pruebas.py [--puerto 8889] [--camara pi|webcam]
+    cd pi && .venv/bin/python herramientas/panel_pruebas.py [--puerto 8889] [--camara pi|webcam|sim]
+
+Con ``--camara sim`` usa el libro simulado de ArchiLector: sirve para ver el panel en un PC, sin la Pi.
 """
 import argparse
 import difflib
@@ -38,7 +40,8 @@ sys.path.insert(0, RAIZ)
 
 ap = argparse.ArgumentParser(description="Panel de pruebas de ArchiLector (solo LAN, sin autenticacion)")
 ap.add_argument("--puerto", type=int, default=8889)
-ap.add_argument("--camara", choices=["pi", "webcam"], default="pi", help="CSI (2592x1944) o webcam USB (1280x720)")
+ap.add_argument("--camara", choices=["pi", "webcam", "sim"], default="pi",
+                help="CSI (2592x1944), webcam USB (1280x720) o libro simulado (para un PC sin cámara)")
 args = ap.parse_args()
 if os.path.exists(f"{RAIZ}/.env"):  # ANTHROPIC_API_KEY para leer con Claude
     for _l in open(f"{RAIZ}/.env", encoding="utf-8").read().splitlines():
@@ -90,9 +93,34 @@ class Webcam:
         return self.ultimo.copy()
 
 
+class CamSimulada:
+    """Libro simulado de ArchiLector como cámara: pasa una hoja cada pocos segundos."""
+
+    def __init__(self, salida):
+        from archilector.simulacion import LibroSimulado
+
+        self.libro, self.salida = LibroSimulado(hojas=40), salida
+        threading.Thread(target=self._emitir, daemon=True).start()
+
+    def _emitir(self):
+        n = 0
+        while True:
+            f = self.libro.renderizar()
+            self.salida.write(cv2.imencode(".jpg", cv2.resize(f, None, fx=0.5, fy=0.5), [cv2.IMWRITE_JPEG_QUALITY, 75])[1].tobytes())
+            n += 1
+            if n % 40 == 0:
+                self.libro.voltear()
+            time.sleep(0.2)
+
+    def capture_array(self, _nombre="main"):
+        return self.libro.renderizar()
+
+
 salida = Salida()
 if args.camara == "webcam":
     cam, RES = Webcam(salida), "1280×720 (webcam)"
+elif args.camara == "sim":
+    cam, RES = CamSimulada(salida), "libro simulado"
 else:
     from picamera2 import Picamera2
     from picamera2.encoders import MJPEGEncoder
@@ -254,6 +282,7 @@ def trabajo(p):
         paso("OCR " + p["ocr"], t)
         res["ocr_texto"] = texto
         res["numero_pagina"] = num
+        estado["lectura"] = {"ocr_texto": texto, "motor": p["ocr"]}  # se muestra ya, sin esperar a la voz
 
         voz = limpiar_para_voz(texto)
         res["texto_voz"] = voz
@@ -309,79 +338,10 @@ def trabajo(p):
 
 
 # ----------------------------------------------------------------------------- pagina
-HTML = r"""<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ArchiLector · Pruebas</title>
-<style>
-:root{--bg:#f6f7f9;--card:#fff;--tx:#1b1f24;--mut:#667085;--bd:#d9dde3;--ac:#1f6feb;--ok:#1a7f37;--ma:#b54708}
-@media (prefers-color-scheme:dark){:root{--bg:#0f1318;--card:#171c23;--tx:#e6e9ee;--mut:#9aa4b2;--bd:#2a313b;--ac:#58a6ff;--ok:#3fb950;--ma:#e3a008}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,sans-serif}
-header{padding:12px 16px;border-bottom:1px solid var(--bd);display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
-h1{font-size:18px;margin:0}small,.mut{color:var(--mut)}
-main{display:grid;grid-template-columns:minmax(300px,1fr) minmax(320px,1fr);gap:14px;padding:14px;max-width:1500px;margin:auto}
-@media(max-width:900px){main{grid-template-columns:1fr}}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px}
-.card h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);margin:0 0 8px}
-img.live,img.pg{width:100%;border-radius:6px;background:#000;display:block}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0}
-label{font-size:13px;color:var(--mut)}select,input,textarea{background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:6px 8px;font:inherit}
-input[type=number]{width:64px}textarea{width:100%;min-height:60px}
-button{background:var(--ac);color:#fff;border:0;border-radius:8px;padding:10px 16px;font:600 15px system-ui;cursor:pointer}button:disabled{opacity:.5;cursor:wait}
-.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
-.k{border:1px solid var(--bd);border-radius:8px;padding:8px}.k b{display:block;font-size:20px}.k span{font-size:12px;color:var(--mut)}
-.pasos div{display:flex;justify-content:space-between;border-bottom:1px dashed var(--bd);padding:3px 0}
-pre{white-space:pre-wrap;background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:8px;margin:6px 0;max-height:260px;overflow:auto;font:13px/1.4 ui-monospace,monospace}
-.ok{color:var(--ok)}.ma{color:var(--ma)}audio{width:100%;margin-top:6px}
-</style></head><body>
-<header><h1>ArchiLector · Panel de pruebas</h1><small id="info">…</small></header>
-<main>
-<section>
- <div class="card"><h2>Cámara en vivo</h2><img class="live" src="/s.mjpg" alt="cámara">
-  <div class="row mut">La foto para el OCR se toma a 2592×1944; aquí ves una vista de 1280×960.</div></div>
- <div class="card" style="margin-top:14px"><h2>Ajustes</h2>
-  <div class="row"><label>OCR <select id="ocr"><option value="tesseract">Tesseract (español)</option><option value="rapidocr">RapidOCR (PP-OCRv4)</option><option value="claude-haiku-5-5">Claude Haiku 5.5</option><option value="claude-sonnet-5-5">Claude Sonnet 5.5</option><option value="claude-opus-5-5">Claude Opus 5.5</option></select></label>
-   <label>Velocidad de voz <input id="vel" type="range" min="0.7" max="1.5" step="0.05" value="1.0" oninput="velv.textContent=this.value"> <b id="velv">1.0</b></label></div>
-  <div class="row"><label>Página <select id="modo" onchange="man.style.display=this.value=='manual'?'flex':'none'"><option value="manual">Recorte manual</option><option value="proyecto">Preproceso del proyecto</option><option value="ninguno">Imagen completa</option></select></label></div>
-  <div class="row" id="man"><label>izq % <input type="number" id="x0" value="23"></label><label>arriba % <input type="number" id="y0" value="0"></label><label>der % <input type="number" id="x1" value="78"></label><label>abajo % <input type="number" id="y1" value="97"></label></div>
-  <label>Texto correcto de la página (opcional, para medir la precisión del OCR)</label><textarea id="ref" placeholder="Pega aquí el texto real de la página…"></textarea>
-  <div class="row"><button id="go" onclick="lanzar()">📷 Capturar y leer en voz alta</button></div>
- </div>
-</section>
-<section>
- <div class="card"><h2>Progreso <span id="fase" class="mut"></span></h2><div class="pasos" id="pasos"><span class="mut">Aún sin ejecutar.</span></div><div id="err" class="ma"></div></div>
- <div class="card" style="margin-top:14px"><h2>Métricas</h2><div class="kpis" id="kpis"><span class="mut">—</span></div></div>
- <div class="card" style="margin-top:14px"><h2>Voz (suena en esta computadora)</h2><audio id="aud" controls></audio><div class="mut" id="vosk"></div></div>
- <div class="card" style="margin-top:14px"><h2>Imagen que lee el OCR</h2><img class="pg" id="pg" alt=""></div>
- <div class="card" style="margin-top:14px"><h2>Texto leído por el OCR</h2><pre id="txt">—</pre></div>
-</section></main>
-<script>
-const $=id=>document.getElementById(id);let timer=null,lastRes=null;
-fetch('/api/info').then(r=>r.json()).then(i=>{$('info').textContent='Micrófono en la Pi: '+(i.mic?'detectado':'no detectado')+' · Piper y Vosk '+(i.modelos?'cargados':'cargando…')});
-async function lanzar(){
- const b={ocr:$('ocr').value,vel:+$('vel').value,modo:$('modo').value,x0:$('x0').value,y0:$('y0').value,x1:$('x1').value,y1:$('y1').value,referencia:$('ref').value};
- const r=await fetch('/api/leer',{method:'POST',body:JSON.stringify(b)});const j=await r.json();
- if(!j.ok){$('err').textContent=j.error;return}
- $('go').disabled=true;$('err').textContent='';$('aud').pause();lastRes=null;timer=setInterval(poll,400);poll();
-}
-async function poll(){
- const e=await (await fetch('/api/estado')).json();
- $('fase').textContent=e.corriendo?'· '+e.fase:'· '+e.fase;
- $('pasos').innerHTML=e.pasos.map(p=>`<div><span>${p.nombre}</span><b>${p.seg.toFixed(1)} s</b></div>`).join('')||'<span class="mut">…</span>';
- if(!e.corriendo){clearInterval(timer);$('go').disabled=false;
-  if(e.error){$('err').textContent=e.error;return}
-  if(e.resultado&&e.resultado!==lastRes){lastRes=e.resultado;mostrar(e.resultado)}}
-}
-function k(v,l,cls){return `<div class="k"><b class="${cls||''}">${v}</b><span>${l}</span></div>`}
-function mostrar(r){
- const q=t=>Date.now();
- $('pg').src='/api/imagen.jpg?'+q();$('aud').src='/api/audio.wav?'+q();$('aud').play().catch(()=>{});
- $('txt').textContent=r.ocr_texto;
- let h=k(r.total_seg+' s','tiempo total del ciclo')+k(r.ocr_seg+' s','OCR ('+r.motor+')')+k(r.numero_pagina??'—','número de página leído')+k(r.n_palabras,'palabras')
-  +k(r.audio_seg+' s','duración del audio')+k(r.sintesis_seg+' s','síntesis de voz')+k(r.factor_tiempo_real+'×','factor tiempo real (<1 = más rápido que hablar)',r.factor_tiempo_real<1?'ok':'ma')
-  +k(r.palabras_por_min,'palabras por minuto (voz)')+k((r.wer_voz*100).toFixed(1)+' %','error de palabras de la voz (Vosk)',r.wer_voz<.15?'ok':'ma')+k(r.nitidez,'nitidez (Laplaciano)');
- if(r.similitud_ocr!==undefined)h+=k((r.similitud_ocr*100).toFixed(1)+' %','similitud del OCR con tu texto')+k((r.wer_ocr*100).toFixed(1)+' %','error de palabras del OCR',r.wer_ocr<.1?'ok':'ma');
- $('kpis').innerHTML=h;$('vosk').textContent='Vosk entendió: '+r.vosk_texto;
-}
-</script></body></html>"""
+def pagina_html() -> bytes:
+    """La página está en panel_pruebas.html (se lee en cada pedido: editar y recargar)."""
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "panel_pruebas.html"), "rb") as f:
+        return f.read()
 
 # ----------------------------------------------------------------------------- servidor
 class H(server.BaseHTTPRequestHandler):
@@ -413,14 +373,21 @@ class H(server.BaseHTTPRequestHandler):
         elif ruta == "/api/estado":
             self._send(json.dumps(estado).encode(), "application/json")
         elif ruta == "/api/info":
-            mic = "card" in subprocess.run(["arecord", "-l"], capture_output=True, text=True).stdout
-            self._send(json.dumps({"mic": mic, "modelos": "piper" in _m and "vosk" in _m}).encode(), "application/json")
+            try:
+                mic = "card" in subprocess.run(["arecord", "-l"], capture_output=True, text=True).stdout
+            except OSError:  # PC sin ALSA
+                mic = False
+            self._send(json.dumps({"mic": mic, "modelos": "piper" in _m and "vosk" in _m, "camara": RES,
+                                   "clave": bool(os.environ.get("ANTHROPIC_API_KEY"))}).encode(), "application/json")
+        elif ruta == "/estaticos/estilo.css":  # el mismo diseño que el panel de ArchiLector
+            with open(f"{RAIZ}/archilector/web/estaticos/estilo.css", "rb") as f:
+                self._send(f.read(), "text/css; charset=utf-8")
         elif ruta == "/api/imagen.jpg":
             self._send(archivos["imagen"], "image/jpeg")
         elif ruta == "/api/audio.wav":
             self._send(archivos["audio"], "audio/wav")
         else:
-            self._send(HTML.encode(), "text/html; charset=utf-8")
+            self._send(pagina_html(), "text/html; charset=utf-8")
 
     def do_POST(self):
         if self.path != "/api/leer":
@@ -428,7 +395,7 @@ class H(server.BaseHTTPRequestHandler):
         p = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or b"{}")
         if not job_lock.acquire(blocking=False):
             return self._send(json.dumps({"ok": False, "error": "Ya hay una prueba en curso."}).encode(), "application/json")
-        estado.update(corriendo=True, pasos=[], fase="Iniciando", resultado=None, error=None)
+        estado.update(corriendo=True, pasos=[], fase="Iniciando", resultado=None, error=None, lectura=None)
         threading.Thread(target=trabajo, args=(p,), daemon=True).start()
         self._send(json.dumps({"ok": True}).encode(), "application/json")
 

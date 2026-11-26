@@ -330,6 +330,27 @@ details pre { white-space: pre-wrap; font-family: var(--fuente); font-size: .82r
 .clases { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
 .clases button { justify-content: space-between; }
 
+/* --- métricas en mosaico y pasos (panel de pruebas) -------------------------------------------------- */
+.mosaico { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.tesela { border: 1px solid var(--borde); border-radius: 10px; padding: 12px 14px; background: var(--superficie-2); min-width: 0; }
+.tesela .valor { font-size: 1.35rem; font-weight: 700; letter-spacing: -.01em; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.tesela .valor.ok { color: var(--ok); } .tesela .valor.aviso { color: var(--aviso); } .tesela .valor.peligro { color: var(--peligro); }
+.tesela .nota { color: var(--suave); font-size: .8rem; margin-top: 2px; }
+.pasos { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.pasos li { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px dashed var(--borde); font-size: .92rem; }
+.pasos li:last-child { border-bottom: 0; }
+.pasos .marca-paso { width: 22px; height: 22px; border-radius: 50%; flex: none; display: grid; place-items: center; border: 2px solid var(--borde-fuerte); }
+.pasos .marca-paso svg { width: 13px; height: 13px; }
+.pasos li.hecho .marca-paso { background: var(--ok); border-color: var(--ok); color: var(--sobre-acento); }
+.pasos li.actual .marca-paso { border-color: var(--acento); border-top-color: transparent; animation: girar .8s linear infinite; }
+.pasos li.pendiente { color: var(--tenue); }
+.pasos li .tiempo { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 600; }
+@keyframes girar { to { transform: rotate(360deg); } }
+input[type=range] { padding: 0; min-height: 0; border: 0; background: transparent; accent-color: var(--acento); }
+audio { width: 100%; }
+textarea { min-height: 84px; resize: vertical; line-height: 1.5; }
+.vivo-img { width: 100%; height: 100%; object-fit: contain; background: #111; }
+
 /* --- avisos flotantes --------------------------------------------------------------------------------- */
 .tostadas { position: fixed; right: 20px; bottom: 20px; display: grid; gap: 8px; z-index: 50; }
 .tostada {
