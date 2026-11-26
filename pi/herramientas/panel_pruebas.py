@@ -67,7 +67,9 @@ class Webcam:
     """Webcam USB con OpenCV: misma interfaz que Picamera2 para el panel (capture_array y video en vivo)."""
 
     def __init__(self, salida, ancho=1280, alto=720):
-        rutas = sorted(glob.glob("/dev/v4l/by-id/usb-*-video-index0")) or [0]
+        rutas = sorted(glob.glob("/dev/v4l/by-id/usb-*-video-index0"))
+        if not rutas:  # sin esto abriría /dev/video0, que es la CSI de ArchiLector
+            raise SystemExit("no hay webcam USB conectada")
         self.cap = cv2.VideoCapture(rutas[0], cv2.CAP_V4L2)
         if not self.cap.isOpened():
             raise SystemExit(f"no se pudo abrir la webcam {rutas[0]} (¿la usa ArchiLector?)")

@@ -11,6 +11,8 @@ User=archilector
 Group=archilector
 SupplementaryGroups=video audio
 WorkingDirectory=/home/archilector/ArchiLector/pi
+# Sin webcam no arranca (ni se reintenta): enchúfela y haga «sudo systemctl start panel-pruebas».
+ExecCondition=/bin/sh -c 'ls /dev/v4l/by-id/usb-*-video-index0'
 ExecStart=/home/archilector/ArchiLector/pi/.venv/bin/python herramientas/panel_pruebas.py --camara webcam
 Restart=on-failure
 RestartSec=5
