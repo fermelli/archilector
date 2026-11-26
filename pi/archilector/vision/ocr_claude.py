@@ -9,6 +9,7 @@ import base64
 import json
 import logging
 import os
+import threading
 import time
 
 import cv2
@@ -23,6 +24,7 @@ PAUSA_S = 120  # tras un error de red no se insiste en cada página
 SISTEMA = ("Transcribes fotos de páginas de libros y documentos en español para leerlas en voz alta. "
            "Copia el texto tal cual, en orden de lectura, con acentos, ñ, ¿ y ¡; no corrijas ni inventes. "
            "Devuelve el número de página impreso aparte y no lo incluyas en las líneas. "
+           "Si en un costado asoma un trozo de la página vecina, ignóralo: transcribe solo la página principal. "
            "categoria: texto (texto corrido), formulario_tabla, portada_indice (portada o índice) o blanco. "
            "Si la foto no muestra una página (la sala, una mano), es_pagina es false.")
 ESQUEMA = {
@@ -59,6 +61,7 @@ class OCRClaude:
     def __init__(self, respaldo, modelo: str = MODELOS[0], cliente=None):
         self.respaldo, self.modelo, self._cliente = respaldo, modelo, cliente
         self._pausa_hasta = 0.0
+        self._lock = threading.Lock()  # el OCR local no admite dos páginas a la vez
         self.ultimo = "local"  # quién leyó la última página, para el panel
 
     @property
@@ -76,7 +79,8 @@ class OCRClaude:
                 if type(exc).__name__ in ("APIConnectionError", "APITimeoutError"):
                     self._pausa_hasta = time.monotonic() + PAUSA_S
         self.ultimo = "local"
-        return self.respaldo.leer(pagina)
+        with self._lock:
+            return self.respaldo.leer(pagina)
 
     def _leer_claude(self, pagina: np.ndarray) -> ResultadoOCR:
         if self._cliente is None:

@@ -25,6 +25,7 @@ import logging
 import queue
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -70,6 +71,7 @@ class Captura:
     corregida: preproceso.FotoCorregida
     ocr: ResultadoOCR
     categoria: str = C.TEXTO
+    izquierda: Captura | None = None  # con vision.lado_pagina «ambas»: la otra página de la misma foto
 
     @property
     def numero_impreso(self) -> int | None:
@@ -198,12 +200,17 @@ class Orquestador:
             actual = self._analizar(self._capturar())
             aviso.join()
             while True:
-                self._procesar_pagina(doc_id, modo, actual)
+                paginas = [p for p in (actual.izquierda, actual) if p is not None]  # izquierda primero
+                if self._max_paginas:
+                    paginas = paginas[:self._max_paginas - self._numero]
+                for p in paginas:
+                    self._procesar_pagina(doc_id, modo, p)
                 ultima = bool(self._max_paginas and self._numero >= self._max_paginas)
                 if modo == LECTURA:
                     if not ultima and self.enlace is not None and self.cfg["lectura"]["adelantar"]:
-                        self._adelantar(actual)
-                    self._leer(actual)  # también la última: el límite solo evita voltear otra hoja
+                        self._adelantar(actual)  # las dos páginas ya están fotografiadas
+                    for p in paginas:
+                        self._leer(p)  # también la última: el límite solo evita voltear otra hoja
                 if ultima:
                     break
                 if self._adelanto:
@@ -297,7 +304,14 @@ class Orquestador:
 
     def _analizar(self, foto: np.ndarray) -> Captura:
         corregida = preproceso.corregir(foto, self.cfg["vision"]["lado_pagina"])
-        return Captura(foto, corregida, self.ocr.leer(corregida.pagina))
+        if corregida.izquierda is None:
+            return Captura(foto, corregida, self.ocr.leer(corregida.pagina))
+        izq = preproceso.FotoCorregida(corregida.libro, corregida.izquierda,
+                                       preproceso.nitidez(corregida.izquierda), corregida.contorno_hallado)
+        # Con Claude las dos páginas se leen a la vez; el OCR local, de a una
+        with ThreadPoolExecutor(2 if getattr(self.ocr, "hay_clave", False) else 1) as ex:
+            ocr_izq, ocr_der = ex.map(self.ocr.leer, (izq.pagina, corregida.pagina))
+        return Captura(foto, corregida, ocr_der, izquierda=Captura(foto, izq, ocr_izq))
 
     def _procesar_pagina(self, doc_id: int, modo: str, c: Captura) -> None:
         self._numero += 1
@@ -433,14 +447,17 @@ class Orquestador:
         despues = None
         if v.clase == PAGINA_NUEVA:
             despues = self._analizar(foto)
-            esperado = self._numero_esperado()
-            d = despues.numero_impreso
+            # La página derecha queda 2 lugares adelante si también se lee la izquierda
+            k, d = (2 if despues.izquierda else 1), despues.numero_impreso
+            if d is None and despues.izquierda:
+                k, d = 1, despues.izquierda.numero_impreso
+            esperado = self._numero_esperado(k)
             if esperado is not None and d is not None:
-                paso = self.cfg["vision"]["paso_numeracion"]
-                if d == esperado + paso:
+                salto = self.cfg["vision"]["paso_numeracion"] * k  # lo que avanza la numeración en una hoja
+                if d == esperado + salto:
                     log.warning("Se esperaba la página %s y se leyó %s: pasaron dos hojas", esperado, d)
                     v.clase = DOS_HOJAS
-                elif d == esperado - paso:
+                elif d == esperado - salto:
                     log.warning("Se leyó otra vez la página %s: la hoja no pasó", d)
                     v.clase = MISMA_PAGINA
         self.publico.ultimo_veredicto = {
@@ -450,13 +467,13 @@ class Orquestador:
         log.info("Verificador: %s (%.2f, %s; regla: %s)", v.clase, v.confianza, v.fuente, v.regla)
         return v, foto, despues
 
-    def _numero_esperado(self) -> int | None:
+    def _numero_esperado(self, adelante: int = 1) -> int | None:
         """Número impreso que debería tener la página siguiente, a partir del
         último número leído (aunque las páginas intermedias no lo muestren)."""
         if self._ref_impreso is None:
             return None
         orden, impreso = self._ref_impreso
-        return impreso + self.cfg["vision"]["paso_numeracion"] * (self._numero + 1 - orden)
+        return impreso + self.cfg["vision"]["paso_numeracion"] * (self._numero + adelante - orden)
 
     def _registrar_volteo(self, cmd, respuesta, v: Veredicto, intento, accion, antes: Captura,
                           foto_despues: np.ndarray) -> None:

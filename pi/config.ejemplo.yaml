@@ -26,9 +26,9 @@ ocr:
     modelo: claude-haiku-5-5      # claude-haiku-5-5 | claude-sonnet-5-5 | claude-opus-5-5 (también en Calibración)
 
 vision:
-  lado_pagina: derecha            # una cara por volteo (alcance 1.4 del Diseño)
+  lado_pagina: ambas              # ambas: izquierda y luego derecha, de la misma foto | derecha (alcance 1.4)
   region_canto: [0.0, 0.2, 0.15, 0.8]   # canto de las hojas pasadas en la foto: ajustar tras el montaje
-  paso_numeracion: 2
+  paso_numeracion: 1              # avance del número impreso por página leída (2 con «derecha»)
 
 ia:
   modelo_verificador: modelos/verificador.tflite    # se copian desde Colab

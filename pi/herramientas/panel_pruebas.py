@@ -28,6 +28,7 @@ import threading
 import time
 import unicodedata
 import wave
+from concurrent.futures import ThreadPoolExecutor
 from http import server
 from socketserver import ThreadingMixIn
 
@@ -55,6 +56,7 @@ class Salida(io.BufferedIOBase):
         super().__init__()
         self.frame = None
         self.cond = threading.Condition()
+        self.mirando = 0  # navegadores con el video en vivo abierto
 
     def write(self, buf):
         with self.cond:
@@ -81,13 +83,17 @@ class Webcam:
         threading.Thread(target=self._leer, daemon=True).start()
 
     def _leer(self):
+        enviado = 0.0
         while True:
             ok, f = self.cap.read()
             if not ok:
                 time.sleep(0.1)
                 continue
             self.ultimo = f
-            self.salida.write(cv2.imencode(".jpg", f, [cv2.IMWRITE_JPEG_QUALITY, 80])[1].tobytes())
+            # Comprimir el video cuesta CPU: solo si alguien lo mira, y a 10 cuadros por segundo
+            if self.salida.mirando and time.monotonic() - enviado >= 0.1:
+                enviado = time.monotonic()
+                self.salida.write(cv2.imencode(".jpg", f, [cv2.IMWRITE_JPEG_QUALITY, 80])[1].tobytes())
 
     def capture_array(self, _nombre="main"):
         while self.ultimo is None:
@@ -258,7 +264,14 @@ def trabajo(p):
 
         t = time.time(); estado["fase"] = "Preparando la página"
         h, w = frame.shape[:2]
-        if p["modo"] == "proyecto":
+        if p["modo"] == "ambas":  # como ArchiLector: las dos páginas de la misma foto, cortadas en el lomo
+            from archilector.vision.preproceso import corregir, lomo
+            f = corregir(frame, "ambas")
+            paginas, vista = [f.izquierda, f.pagina], f.libro.copy()
+            c = lomo(f.libro)
+            cv2.line(vista, (c, 0), (c, vista.shape[0]), (40, 40, 220), max(2, vista.shape[1] // 250))
+            res["contorno_hallado"] = f.contorno_hallado
+        elif p["modo"] == "proyecto":
             from archilector.vision.preproceso import corregir
             f = corregir(frame)
             pagina = f.pagina
@@ -268,23 +281,35 @@ def trabajo(p):
             pagina = frame[int(h * y0):int(h * y1), int(w * x0):int(w * x1)]
         else:
             pagina = frame
-        ok, jpg = cv2.imencode(".jpg", cv2.resize(pagina, None, fx=900 / max(pagina.shape[:2]), fy=900 / max(pagina.shape[:2]),
-                                                    interpolation=cv2.INTER_AREA), [cv2.IMWRITE_JPEG_QUALITY, 80])
+        if p["modo"] != "ambas":
+            paginas, vista = [pagina], pagina
+        esc = 900 / max(vista.shape[:2])
+        ok, jpg = cv2.imencode(".jpg", cv2.resize(vista, None, fx=esc, fy=esc, interpolation=cv2.INTER_AREA),
+                               [cv2.IMWRITE_JPEG_QUALITY, 80])
         archivos["imagen"] = jpg.tobytes()
-        res["nitidez"] = round(float(cv2.Laplacian(cv2.cvtColor(pagina, cv2.COLOR_BGR2GRAY), cv2.CV_64F).var()), 1)
+        res["nitidez"] = round(min(float(cv2.Laplacian(cv2.cvtColor(g, cv2.COLOR_BGR2GRAY), cv2.CV_64F).var())
+                                   for g in paginas), 1)
         paso("Preparar página", t)
 
         t = time.time(); estado["fase"] = "Leyendo el texto (OCR %s)" % p["ocr"]
-        if p["ocr"] == "tesseract":
-            texto, num = ocr_tesseract(pagina)
-        else:
-            r = (claude(p["ocr"]) if p["ocr"].startswith("claude") else rapid()).leer(pagina)
-            texto, num = r.texto, r.numero_pagina
+        def leer(pg):
+            if p["ocr"] == "tesseract":
+                return ocr_tesseract(pg)
+            r = (claude(p["ocr"]) if p["ocr"].startswith("claude") else rapid()).leer(pg)
+            return r.texto, r.numero_pagina
+
+        with ThreadPoolExecutor(2 if p["ocr"].startswith("claude") else 1) as ex:  # Claude: las dos a la vez
+            lecturas = list(ex.map(leer, paginas))
+        texto, num = "\n\n".join(t for t, _ in lecturas), lecturas[-1][1]  # la voz lee izquierda y luego derecha
+        lados = ["izquierda", "derecha"] if len(lecturas) == 2 else [""]
+        res["paginas"] = [{"lado": l, "texto": tx, "numero": n} for l, (tx, n) in zip(lados, lecturas)]
+        if len(lecturas) == 2:
+            res["numero_izquierda"] = lecturas[0][1]
         res["ocr_seg"] = round(time.time() - t, 2)
         paso("OCR " + p["ocr"], t)
         res["ocr_texto"] = texto
         res["numero_pagina"] = num
-        estado["lectura"] = {"ocr_texto": texto, "motor": p["ocr"]}  # se muestra ya, sin esperar a la voz
+        estado["lectura"] = {"paginas": res["paginas"], "motor": p["ocr"]}  # se muestra ya, sin esperar a la voz
 
         voz = limpiar_para_voz(texto)
         res["texto_voz"] = voz
@@ -364,6 +389,7 @@ class H(server.BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "multipart/x-mixed-replace; boundary=FRAME")
             self.end_headers()
+            salida.mirando += 1
             try:
                 while True:
                     with salida.cond:
@@ -372,6 +398,8 @@ class H(server.BaseHTTPRequestHandler):
                     self.wfile.write(b"--FRAME\r\nContent-Type: image/jpeg\r\nContent-Length: %d\r\n\r\n" % len(f) + f + b"\r\n")
             except Exception:  # noqa: BLE001
                 pass
+            finally:
+                salida.mirando -= 1
         elif ruta == "/api/estado":
             self._send(json.dumps(estado).encode(), "application/json")
         elif ruta == "/api/info":

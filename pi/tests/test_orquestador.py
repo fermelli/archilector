@@ -32,9 +32,11 @@ class VerificadorGuionado(Verificador):
         return Veredicto(clase, 0.95, "guion", regla=v.regla, imagen_compuesta=v.imagen_compuesta)
 
 
-def armar(tmp_path, verificador, escala=0.01):
+def armar(tmp_path, verificador, escala=0.01, lado="derecha"):
     cfg = configuracion.cargar(None)
     cfg["datos"] = str(tmp_path)
+    # La mayoría de las pruebas cuentan una página por hoja; «ambas» tiene las suyas al final
+    cfg["vision"].update(lado_pagina=lado, paso_numeracion=1 if lado == "ambas" else 2)
     cfg["camara"]["espera_luz"] = 0
     libro = LibroSimulado(hojas=30)
     sim = SimuladorESP32(libro=libro, escala_tiempo=escala)
@@ -276,3 +278,48 @@ def test_el_saludo_suena_mientras_se_lee_la_primera_pagina(tmp_path):
     o.esperar_fin(20)
     assert o.ocr.durante_saludo[0] is True  # la primera página se leyó con el saludo sonando
     assert o.voz.dicho[:2] == ["Modo lectura.", "Leyendo la primera página."]
+
+
+class OCRAmbasPaginas:
+    """OCR falso para «ambas»: las llamadas llegan de a pares (izquierda y derecha) y
+    'lee' el número y el texto de cada lado del libro simulado (la contratapa no tiene)."""
+
+    def __init__(self, libro):
+        self.libro, self.llamadas = libro, 0
+
+    def leer(self, pagina):
+        from archilector.vision.ocr import LineaOCR, ResultadoOCR
+
+        n = self.libro.pagina_derecha - (1 if self.llamadas % 2 == 0 else 0)
+        self.llamadas += 1
+        if n == 0:
+            return ResultadoOCR()
+        return ResultadoOCR([LineaOCR([[0, 0], [1, 0], [1, 1], [0, 1]], f"pagina {n}", 0.99)], numero_pagina=n)
+
+
+def test_ambas_guarda_izquierda_y_derecha_de_cada_foto(tmp_path):
+    o, sim, libro, db = armar(tmp_path, VerificadorGuionado(), lado="ambas")
+    o.ocr = OCRAmbasPaginas(libro)
+    doc = o.iniciar_documento("x", "l", ARCHIVO, max_paginas=5)
+    o.esperar_fin(20)
+    assert sim.ordenes_ejecutadas == ["TURN", "TURN"]  # 5 páginas en 3 fotos
+    assert [p["numero_impreso"] for p in db.paginas(doc)] == [None, 1, 2, 3, 4]
+
+
+def test_ambas_lee_primero_la_izquierda(tmp_path):
+    o, sim, libro, _ = armar(tmp_path, VerificadorGuionado(), lado="ambas")
+    o.ocr = OCRAmbasPaginas(libro)
+    o.iniciar_documento("x", "l", LECTURA, max_paginas=4)
+    o.esperar_fin(20)
+    leidas = [d for d in o.voz.dicho if d.startswith("pagina") or "No se reconoció" in d]
+    assert leidas == ["No se reconoció texto en esta página.", "pagina 1", "pagina 2", "pagina 3"]
+
+
+def test_ambas_dos_hojas_por_numeracion(tmp_path):
+    o, sim, libro, _ = armar(tmp_path, Verificador(None), lado="ambas")
+    o.ocr = OCRAmbasPaginas(libro)
+    libro.forzar("ok", "dos_hojas")
+    o.iniciar_documento("x", "l", ARCHIVO, max_paginas=5)
+    o.esperar_fin(20)
+    assert sim.ordenes_ejecutadas == ["TURN", "TURN", "BACK"]
+    assert libro.pagina_derecha == 5

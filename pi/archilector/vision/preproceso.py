@@ -2,7 +2,7 @@
 
 1. Detecta el contorno del libro (la zona clara más grande) y corrige la perspectiva.
 2. Mejora el contraste con CLAHE sobre la luminancia.
-3. Separa la página que se captura en cada volteo (la derecha, alcance 1.4).
+3. Busca el lomo y separa la página izquierda, la derecha o ambas.
 """
 from __future__ import annotations
 
@@ -15,9 +15,10 @@ import numpy as np
 @dataclass
 class FotoCorregida:
     libro: np.ndarray    # libro abierto completo, enderezado (BGR)
-    pagina: np.ndarray   # página capturada (BGR, contraste mejorado)
+    pagina: np.ndarray   # página capturada (BGR, contraste mejorado); con «ambas», la derecha
     nitidez: float       # varianza del Laplaciano: métrica de calidad
     contorno_hallado: bool
+    izquierda: np.ndarray | None = None  # solo con «ambas»
 
 
 def _ordenar_esquinas(pts: np.ndarray) -> np.ndarray:
@@ -68,13 +69,28 @@ def nitidez(img: np.ndarray) -> float:
     return float(cv2.Laplacian(gris, cv2.CV_64F).var())
 
 
+def lomo(libro: np.ndarray) -> int:
+    """Columna del lomo: la franja más oscura (su sombra) en el 30 % central; si no se nota, la mitad."""
+    gris = cv2.cvtColor(libro, cv2.COLOR_BGR2GRAY) if libro.ndim == 3 else libro
+    ancho = gris.shape[1]
+    a, b = int(ancho * 0.35), int(ancho * 0.65)
+    k = max(3, ancho // 200)
+    perfil = np.convolve(gris[:, a:b].mean(axis=0), np.ones(k) / k, mode="same")[k:-k]
+    i = int(np.argmin(perfil))
+    return a + k + i if perfil[i] < 0.9 * np.median(perfil) else ancho // 2
+
+
 def separar_pagina(libro: np.ndarray, lado: str = "derecha") -> np.ndarray:
-    mitad = libro.shape[1] // 2
-    return libro[:, mitad:] if lado == "derecha" else libro[:, :mitad]
+    """Corta en el lomo, con un margen del 2 % para no comerse letras junto al pliegue."""
+    c, m = lomo(libro), int(libro.shape[1] * 0.02)
+    return libro[:, max(0, c - m):] if lado == "derecha" else libro[:, :c + m]
 
 
 def corregir(img: np.ndarray, lado: str = "derecha") -> FotoCorregida:
+    """``lado``: derecha, izquierda o ambas (la derecha queda en ``pagina``)."""
     esquinas = detectar_libro(img)
     libro = enderezar(img, esquinas) if esquinas is not None else img
-    pagina = mejorar_contraste(separar_pagina(libro, lado))
-    return FotoCorregida(libro=libro, pagina=pagina, nitidez=nitidez(pagina), contorno_hallado=esquinas is not None)
+    pagina = mejorar_contraste(separar_pagina(libro, "izquierda" if lado == "izquierda" else "derecha"))
+    izquierda = mejorar_contraste(separar_pagina(libro, "izquierda")) if lado == "ambas" else None
+    return FotoCorregida(libro=libro, pagina=pagina, nitidez=nitidez(pagina), contorno_hallado=esquinas is not None,
+                         izquierda=izquierda)

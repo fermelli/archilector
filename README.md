@@ -79,7 +79,7 @@ sudo systemctl start archilector                 # panel en http://<pi>.local:80
 ```bash
 cd pi
 python -m venv .venv && .venv/Scripts/pip install -e .[dev]     # en Linux: .venv/bin/pip
-.venv/Scripts/python -m pytest                                    # 73 pruebas
+.venv/Scripts/python -m pytest                                    # 80 pruebas
 .venv/Scripts/python -m archilector ejecutar --puerto sim:// --camara sim --sin-voz
 ```
 
@@ -125,6 +125,10 @@ foto (LED 100 %) → corrección y OCR → clasificador → guardar / leer en vo
                                        ├─ hoja doblada  → LCD «REVISE LA HOJA», 3 pitidos, espera #
                                        └─ confianza < 0,80 → otra foto; si se repite, hoja doblada
 ```
+
+**Las dos páginas con una sola cámara:** con `vision.lado_pagina: ambas` (defecto) se busca el lomo en la
+foto (la franja más oscura del centro), se corta ahí y se leen la página izquierda y luego la derecha; con Claude,
+las dos a la vez. Cada volteo da dos páginas. `derecha` (con `paso_numeracion: 2`) vuelve a una cara por volteo.
 
 Además del verificador, el número de página impreso que lee el OCR sirve de segunda comprobación:
 si salta de más (o no avanza) se corrige la clase, aunque las páginas intermedias no tengan número.
@@ -212,8 +216,8 @@ Mientras no haya modelos, la Pi usa la regla de píxeles y la regla de palabras 
 ## Pendiente de validar con hardware
 
 Compilado y probado en un PC con el simulador: el firmware compila sin advertencias en sus dos entornos y
-las 73 pruebas de la Pi pasan (protocolo, TC.1–TC.6, cada clase del verificador, modos, lectura adelantada,
-lectura con Claude, voz, PDF y panel web).
+las 80 pruebas de la Pi pasan (protocolo, TC.1–TC.6, cada clase del verificador, modos, lectura adelantada,
+lectura con Claude, las dos páginas de una foto, voz, PDF y panel web).
 
 Probado en la Raspberry Pi 4, con el ESP32 simulado: captura con Picamera2 (CSI) y con la webcam GW600,
 lectura con Claude y respaldo del OCR local, Piper (0,54 veces el tiempo real a 1,8 GHz; con la fuente

@@ -62,6 +62,7 @@
             </label>
             <label class="campo"><span>Qué parte de la foto leer</span>
               <select id="modo">
+                <option value="ambas">Las dos páginas (izquierda y derecha)</option>
                 <option value="manual">Recorte manual</option>
                 <option value="proyecto">Detectar la página (preproceso)</option>
                 <option value="ninguno">La foto completa</option>
@@ -69,7 +70,7 @@
             </label>
           </div>
 
-          <div id="man" style="margin-top:14px">
+          <div id="man" style="margin-top:14px" hidden>
             <div class="etiqueta" style="margin-bottom:6px">Recorte, en % de la foto</div>
             <div class="campos" style="grid-template-columns: repeat(4, minmax(0, 1fr)); gap:8px">
               <label class="campo"><small>Izquierda</small><input type="number" id="x0" value="23" min="0" max="100"></label>
@@ -118,19 +119,20 @@
           <p class="ayuda" id="vosk" hidden></p>
         </div>
       </section>
-
-      <section class="tarjeta" aria-labelledby="t-lectura">
-        <div class="tarjeta-cab"><h2 id="t-lectura">Lo que se leyó</h2></div>
-        <div class="tarjeta-cuerpo">
-          <div class="vista" style="aspect-ratio: 3 / 4; margin-bottom:14px" id="pg-caja">
-            <img id="pg" alt="Imagen que leyó el OCR" hidden>
-            <div class="vacio" id="pg-vacio"><b>Sin imagen todavía</b>Aquí aparece la parte de la foto que se leyó.</div>
-          </div>
-          <details open><summary>Texto reconocido</summary><pre id="txt">—</pre></details>
-        </div>
-      </section>
     </div>
   </div>
+
+  <section class="tarjeta" aria-labelledby="t-lectura" style="margin-top:22px">
+    <div class="tarjeta-cab"><h2 id="t-lectura">Lo que se leyó</h2><span class="sub" id="lect-sub"></span></div>
+    <div class="tarjeta-cuerpo">
+      <figure class="lectura-foto">
+        <img id="pg" alt="Imagen que leyó el OCR" hidden>
+        <div class="vacio" id="pg-vacio"><b>Sin imagen todavía</b>Aquí aparece la foto que se leyó y, debajo, el texto de cada página.</div>
+        <figcaption id="pg-nota" hidden>La línea roja marca dónde se encontró el lomo: a la izquierda, una página; a la derecha, la otra.</figcaption>
+      </figure>
+      <div class="hojas" id="hojas"></div>
+    </div>
+  </section>
 </main>
 <div class="tostadas" id="tostadas" aria-live="polite"></div>
 
@@ -233,7 +235,28 @@ function tesela(valor, nota, tono) {
 function mostrarLectura(l) {
   lecturaMostrada = l;
   $("pg").src = "/api/imagen.jpg?" + Date.now(); $("pg").hidden = false; $("pg-vacio").hidden = true;
-  $("txt").textContent = l.ocr_texto || "—";
+  const pags = l.paginas || [{ lado: "", texto: l.ocr_texto, numero: l.numero_pagina }];
+  $("pg-nota").hidden = pags.length < 2;
+  $("lect-sub").textContent = pags.length > 1 ? "Dos páginas, de izquierda a derecha" : "";
+  $("hojas").className = "hojas" + (pags.length > 1 ? " dos" : "");
+  $("hojas").replaceChildren(...pags.map(hoja));
+}
+
+function hoja(p) {
+  const a = document.createElement("article"), cab = document.createElement("header"), t = document.createElement("b");
+  a.className = "hoja";
+  t.textContent = p.lado ? "Página " + p.lado : "Texto reconocido";
+  cab.append(t);
+  if (p.numero !== null && p.numero !== undefined) {
+    const n = document.createElement("span"); n.className = "insignia"; n.textContent = "n.º " + p.numero; cab.append(n);
+  }
+  const cuenta = document.createElement("span");
+  cuenta.className = "suave chico"; cuenta.textContent = (p.texto || "").split(/\s+/).filter(Boolean).length + " palabras";
+  const cuerpo = document.createElement("div");
+  cuerpo.className = "hoja-texto" + (p.texto && p.texto.trim() ? "" : " vacia");
+  cuerpo.textContent = p.texto && p.texto.trim() ? p.texto : "No se reconoció texto en esta página.";
+  cab.append(cuenta); a.append(cab, cuerpo);
+  return a;
 }
 
 function mostrar(r) {
@@ -250,7 +273,8 @@ function mostrar(r) {
     tesela(r.n_palabras, "palabras"),
     tesela(r.palabras_por_min, "palabras por minuto"),
     tesela(pct(r.wer_voz), "error de palabras de la voz (Vosk)", r.wer_voz < 0.15 ? "ok" : "aviso"),
-    tesela(r.numero_pagina ?? "—", "número de página leído"),
+    tesela(r.numero_izquierda !== undefined ? (r.numero_izquierda ?? "—") + " · " + (r.numero_pagina ?? "—") : (r.numero_pagina ?? "—"),
+           r.numero_izquierda !== undefined ? "números de página (izquierda · derecha)" : "número de página leído"),
     tesela(r.nitidez, "nitidez (laplaciano)"),
   ];
   if (r.similitud_ocr !== undefined) {

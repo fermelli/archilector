@@ -24,10 +24,10 @@ POR_DEFECTO: dict = {
         "espera_luz": 0.3,  # s para que la luz se estabilice
     },
     "vision": {
-        "lado_pagina": "derecha",  # una cara por volteo (alcance 1.4)
+        "lado_pagina": "ambas",  # ambas (izquierda y luego derecha) | derecha | izquierda
         # Canto de las hojas pasadas en la foto (fracciones x0, y0, x1, y1); ajustar tras el montaje
         "region_canto": [0.0, 0.2, 0.15, 0.8],
-        "paso_numeracion": 2,  # la página derecha avanza de 2 en 2 por hoja
+        "paso_numeracion": 1,  # cuánto avanza el número impreso por página leída (2 con «derecha»)
     },
     "ocr": {
         "activo": True,
