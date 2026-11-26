@@ -13,6 +13,8 @@ ExecStart=/home/archilector/ArchiLector/pi/.venv/bin/python -m archilector --con
 Restart=on-failure
 RestartSec=5
 Environment=PYTHONUNBUFFERED=1
+# Pocas zonas de memoria por hilo: sin esto el proceso crecía hasta colgar la Pi de 2 GB
+Environment=MALLOC_ARENA_MAX=2
 
 [Install]
 WantedBy=multi-user.target

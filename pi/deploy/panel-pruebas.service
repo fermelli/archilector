@@ -17,6 +17,11 @@ ExecStart=/home/archilector/ArchiLector/pi/.venv/bin/python herramientas/panel_p
 Restart=on-failure
 RestartSec=5
 Environment=PYTHONUNBUFFERED=1
+# Pocas zonas de memoria por hilo: sin esto el proceso crecía hasta colgar la Pi de 2 GB
+Environment=MALLOC_ARENA_MAX=2
+# Si aun así se pasa, se reinicia solo el panel y no se cuelga toda la Pi
+MemoryHigh=600M
+MemoryMax=800M
 
 [Install]
 WantedBy=multi-user.target
