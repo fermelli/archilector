@@ -271,6 +271,39 @@ hasta 2,5 A calientan los rieles de la protoboard. Ahí usar Wago, regleta o la 
 6. **Con el multímetro: ningún zócalo del ESP32 con continuidad a +5 V.**
 7. Insertar el DevKit y conectarlo solo por USB.
 
+### B2 (alternativa). Armado de prueba en protoboard
+
+Antes de soldar la placa de control, todo se puede probar en una protoboard. Los contactos de una protoboard
+aguantan alrededor de 1 A: sirven para casi todo, **salvo la alimentación del MG996R** (picos de hasta 2,5 A).
+
+| Carga | ¿En la protoboard? |
+|---|---|
+| SG90 (barra), ULN2003 + 28BYJ-48 (~0,25 A) | Sí |
+| Circuitos del MOSFET (LED), del 2N2222 (buzzer) y del convertidor de nivel (LCD) | Sí |
+| Resistencias de 10 kΩ del teclado | Sí |
+| Tira LED de 40 cm (~0,4 A) | Sí, con cables cortos y gruesos |
+| **MG996R: rojo y marrón** | **No**: empalmados directo a la fuente, después del fusible |
+| MG996R: señal (GPIO 18) | Sí |
+
+```
+Fuente +5 V ── fusible 3 A ──┬──────────► riel + de la protoboard
+                             └─ empalme ─► MG996R rojo      (fuera de la protoboard)
+Fuente GND ──────────────────┬──────────► riel − de la protoboard
+                             └─ empalme ─► MG996R marrón
+Riel − ─► GND del ESP32 (tierra común) · capacitor de 2200 µF entre riel + y riel −, junto a la entrada
+```
+
+1. La fuente entra a los rieles con cable AWG 18–20, no con cables Dupont.
+2. **Medir la continuidad de los rieles de punta a punta**: en muchas protoboards largas están cortados a la
+   mitad; si es así, unir las mitades con un cable.
+3. Un solo par de rieles para el +5 V. Si el otro par se usa para 3,3 V (resistencias del teclado), marcarlo.
+4. El ESP32 queda **fuera** de la protoboard (es tan ancho que tapa un lado) y se cablea con Dupont: del riel −
+   a un GND del ESP32; **ningún cable del riel + va al ESP32** (ni a 5V/VIN ni a 3V3).
+5. Conectar las cargas de a una, con la fuente apagada: SG90 → MG996R (sin bocina, paso E5) → ULN2003 y motor
+   → buzzer → tira LED → LCD.
+6. Pasar a la placa de control si un contacto se calienta, si algo falla al mover un cable o cuando el
+   robot ya esté probado.
+
 ### B3. Firmware de prueba (T2.2 a T2.5)
 
 Desde un PC con PlatformIO (o VS Code con la extensión PlatformIO):
@@ -314,6 +347,23 @@ la LCD debe mostrar «SIN ENLACE».
 3. Ajustar el contraste con el potenciómetro de la mochila PCF8574.
 4. **T6.1:** los textos de la LCD se leen completos. **T6.2:** con el brazo girando, la tecla **D** lo
    detiene en menos de 100 ms, aunque la Pi esté desconectada.
+
+**Sin el BSS138.** La LCD **no** se conecta directo al ESP32: la mochila PCF8574 tiene resistencias que llevan
+SDA y SCL a 5 V, y los pines del ESP32 no toleran 5 V (regla 4). Opciones:
+
+1. Dejar la LCD para el final: el robot funciona sin ella (los mensajes también aparecen en el panel web y por voz).
+2. Comprar el módulo («convertidor de nivel lógico 4 canales» o «level shifter BSS138»).
+3. Armarlo en la protoboard con **2 transistores 2N7000** y **4 resistencias de 10 kΩ**, uno por línea (SDA y SCL):
+
+   ```
+   3,3 V ── 10 kΩ ──┬── GPIO 21 (o 22) del ESP32
+                    S
+   3,3 V ────────── G    2N7000  (cara plana de frente: S, G, D)
+                    D
+   5 V ──── 10 kΩ ──┴── SDA (o SCL) de la LCD
+   ```
+4. Alimentar la mochila I2C a 3,3 V: es seguro, pero casi todas las LCD 16×2 son de 5 V y a 3,3 V el texto
+   apenas se ve. Solo sirve con una LCD de 3,3 V.
 
 ---
 
