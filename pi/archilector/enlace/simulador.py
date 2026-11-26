@@ -300,7 +300,7 @@ class SimuladorESP32:
         asentar = c["T_ASENTAR"] / 1000
         rodillo = (c["PASOS_ARCO"] + extra) / c["VEL_RODILLO"]
         inicio = time.monotonic()
-        limite = 3.0 if cmd == "HOME" else 10.0
+        limite = 3.0 if cmd == "HOME" else 10.0 + (c["PASOS_ARCO"] + extra) / c["VEL_RODILLO"]
         try:
             if cmd == "HOME":
                 self._esperar(barra * 0.5 + giro(90, c["ANG_REPOSO"]) + 0.3, inicio, limite)

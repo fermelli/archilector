@@ -314,7 +314,10 @@ void movimientoTarea(void*) {
     uint32_t limite = o.tipo == ORDEN_HOME    ? (uint32_t)T_MAX_HOME_MS
                     : o.tipo == ORDEN_MOVER   ? limiteManual(o)
                     : o.tipo == ORDEN_GIRO    ? (uint32_t)o.ms + 1500
-                                              : (uint32_t)T_MAX_VOLTEO_MS;
+                    // Volteo: 10 s para brazo y barra, más lo que tarda el arco del rodillo
+                    // a la velocidad calibrada (un arco largo y lento puede llevar 15 s o más)
+                                              : (uint32_t)T_MAX_VOLTEO_MS +
+                                                    (uint32_t)((cal.pasosArco + o.extra) * 1000L / cal.velRodillo);
     Contexto c{millis(), limite};
     uint8_t r = E_NINGUNO;
     switch (o.tipo) {

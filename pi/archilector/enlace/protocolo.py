@@ -26,9 +26,11 @@ TIEMPO_MAXIMO = {
     "PING": 0.05,
     "STATUS": 0.05,
     "HOME": 3.0,
-    "TURN": 10.0,
-    "RETRY": 10.0,
-    "BACK": 10.0,
+    # El ESP32 limita cada volteo a 10 s + lo que tarda el arco (PASOS_ARCO / VEL_RODILLO); aquí va
+    # el peor caso (8192 + 2000 pasos a 50 pasos/s). Si el ESP32 muere antes, lo detecta el latido.
+    "TURN": 215.0,
+    "RETRY": 215.0,
+    "BACK": 215.0,
     "MOVE": 28.0,  # tope; el ESP32 calcula el límite de cada orden según la velocidad calibrada
     "SPIN": 11.5,  # hasta 10 s de giro + margen
     "FREE": 0.05,
