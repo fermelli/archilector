@@ -53,10 +53,10 @@
                   <option value="tesseract">Tesseract (español)</option>
                   <option value="rapidocr">RapidOCR (PP-OCRv4)</option>
                 </optgroup>
-                <optgroup label="Claude (necesita internet)">
-                  <option value="claude-haiku-5-5">Claude Haiku 5.5 · económico</option>
-                  <option value="claude-sonnet-5-5">Claude Sonnet 5.5</option>
-                  <option value="claude-opus-5-5">Claude Opus 5.5 · el más preciso</option>
+                <optgroup label="IA en la nube (necesita internet)">
+                  <option value="claude-haiku-5-5">IA · económica</option>
+                  <option value="claude-sonnet-5-5">IA · equilibrada</option>
+                  <option value="claude-opus-5-5">IA · la más precisa</option>
                 </optgroup>
               </select>
             </label>
@@ -71,11 +71,11 @@
             <label class="campo" id="div-campo"><span>Quién divide las páginas</span>
               <select id="division">
                 <option value="local">La Pi, buscando el lomo (sin internet)</option>
-                <option value="claude">Claude, con la foto entera (una sola llamada)</option>
+                <option value="claude">La IA, con la foto entera (una sola llamada)</option>
               </select>
             </label>
           </div>
-          <p class="ayuda" id="div-nota" hidden>Claude ubica el lomo y lee las dos páginas a la vez. Si en «Leer con» no eligió un modelo de Claude, se usa Haiku.</p>
+          <p class="ayuda" id="div-nota" hidden>La IA ubica el lomo y lee las dos páginas a la vez. Si en «Leer con» no eligió la IA, se usa la económica.</p>
 
           <div id="man" style="margin-top:14px" hidden>
             <div class="etiqueta" style="margin-bottom:6px">Recorte, en % de la foto</div>
@@ -178,7 +178,7 @@ fetch("/api/info").then((r) => r.json()).then((i) => {
     insignia("Cámara: " + i.camara, "ok"),
     insignia(i.mic ? "Micrófono detectado" : "Sin micrófono", i.mic ? "ok" : ""),
     insignia(i.modelos ? "Piper y Vosk listos" : "Cargando Piper y Vosk…", i.modelos ? "ok" : "aviso"),
-    insignia(i.clave ? "Claude con clave" : "Claude sin clave", i.clave ? "ok" : "aviso"),
+    insignia(i.clave ? "IA con clave" : "IA sin clave", i.clave ? "ok" : "aviso"),
   );
   $("nota-camara").textContent = "Vista reducida de " + i.camara + ". La foto para el OCR se toma a la resolución completa.";
 }).catch(() => {});
@@ -294,7 +294,7 @@ function mostrar(r) {
     tesela(r.numero_izquierda !== undefined ? (r.numero_izquierda ?? "—") + " · " + (r.numero_pagina ?? "—") : (r.numero_pagina ?? "—"),
            r.numero_izquierda !== undefined ? "números de página (izquierda · derecha)" : "número de página leído"),
     tesela(r.nitidez, "nitidez (laplaciano)"),
-    ...(r.lomo_claude !== undefined ? [tesela(pct(r.lomo_claude) + " · " + pct(r.lomo_local), "lomo según Claude · según la Pi (del ancho)")] : []),
+    ...(r.lomo_claude !== undefined ? [tesela(pct(r.lomo_claude) + " · " + pct(r.lomo_local), "lomo según la IA · según la Pi (del ancho)")] : []),
   ];
   if (r.similitud_ocr !== undefined) {
     teselas.unshift(tesela(pct(r.wer_ocr), "error de palabras del OCR", r.wer_ocr < 0.1 ? "ok" : "aviso"),

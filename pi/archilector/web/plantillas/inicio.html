@@ -178,8 +178,8 @@ Panel.alActualizar((e) => {
   marcar("s-camara", cam.fuente ? "ok" : "neutro",
     cam.fuente ? cam.fuente.replace(/^webcam:.*by-id\/usb-/, "webcam ").replace(/-video-index0$/, "") + (cam.resolucion ? " · " + cam.resolucion.join("×") : "") : "—");
   if (!e.claude) marcar("s-texto", "neutro", "OCR local");
-  else if (!e.claude.hay_clave) marcar("s-texto", "aviso", "Claude sin clave · OCR local");
-  else marcar("s-texto", "ok", e.claude.modelo.replace("claude-", "Claude ").replace(/-(\d)-(\d)$/, " $1.$2"));
+  else if (!e.claude.hay_clave) marcar("s-texto", "aviso", "IA sin clave · OCR local");
+  else marcar("s-texto", "ok", e.claude.nombre);
   marcar("s-mic", e.microfono ? "ok" : "neutro", e.microfono || "Voz apagada");
   marcar("s-verif", e.verificador === "modelo" ? "ok" : "aviso", e.verificador === "modelo" ? "Modelo entrenado" : "Regla de píxeles (sin modelo)");
 

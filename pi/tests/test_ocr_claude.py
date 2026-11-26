@@ -93,7 +93,9 @@ def test_panel_cambia_el_modelo(tmp_path):
     o, *_, db = armar(tmp_path, VerificadorGuionado())
     o.ocr = OCRClaude(Local(), cliente=ClienteFalso())
     cliente = TestClient(crear_app(o, db, o.enlace, o.cfg))
-    assert "Lectura con Claude" in cliente.get("/calibracion").text
+    pagina = cliente.get("/calibracion").text
+    assert "Lectura con IA" in pagina and "IA en la nube · económica" in pagina
+    assert "Claude" not in pagina and "Haiku" not in pagina  # la marca no se muestra en el panel
     r = cliente.post("/ocr/modelo", data={"modelo": "claude-opus-5-5"}, follow_redirects=False)
     assert r.status_code == 303 and o.ocr.modelo == "claude-opus-5-5"
     assert cliente.post("/ocr/modelo", data={"modelo": "gpt"}).status_code == 400

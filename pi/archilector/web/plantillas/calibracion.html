@@ -44,7 +44,7 @@
 
   <section class="tarjeta" aria-labelledby="t-claude">
     <div class="tarjeta-cab">
-      <h2 id="t-claude">Lectura con Claude</h2>
+      <h2 id="t-claude">Lectura con IA</h2>
       {% if not claude %}<span class="insignia">Desactivada</span>
       {% elif claude.hay_clave %}<span class="insignia ok"><i class="punto"></i>Activa</span>
       {% else %}<span class="insignia aviso"><i class="punto"></i>Sin clave</span>{% endif %}
@@ -55,20 +55,20 @@
         <label class="campo"><span>Modelo</span>
           <select name="modelo">
             {% for m in claude.modelos %}
-            <option value="{{ m }}" {% if m == claude.modelo %}selected{% endif %}>{{ m.replace('claude-', 'Claude ').replace('-5-5', ' 5.5').replace('haiku', 'Haiku').replace('sonnet', 'Sonnet').replace('opus', 'Opus') }}{{ ' · económico' if 'haiku' in m else (' · el más preciso' if 'opus' in m else '') }}</option>
+            <option value="{{ m }}" {% if m == claude.modelo %}selected{% endif %}>{{ claude.nombres[m] }}</option>
             {% endfor %}
           </select>
         </label>
         <button class="sec">Usar</button>
       </form>
       <ul class="lista" style="margin-top:16px">
-        <li><span class="nombre">Última página</span><span class="detalle">{{ 'leída por ' ~ claude.ultimo if claude.ultimo != 'local' else 'leída con el OCR local' }}</span></li>
+        <li><span class="nombre">Última página</span><span class="detalle">{{ 'leída por ' ~ claude.nombre_ultimo if claude.ultimo != 'local' else 'leída con el OCR local' }}</span></li>
         <li><span class="nombre">Respaldo</span><span class="detalle">OCR local, si no hay internet o clave</span></li>
       </ul>
-      {% if not claude.hay_clave %}<p class="ayuda">Ponga <code>ANTHROPIC_API_KEY</code> en <code>pi/.env</code> y reinicie el servicio.</p>{% endif %}
+      {% if not claude.hay_clave %}<p class="ayuda">Ponga la clave del servicio de IA en <code>pi/.env</code> y reinicie el servicio.</p>{% endif %}
       {% else %}
-      <p class="suave" style="margin:0">Las páginas se leen con el OCR local. Para leer con Claude, active <code>ocr.claude.activo</code> en
-        <code>config.yaml</code> y ponga la clave en <code>pi/.env</code>.</p>
+      <p class="suave" style="margin:0">Las páginas se leen con el OCR local. Para leer con IA, actívela en <code>config.yaml</code>
+        y ponga la clave en <code>pi/.env</code>.</p>
       {% endif %}
     </div>
   </section>

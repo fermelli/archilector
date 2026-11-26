@@ -240,21 +240,24 @@ def crear_app(orquestador, db, enlace, cfg: dict, escucha=None) -> FastAPI:
                       camara=_info_camara(), opciones_camara=opciones, claude=_info_claude())
 
     def _info_claude() -> dict | None:
-        from ..vision.ocr_claude import MODELOS
+        from ..vision.ocr_claude import MODELOS, nombre_visible
 
         o = orquestador.ocr
         if not hasattr(o, "hay_clave"):
             return None  # ocr.claude.activo: false
-        return {"modelo": o.modelo, "modelos": MODELOS, "hay_clave": o.hay_clave, "ultimo": o.ultimo}
+        return {"modelo": o.modelo, "modelos": MODELOS, "hay_clave": o.hay_clave, "ultimo": o.ultimo,
+                "nombre": nombre_visible(o.modelo), "nombre_ultimo": nombre_visible(o.ultimo),
+                "nombres": {m: nombre_visible(m) for m in MODELOS}}
 
     @app.post("/ocr/modelo")
     def ocr_modelo(modelo: str = Form(...)):
         from ..vision.ocr_claude import MODELOS
 
         if _info_claude() is None or modelo not in MODELOS:
-            raise HTTPException(400, "modelo desconocido o Claude desactivado")
+            raise HTTPException(400, "modelo desconocido o lectura con IA desactivada")
         orquestador.ocr.modelo = modelo
-        return RedirectResponse(f"/calibracion?msg={quote('Lectura con ' + modelo)}", status_code=303)
+        msg = "Lectura con " + _info_claude()["nombre"]
+        return RedirectResponse(f"/calibracion?msg={quote(msg)}", status_code=303)
 
     def _enviar(*cmd) -> str:
         if enlace is None:

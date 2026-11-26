@@ -9,6 +9,7 @@ import base64
 import json
 import logging
 import os
+import re
 import threading
 import time
 
@@ -67,13 +68,35 @@ def _a_resultado(lineas: list[str], numero, alto: int, ancho: int, categoria: st
     return ResultadoOCR(res, numero if isinstance(numero, int) else numero_impreso(res, alto), categoria)
 
 
+# Lo que se muestra en los paneles: sin el nombre de la marca del servicio de IA
+NOMBRES_VISIBLES = {
+    "claude-haiku-5-5": "IA en la nube · económica",
+    "claude-sonnet-5-5": "IA en la nube · equilibrada",
+    "claude-opus-5-5": "IA en la nube · la más precisa",
+}
+
+
+def nombre_visible(modelo: str | None) -> str:
+    """Nombre para el panel: «IA en la nube · …» para los modelos, «OCR local» para el respaldo."""
+    if not modelo or modelo == "local":
+        return "OCR local"
+    return NOMBRES_VISIBLES.get(modelo, "IA en la nube")
+
+
+def ocultar_marca(texto: str) -> str:
+    """Quita el nombre de la marca de un texto que va a la pantalla (p. ej. un error de la API)."""
+    for m, n in NOMBRES_VISIBLES.items():
+        texto = texto.replace(m, n)
+    return re.sub(r"(?i)\b(anthropic|claude)\b", "IA", texto)
+
+
 def motivo(exc: Exception) -> str:
-    """Por qué falló Claude, en palabras para el panel."""
+    """Por qué falló la lectura con IA, en palabras para el panel."""
     if "content filtering" in str(exc):
-        return "el filtro de contenido de Anthropic bloqueó la respuesta (suele pasar al transcribir libros publicados)"
+        return "el filtro de contenido del servicio de IA bloqueó la respuesta (suele pasar al transcribir libros publicados)"
     if type(exc).__name__ in ("APIConnectionError", "APITimeoutError"):
-        return "sin conexión con la API"
-    return f"{type(exc).__name__}: {exc}"[:200]
+        return "sin conexión con el servicio de IA"
+    return ocultar_marca(f"{type(exc).__name__}: {exc}")[:200]
 
 
 class OCRClaude:

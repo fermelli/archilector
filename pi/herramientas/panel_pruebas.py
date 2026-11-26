@@ -38,6 +38,7 @@ RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # carpeta pi
 PIPER = f"{RAIZ}/modelos/voz/es_ES-davefx-medium.onnx"
 VOSK = f"{RAIZ}/modelos/vosk-model-small-es-0.42"
 sys.path.insert(0, RAIZ)
+from archilector.vision.ocr_claude import nombre_visible, ocultar_marca  # noqa: E402 (nombres sin marca)
 
 ap = argparse.ArgumentParser(description="Panel de pruebas de ArchiLector (solo LAN, sin autenticacion)")
 ap.add_argument("--puerto", type=int, default=8889)
@@ -174,7 +175,7 @@ def rapid():
 class _SinRespaldo:
     def leer(self, pagina):
         m = _m["claude"].motivo if _m["claude"].hay_clave else "falta ANTHROPIC_API_KEY en pi/.env"
-        raise RuntimeError(f"Claude no leyó la página: {m}")
+        raise RuntimeError(f"La IA no leyó la página: {m}")
 
 
 def claude(modelo):
@@ -300,7 +301,8 @@ def trabajo(p):
                                    for g in paginas), 1)
         paso("Preparar página", t)
 
-        t = time.time(); estado["fase"] = "Leyendo el texto (OCR %s)" % p["ocr"]
+        visible = nombre_visible(p["ocr"]) if p["ocr"].startswith("claude") else p["ocr"]
+        t = time.time(); estado["fase"] = "Leyendo el texto (%s)" % visible
         def leer(pg):
             if p["ocr"] == "tesseract":
                 return ocr_tesseract(pg)
@@ -309,12 +311,12 @@ def trabajo(p):
 
         claude_divide = p["modo"] == "ambas" and p.get("division") == "claude"
         if claude_divide:  # Claude ubica el lomo y lee las dos páginas en una sola llamada
-            estado["fase"] = "Claude divide el libro y lee las dos páginas"
+            estado["fase"] = "La IA divide el libro y lee las dos páginas"
             cl = claude(p["ocr"])
             pliego = cl.leer_pliego(f.libro)
             if pliego is None:  # como ArchiLector: se divide en la Pi y se lee cada página
                 claude_divide = False
-                estado["aviso"] = ("Claude no dividió el libro: " + (cl.motivo if cl.hay_clave else "falta la clave")
+                estado["aviso"] = ("La IA no dividió el libro: " + (cl.motivo if cl.hay_clave else "falta la clave")
                                    + ". Se dividió en la Pi, buscando el lomo.")
         if claude_divide:
             col, *resultados = pliego
@@ -330,7 +332,7 @@ def trabajo(p):
         if len(lecturas) == 2:
             res["numero_izquierda"] = lecturas[0][1]
         res["ocr_seg"] = round(time.time() - t, 2)
-        paso("Claude divide y lee · " + claude(p["ocr"]).modelo if claude_divide else "OCR " + p["ocr"], t)
+        paso("La IA divide y lee · " + nombre_visible(claude(p["ocr"]).modelo) if claude_divide else "Leer · " + visible, t)
         res["ocr_texto"] = texto
         res["numero_pagina"] = num
         estado["lectura"] = {"paginas": res["paginas"]}  # se muestra ya, sin esperar a la voz
@@ -376,12 +378,12 @@ def trabajo(p):
         res["wer_voz"] = round(wer(pal, oido.split()), 3)
 
         res["total_seg"] = round(sum(s["seg"] for s in estado["pasos"]), 1)
-        res["motor"] = claude(p["ocr"]).modelo + " (divide y lee)" if claude_divide else p["ocr"]
+        res["motor"] = nombre_visible(claude(p["ocr"]).modelo) + " (divide y lee)" if claude_divide else visible
         res["vel"] = p["vel"]
         estado["resultado"] = res
         estado["fase"] = "Listo"
     except Exception as e:  # noqa: BLE001
-        estado["error"] = f"{type(e).__name__}: {e}"
+        estado["error"] = ocultar_marca(f"{type(e).__name__}: {e}")
         estado["fase"] = "Error"
     finally:
         estado["corriendo"] = False
