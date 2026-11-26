@@ -114,10 +114,15 @@ def crear_app(orquestador, db, enlace, cfg: dict, escucha=None) -> FastAPI:
         return JSONResponse(e)
 
     @app.post("/control/iniciar")
-    def control_iniciar(titulo: str = Form(...), libro: str = Form(...), modo: str = Form(...),
-                        max_paginas: int | None = Form(None)):
+    def control_iniciar(titulo: str | None = Form(None), libro: str | None = Form(None),
+                        modo: str | None = Form(None), max_paginas: int | None = Form(None)):
+        # Sin formulario es el botón «Iniciar lectura / seguir»: lo mismo que la tecla A
+        # (sigue si hay una lectura en pausa; si no hay documento, empieza una lectura).
+        if modo is None:
+            orquestador.orden("iniciar")
+            return {"ok": True}
         try:
-            orquestador.iniciar_documento(titulo.strip() or "Documento", libro.strip() or "libro", modo,
+            orquestador.iniciar_documento((titulo or "").strip() or "Documento", (libro or "").strip() or "libro", modo,
                                           max_paginas or None)
         except (RuntimeError, ValueError) as exc:
             raise HTTPException(409, str(exc)) from exc

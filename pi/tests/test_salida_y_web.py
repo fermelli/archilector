@@ -107,4 +107,9 @@ def test_panel_web(tmp_path):
     assert cliente.post("/manual/comando", data={"comando": "POS", "valor": "0"}).json()["ok"]
     assert cliente.post("/manual/comando", data={"comando": "CFG", "pieza": "NADA"}).status_code == 400
     assert cliente.post("/manual/comando", data={"comando": "TURN"}).status_code == 400
+
+    # «Iniciar lectura / seguir» sin formulario = tecla A (antes respondía 422)
+    llamadas = []
+    o.orden = llamadas.append
+    assert cliente.post("/control/iniciar").json() == {"ok": True} and llamadas == ["iniciar"]
     assert cliente.post("/manual/comando", data={"comando": "STATUS"}).json()["respuesta"].startswith("STATE")
