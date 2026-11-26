@@ -50,9 +50,6 @@
   <rect x="482" y="180" width="36" height="20" fill="#2e7d32" stroke="#1b4d1f"/>
   <rect x="494" y="200" width="12" height="10" fill="#1d2330"/>
   <path d="M518 186 C 535 186, 540 170, 540 158" stroke="#c79100" stroke-width="3" fill="none"/>
-  <!-- LED -->
-  <rect x="418" y="182" width="52" height="9" rx="2" fill="#fff3b0" stroke="#b38600" transform="rotate(-35 444 186)"/>
-  <rect x="530" y="182" width="52" height="9" rx="2" fill="#fff3b0" stroke="#b38600" transform="rotate(35 556 186)"/>
   <!-- parlante -->
   <rect x="829" y="440" width="44" height="50" rx="5" fill="#4a4f58"/>
   <circle cx="851" cy="465" r="14" fill="#8a8f99"/>
@@ -62,7 +59,7 @@
   <path d="M540 170 H560" class="lider"/>
   <path d="M829 190 H880" class="lider"/><text x="885" y="186" class="b">P11 torre</text><text x="885" y="203" class="s">viga con ranura: lente a 350 ± 30 mm</text>
   <path d="M506 205 L585 250 H880" class="lider"/><text x="885" y="246" class="b">Cámara V1.3 (CSI, cinta de 15 cm)</text><text x="885" y="263" class="s">lente hacia abajo, sensor paralelo al atril</text>
-  <path d="M560 200 L600 290 H880" class="lider"/><text x="885" y="286" class="b">Tiras LED a ~45° con difusor</text><text x="885" y="303" class="s">a ambos lados de la cámara (circuito a)</text>
+  <text x="885" y="286" class="b">Iluminación: lámpara de escritorio fija</text><text x="885" y="303" class="s">a un costado, a ~45° (sin tira LED en v2.3)</text>
   <path d="M873 465 H880" class="lider"/><text x="885" y="461" class="b">Parlante + PAM8403</text><text x="885" y="478" class="s">en la torre, lejos de los motores</text>
 
   <!-- cotas -->

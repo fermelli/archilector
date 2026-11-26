@@ -46,7 +46,7 @@
 
   <!-- Pi -->
   <rect x="815" y="118" width="350" height="54" rx="8" class="pi"/><text x="827" y="140" class="b">1. Pi OS Lite 64 bits + instalar.sh</text><text x="827" y="159" class="s">regla udev, servicio, Piper y Vosk</text>
-  <rect x="815" y="188" width="350" height="54" rx="8" class="pi"/><text x="827" y="210" class="b">2. Cámara en la viga, LED con difusor</text><text x="827" y="229" class="prueba">T4.1 · T4.2 · T4.3 · T4.4</text>
+  <rect x="815" y="188" width="350" height="54" rx="8" class="pi"/><text x="827" y="210" class="b">2. Cámara en la viga y lámpara fija</text><text x="827" y="229" class="prueba">T4.1 · T4.2 · T4.3 · T4.4</text>
   <rect x="815" y="258" width="350" height="54" rx="8" class="pi"/><text x="827" y="280" class="b">3. Audio: PAM8403, parlante, micrófono</text><text x="827" y="299" class="prueba">T6.3 · T6.4</text>
   <rect x="815" y="328" width="350" height="54" rx="8" class="pi"/><text x="827" y="350" class="b">4. Temperatura, puerto fijo y tiempos</text><text x="827" y="369" class="prueba">T5.1 · T5.2 · T5.3</text>
   <path d="M990 172 V186" class="flecha" marker-end="url(#f)"/><path d="M990 242 V256" class="flecha" marker-end="url(#f)"/><path d="M990 312 V326" class="flecha" marker-end="url(#f)"/>

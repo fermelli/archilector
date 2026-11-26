@@ -37,7 +37,7 @@ pio run -e prueba_salidas -t upload   # prueba T2.3 (activa cada salida; tambié
 | `comunicacion.cpp` | Comandos PING, STATUS, HOME, TURN, RETRY, BACK, LIGHT, LCD, BEEP, STOP, CFG; vigilancia de 5 s | Técnico 8.3 y 8.6 |
 | `estado.cpp` | ARRANQUE → REPOSO ⇄ MOVIENDO → FALLA / PARADA | Técnico figura 8.3 |
 | `movimiento.cpp` | Secuencias del rodillo con servos en rampa y parada en < 10 ms | Técnico figura 8.2, Diseño tabla 5 |
-| `interfaz.cpp`, `lcd_i2c.cpp` | Teclado 4×4, buzzer, tira LED; la LCD por PCF8574 es opcional (en v2.3 no se monta y el firmware sigue sin ella) | Técnico 7.2 y 7.3 |
+| `interfaz.cpp`, `lcd_i2c.cpp` | Teclado 4×4 y buzzer; la LCD por PCF8574 y la tira LED son opcionales (en v2.3 no se montan: el firmware sigue sin ellas y los comandos `LCD` y `LIGHT` no hacen nada visible) | Técnico 7.2 y 7.3 |
 | `calibracion.cpp` | Parámetros de la tabla 5.5 en NVS | Técnico 5.5 |
 
 Tareas de FreeRTOS: movimiento en el núcleo 1 con prioridad máxima; comunicación e interfaz en el núcleo 0.
@@ -50,8 +50,8 @@ deshabilita con `CFG,EMBRAGUE,1` si los rodillos tienen embrague (prueba T3.0).
 
 ### Decisiones donde los documentos no coinciden o no lo especifican
 
-* **Pines:** se usa la tabla 4.3 del Documento Técnico (buzzer GPIO4, filas del teclado 13/16/17/23, LED GPIO27).
-  La tabla 2b del Documento de Diseño tiene otra asignación y conviene actualizarla.
+* **Pines:** se usa la tabla 4.3 del Documento Técnico (buzzer GPIO4, filas del teclado 13/16/17/23; GPIO 21, 22 y 27 libres en v2.3).
+  La tabla 2b del Documento de Diseño v2.3 coincide con ella.
 * **E07:** al arrancar tras un brownout, pánico o watchdog el ESP32 envía `$0,EVT,STATE,ARRANQUE,E07*CS`.
 * **Vigilancia de 5 s:** se arma con la primera trama válida, para que el ESP32 no quede en PARADA mientras la Pi arranca.
 * **Movimiento interrumpido** por STOP, tecla D o pérdida de enlace: responde `FAIL,E06` a la orden en curso.
@@ -118,7 +118,7 @@ la webcam se fija en `camara.webcam` (1280 × 720 para la Redragon GW600). Ver l
 ### Ciclo de operación
 
 ```
-foto (LED 100 %) → corrección y OCR → clasificador → guardar / leer en voz alta
+foto (lámpara fija) → corrección y OCR → clasificador → guardar / leer en voz alta
    → TURN → DONE → foto → verificador ─┬─ página nueva  → siguiente página
                                        ├─ misma página  → RETRY,40 (máx. 2), después pide ayuda
                                        ├─ dos hojas     → BACK y verifica de nuevo; si persiste, pide ayuda
@@ -162,7 +162,7 @@ Si la imagen no tiene una página legible, Tesseract devuelve un resultado vací
   página sigue siendo alta, así que el respaldo del híbrido no siempre se activa.
 * No leyó el número de página impreso, así que la segunda comprobación del verificador queda sin dato (`None`).
 * Con esas mismas fotos, el preproceso del proyecto empeoró el resultado; hay que repetir la prueba con el montaje
-  real (cámara fija, luz de la tira LED) antes de cambiar el motor por defecto.
+  real (cámara fija, lámpara de escritorio) antes de cambiar el motor por defecto.
 
 ### Panel web
 

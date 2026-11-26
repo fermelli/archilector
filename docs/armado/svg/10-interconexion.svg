@@ -39,7 +39,7 @@
   <rect x="530" y="90" width="200" height="460" rx="12" class="ctrl"/>
   <text x="630" y="122" text-anchor="middle" class="b" style="font-size:16px">Placa de control</text>
   <text x="630" y="146" text-anchor="middle" class="s">ESP32 DevKit</text>
-  <text x="630" y="164" text-anchor="middle" class="s">IRLZ44N · 2N2222</text>
+  <text x="630" y="164" text-anchor="middle" class="s">2N2222 (buzzer)</text>
   <text x="630" y="182" text-anchor="middle" class="s">pull-ups 10 kΩ</text>
   <text x="630" y="200" text-anchor="middle" class="s">conectores de servos</text>
   <text x="630" y="420" text-anchor="middle" class="s">GND de la placa =</text>
@@ -58,8 +58,7 @@
     <path d="M1070 235 H1120" class="sig"/><text x="1095" y="227" text-anchor="middle" class="c">C03</text>
     <rect x="1120" y="205" width="160" height="60" rx="6" class="mec"/><text x="1132" y="228" class="b">28BYJ-48</text><text x="1132" y="246" class="s">5 hilos, bucle de</text><text x="1132" y="260" class="s">holgura para 180°</text>
 
-    <path d="M730 295 H870" class="sig"/><text x="800" y="287" text-anchor="middle" class="c">C14</text><text x="800" y="312" text-anchor="middle" class="s">2 · AWG 20</text>
-    <rect x="870" y="272" width="200" height="46" rx="6" class="caja"/><text x="882" y="293" class="b">Tira LED</text><text x="882" y="310" class="s">drenador del MOSFET</text>
+    <rect x="870" y="272" width="200" height="46" rx="6" fill="none" stroke="#8a8f99" stroke-width="1.5" stroke-dasharray="5 4"/><text x="882" y="293" class="s">C14: sin uso en v2.3</text><text x="882" y="310" class="s">(sin tira LED)</text>
 
     <path d="M730 355 H870" class="sig"/><text x="800" y="347" text-anchor="middle" class="c">C13</text><text x="800" y="372" text-anchor="middle" class="s">2 · AWG 22</text>
     <rect x="870" y="332" width="200" height="46" rx="6" class="caja"/><text x="882" y="353" class="b">Buzzer</text><text x="882" y="370" class="s">colector del 2N2222</text>
@@ -98,7 +97,7 @@
   <text x="45" y="445" class="b">Orden de conexión (Técnico 9.3)</text>
   <text x="45" y="470" class="s">1. Mecánica completa, sin nada eléctrico.</text>
   <text x="45" y="492" class="s">2. Fuente ATX y placa: C01, C02 y C15.</text>
-  <text x="45" y="514" class="s">3. Actuadores: C07, C08, C09, C03, C13 y C14.</text>
+  <text x="45" y="514" class="s">3. Actuadores: C07, C08, C09, C03 y C13.</text>
   <text x="45" y="536" class="s">4. Interfaz: C12 (teclado).</text>
   <text x="45" y="558" class="s">5. Pi: C17, C16, C18, C19, C05 y C04.</text>
   <text x="45" y="580" class="s">6. Revisar polaridad, una sola tierra (C15), cables</text>

@@ -25,7 +25,7 @@
   <!-- ================= FUENTE ATX ================= -->
   <rect x="30" y="95" width="300" height="400" rx="10" class="atx"/>
   <text x="180" y="125" text-anchor="middle" class="b">Fuente ATX</text>
-  <text x="180" y="144" text-anchor="middle" class="s">+5 V: 15 a 25 A (sobra para ~3,6 A)</text>
+  <text x="180" y="144" text-anchor="middle" class="s">+5 V: 15 a 25 A (sobra para ~3,0 A)</text>
   <text x="50" y="178" class="b">Conector de 24 pines</text>
 
   <rect x="50" y="195" width="34" height="14" rx="3" fill="#d32f2f"/>
@@ -90,8 +90,8 @@
   <text x="918" y="190">• MG996R · brazo</text><text x="1155" y="190" text-anchor="end" class="s">hasta 2,5 A</text>
   <text x="918" y="218">• SG90 · barra</text><text x="1155" y="218" text-anchor="end" class="s">0,1 a 0,7 A</text>
   <text x="918" y="246">• ULN2003 + 28BYJ-48</text><text x="1155" y="246" text-anchor="end" class="s">~0,25 A</text>
-  <text x="918" y="274">• Tira LED (IRLZ44N)</text><text x="1155" y="274" text-anchor="end" class="s">~0,4 A</text>
-  <text x="918" y="302">• Buzzer</text><text x="1155" y="302" text-anchor="end" class="s">0,03 A</text>
+  <text x="918" y="274">• Buzzer</text><text x="1155" y="274" text-anchor="end" class="s">0,03 A</text>
+  <text x="918" y="302" class="s">Sin tira LED ni LCD en v2.3</text>
   <text x="1035" y="340" text-anchor="middle" class="s">El +5 V no toca el pin 5V/VIN</text>
   <text x="1035" y="356" text-anchor="middle" class="s">del DevKit (regla 1)</text>
 
@@ -127,7 +127,7 @@
   <text x="628" y="636">3. T1.2 desenchufada: sin continuidad entre +5 V y GND.</text>
   <text x="628" y="658">4. T1.3 con 2,2 Ω 15 W por 1 min: 4,8 V o más.</text>
   <text x="628" y="680">5. Unir el GND de la placa con el GND del ESP32.</text>
-  <text x="628" y="702">6. Primero el SG90; después MG996R, motor y LED.</text>
+  <text x="628" y="702">6. Primero el SG90; después MG996R y motor.</text>
   <text x="628" y="732" class="s">Si la tensión oscila o la fuente se apaga sola, falta carga mínima:</text>
   <text x="628" y="750" class="s">resistencia de 10 Ω 5 W entre +5 V y GND. Todo con la fuente apagada.</text>
 </svg>

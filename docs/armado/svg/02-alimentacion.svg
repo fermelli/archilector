@@ -55,7 +55,7 @@
   <text x="600" y="292" class="s">C16 · USB con datos, ≤ 1 m: datos del ESP32 + su alimentación (0,25 A) + unión de tierra</text>
 
   <!-- ================= RAMA DE ACTUADORES ================= -->
-  <text x="30" y="352" class="b">Rama de actuadores (2,0 A sostenido · pico 3,6 A · la fuente ATX da 15 a 25 A en +5 V)</text>
+  <text x="30" y="352" class="b">Rama de actuadores (1,4 A sostenido · pico 3,0 A · la fuente ATX da 15 a 25 A en +5 V)</text>
 
   <!-- fuente ATX -->
   <rect x="30" y="385" width="200" height="120" rx="8" class="caja"/>
@@ -113,8 +113,8 @@
   <text x="705" y="668">MG996R brazos · 0,9 A (pico 2,5 A)</text>
   <text x="705" y="688">SG90 barra · 0,25 A (pico 0,65 A)</text>
   <text x="705" y="708">28BYJ-48 + ULN2003 · 0,24 A</text>
-  <text x="950" y="668">Tira LED blanca · 0,6 A</text>
-  <text x="950" y="688">Buzzer · 0,03 A</text>
+  <text x="950" y="668">Buzzer · 0,03 A</text>
+  <text x="950" y="688" class="s">Sin tira LED en v2.3</text>
   <text x="705" y="730" class="s">Si la tensión oscila o la ATX se apaga sola: 10 Ω 5 W entre +5 V y GND.</text>
 
   <!-- reglas -->

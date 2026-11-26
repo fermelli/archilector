@@ -72,16 +72,6 @@
   <!-- capacitor de entrada -->
   <rect x="381" y="556" width="28" height="44" rx="5" fill="#1f3b73" stroke="#1d2330"/>
   <rect x="381" y="556" width="7" height="44" fill="#c9ced6"/>
-  <!-- MOSFET y resistencias -->
-  <rect x="420" y="548" width="70" height="58" rx="3" fill="#9aa3ae" stroke="#1d2330"/>
-  <rect x="425" y="540" width="60" height="12" fill="#c9ced6" stroke="#1d2330"/>
-  <text x="455" y="582" text-anchor="middle" class="b" style="font-size:12px">IRLZ44N</text>
-  <rect x="408" y="616" width="34" height="11" rx="5" fill="#d8c7a0" stroke="#1d2330"/><text x="400" y="628" text-anchor="end" class="s">100 Ω</text>
-  <rect x="456" y="616" width="34" height="11" rx="5" fill="#d8c7a0" stroke="#1d2330"/><text x="497" y="611" class="s">100 kΩ</text>
-  <rect x="425" y="690" width="56" height="36" rx="4" fill="#2e7d32" fill-opacity="0.25" stroke="#2e7d32" stroke-width="2"/>
-  <circle cx="440" cy="708" r="6" fill="#fff" stroke="#1d2330"/><circle cx="466" cy="708" r="6" fill="#fff" stroke="#1d2330"/>
-  <path d="M453 726 V808 H445" class="lider"/><text x="440" y="815" text-anchor="end" class="b">Tira LED · C14</text><text x="440" y="832" text-anchor="end" class="s">(+) y (−) del drenador</text>
-
   <!-- buzzer -->
   <path d="M536 552 a16 16 0 0 1 32 0 v22 h-32 z" fill="#1d2330"/>
   <text x="552" y="592" text-anchor="middle" class="b" style="font-size:12px">2N2222</text>
@@ -93,7 +83,7 @@
   <path d="M558 726 V808 H570" class="lider"/><text x="575" y="815" class="b">Buzzer · C13</text><text x="575" y="832" class="s">(dentro de la caja)</text>
 
   <!-- GPIO 21/22 libres (v2.3: sin LCD ni BSS138) -->
-  <path d="M774 200 H840" class="lider"/><text x="845" y="196" class="b">Sin LCD ni BSS138 (v2.3)</text><text x="845" y="213" class="s">GPIO 21 y 22 libres · mensajes en el panel</text><text x="845" y="230" class="s">web, la voz y el buzzer</text>
+  <path d="M774 200 H840" class="lider"/><text x="845" y="196" class="b">Sin LCD, BSS138 ni tira LED (v2.3)</text><text x="845" y="213" class="s">GPIO 21, 22 y 27 libres · mensajes en el panel</text><text x="845" y="230" class="s">web, la voz y el buzzer</text>
   <rect x="678" y="160" width="96" height="80" rx="4" fill="none" stroke="#8a8f99" stroke-width="1.5" stroke-dasharray="5 4"/>
   <text x="726" y="205" text-anchor="middle" class="s">libre</text>
   <!-- teclado -->
@@ -109,6 +99,6 @@
   <path d="M845 616 H885" class="v33"/><text x="892" y="621">3V3 del DevKit (no alimenta cargas)</text>
 
   <rect x="20" y="850" width="1160" height="58" rx="8" class="aviso"/>
-  <text x="35" y="873" class="s">1) Soldar zócalos, conectores, borne, resistencias, MOSFET y transistor; NO insertar el DevKit todavía. 2) Con el multímetro: ningún zócalo del ESP32 con continuidad</text>
+  <text x="35" y="873" class="s">1) Soldar zócalos, conectores, borne, resistencias y transistor; NO insertar el DevKit todavía. 2) Con el multímetro: ningún zócalo del ESP32 con continuidad</text>
   <text x="35" y="893" class="s">a +5 V; +5 V y GND sin corto. 3) Medir la separación entre filas de su DevKit (25,4 mm el de 38 pines; ~22,9 mm el de 30 pines) antes de soldar los zócalos.</text>
 </svg>

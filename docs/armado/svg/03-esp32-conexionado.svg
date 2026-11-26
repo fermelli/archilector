@@ -100,11 +100,9 @@
   <text x="446" y="333" text-anchor="middle" class="s">PWM 50 Hz</text>
 
   <!-- LED y buzzer -->
-  <rect x="190" y="455" width="190" height="56" rx="8" class="caja"/>
-  <text x="200" y="478" class="b">IRLZ44N → tira LED</text>
-  <text x="200" y="498" class="s">C14 · circuito (a) en 04</text>
-  <path d="M380 481 H512" class="sig"/>
-  <text x="446" y="473" text-anchor="middle" class="s">PWM 1 kHz</text>
+  <rect x="190" y="455" width="190" height="56" rx="8" fill="none" stroke="#8a8f99" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <text x="200" y="478" class="b">GPIO 27: libre</text>
+  <text x="200" y="498" class="s">sin tira LED en v2.3</text>
   <rect x="190" y="525" width="190" height="56" rx="8" class="caja"/>
   <text x="200" y="548" class="b">2N2222 → buzzer</text>
   <text x="200" y="568" class="s">C13 · circuito (b) en 04</text>
@@ -183,5 +181,5 @@
   <path d="M370 832 H410" class="gnd"/><text x="417" y="837">Negro GND</text>
   <path d="M520 832 H560" class="pwm"/><text x="567" y="837">Amarillo PWM servos</text>
   <path d="M760 832 H800" class="sig"/><text x="807" y="837">Blanco (gris aquí): otras</text>
-  <text x="35" y="864" class="s">El +5 V de la placa (C02, desde la fuente ATX por el fusible de 4 A) alimenta servos, ULN2003, tira LED y buzzer. Antes de insertar el DevKit: ningún pin del ESP32 con continuidad a +5 V.</text>
+  <text x="35" y="864" class="s">El +5 V de la placa (C02, desde la fuente ATX por el fusible de 4 A) alimenta servos, ULN2003 y buzzer. Antes de insertar el DevKit: ningún pin del ESP32 con continuidad a +5 V.</text>
 </svg>

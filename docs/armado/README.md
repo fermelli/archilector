@@ -14,12 +14,12 @@ travesaño de los dedos, disposición de la placa) aparece marcado como **propue
 | 01 | [Vista general](svg/01-vista-general.svg) | Dónde va cada bloque sobre la base |
 | 02 | [Alimentación](svg/02-alimentacion.svg) | Fuente ATX, fusible, entrada de la placa, tierra única |
 | 03 | [Conexionado del ESP32](svg/03-esp32-conexionado.svg) | Cada pin GPIO y su destino |
-| 04 | [Circuitos auxiliares](svg/04-circuitos-auxiliares.svg) | LED con MOSFET, buzzer, teclado, I2C |
+| 04 | [Circuitos auxiliares](svg/04-circuitos-auxiliares.svg) | Buzzer y teclado (sin tira LED ni LCD en v2.3) |
 | 05 | [Placa de control](svg/05-placa-control.svg) | Disposición en la placa perforada de 7 × 9 cm |
 | 06 | [Mecanismo, vista frontal](svg/06-mecanismo-frontal.svg) | Ángulos del brazo, alturas y piezas |
 | 07 | [Mecanismo, vista superior](svg/07-mecanismo-superior.svg) | Posiciones a lo largo del eje |
 | 08 | [Eje del rodillo](svg/08-eje-rodillo.svg) | Rodillos Canon sobre la varilla M8 |
-| 09 | [Torre y cámara](svg/09-camara-torre.svg) | Altura de 350 mm, campo de visión, LED |
+| 09 | [Torre y cámara](svg/09-camara-torre.svg) | Altura de 350 mm, campo de visión, lámpara |
 | 10 | [Interconexión](svg/10-interconexion.svg) | Cables C01 a C20 |
 | 11 | [Secuencia de volteo](svg/11-secuencia-volteo.svg) | Qué hace cada parámetro de calibración |
 | 12 | [Orden de armado](svg/12-orden-armado.svg) | Fases, pruebas y decisión final |
@@ -49,12 +49,11 @@ Estado según la tabla 2 del Documento de Diseño: **D** = disponible en el inve
 | Servo SG90 | 2 | 1 D + 1 C | Barra de retención (el otro queda de repuesto) |
 | Teclado 4×4 de membrana | 1 | D | Botones |
 | Buzzer activo de 5 V | 1 | D | Alarmas |
-| MOSFET IRLZ44N | 1 | C | Tira LED |
 | Transistor 2N2222 + diodo 1N4148 | 1 + 1 | C | Buzzer |
-| Resistencias 1/4 W: 100 Ω, 1 kΩ, 100 kΩ y 4 × 10 kΩ | 7 | C | Circuitos auxiliares |
+| Resistencias 1/4 W: 1 kΩ y 4 × 10 kΩ | 5 | C | Circuitos auxiliares |
 | Placa perforada 7 × 9 cm + 2 tiras de zócalo hembra | 1 | C | Placa de control |
-| Conectores macho: 2 × 3 pines, 6 y 8 pines; 3 bornes de tornillo de 2 vías (entrada, LED, buzzer) | — | C | Conexiones de la placa |
-| Tira LED blanca de 5 V + difusor | ~40 cm | C | Iluminación uniforme |
+| Conectores macho: 2 × 3 pines, 6 y 8 pines; 2 bornes de tornillo de 2 vías (entrada, buzzer) | — | C | Conexiones de la placa |
+| Lámpara de escritorio fija (luz blanca) | 1 | D si hay | Ilumina la página; reemplaza a la tira LED desde v2.3 |
 | Micrófono USB | 1 | C | Comandos por voz |
 | Amplificador PAM8403 + parlante 4–8 Ω 3 W + potenciómetro de volumen | 1 | C | Lectura en voz alta |
 | Cable USB A a micro USB **con datos**, ≤ 1 m | 1 | C | Pi ↔ ESP32 (C16) |
@@ -196,7 +195,7 @@ del MG996R. Si en T3.3 el servo se esfuerza o vibra, agregar un contrapeso del o
 ![Fuente ATX paso a paso](svg/13-fuente-atx.svg)
 
 Los actuadores se alimentan con una **fuente de computadora (ATX)**: su salida de +5 V da 15 a 25 A, de sobra
-para los ~3,6 A de pico del robot. No hay bornera: la fuente entra directo a la **única entrada de la placa de
+para los ~3,0 A de pico del robot (1,4 A sostenido). No hay bornera: la fuente entra directo a la **única entrada de la placa de
 control** (C02 y C15), y el GND de la placa es el punto único de tierra. La Pi sigue con su fuente oficial (con
 carga, el +5 V de una ATX queda en 4,9–5,0 V y la Pi avisaría baja tensión) y el ESP32 sigue alimentado por el
 USB de la Pi.
@@ -232,11 +231,11 @@ calienta los cables antes de que la fuente se proteja. No abrir la fuente: adent
 ![Placa de control](svg/05-placa-control.svg)
 
 1. Medir la separación entre las filas de pines de **su** DevKit y soldar las dos tiras de zócalo hembra.
-2. Soldar las 4 resistencias de 10 kΩ del teclado, el IRLZ44N con sus resistencias de 100 Ω y 100 kΩ,
+2. Soldar las 4 resistencias de 10 kΩ del teclado,
    el 2N2222 con su resistencia de 1 kΩ y el 1N4148, y los conectores de 3 pines de los servos.
 3. Llevar a la placa **una sola entrada** de +5 V (C02) y GND (C15) desde la fuente ATX (B1); de ahí se
-   alimentan los servos, el LED, el buzzer y el ULN2003. El 5 V **no toca el pin 5V/VIN** del DevKit.
-4. Cablear los GPIO según el esquema 03 y el código de colores. GPIO 21 y 22 quedan libres (sin LCD en v2.3).
+   alimentan los servos, el buzzer y el ULN2003. El 5 V **no toca el pin 5V/VIN** del DevKit.
+4. Cablear los GPIO según el esquema 03 y el código de colores. GPIO 21, 22 y 27 quedan libres (sin LCD ni tira LED en v2.3).
 5. **Con el multímetro: ningún zócalo del ESP32 con continuidad a +5 V.**
 6. Insertar el DevKit y conectarlo solo por USB.
 
@@ -248,9 +247,8 @@ aguantan alrededor de 1 A: sirven para casi todo, **salvo la alimentación del M
 | Carga | ¿En la protoboard? |
 |---|---|
 | SG90 (barra), ULN2003 + 28BYJ-48 (~0,25 A) | Sí |
-| Circuitos del MOSFET (LED) y del 2N2222 (buzzer) | Sí |
+| Circuito del 2N2222 (buzzer) | Sí |
 | Resistencias de 10 kΩ del teclado | Sí |
-| Tira LED de 40 cm (~0,4 A) | Sí, con cables cortos y gruesos |
 | **MG996R: rojo y marrón** | **No**: empalmados directo a la fuente, después del fusible |
 | MG996R: señal (GPIO 18) | Sí |
 
@@ -269,7 +267,7 @@ Riel − ─► GND del ESP32 (tierra común) · capacitor de 2200 µF entre rie
 4. El ESP32 queda **fuera** de la protoboard (es tan ancho que tapa un lado) y se cablea con Dupont: del riel −
    a un GND del ESP32; **ningún cable del riel + va al ESP32** (ni a 5V/VIN ni a 3V3).
 5. Conectar las cargas de a una, con la fuente apagada: SG90 → MG996R (sin bocina, paso E5) → ULN2003 y motor
-   → buzzer → tira LED.
+   → buzzer.
 6. Pasar a la placa de control si un contacto se calienta, si algo falla al mover un cable o cuando el
    robot ya esté probado.
 
@@ -285,7 +283,7 @@ pio device monitor
 
 | Prueba | Pasa si |
 |---|---|
-| T2.2 Arranque limpio | Al reiniciar, ningún servo salta ni se encienden el LED o el buzzer |
+| T2.2 Arranque limpio | Al reiniciar, ningún servo salta ni suena el buzzer |
 | T2.3 Salidas | Cada GPIO cambia de estado y el motor gira en ambos sentidos |
 | T2.5 Teclado | Las 16 teclas se leen una vez cada una, sin rebotes |
 
@@ -336,14 +334,15 @@ comando `LCD` del protocolo se conserva y no hace nada. GPIO 21 y 22 quedan libr
 3. Montar la Pi sobre la viga, junto a la cámara, y conectar la cinta CSI **con la Pi apagada**
    (en la Pi, los contactos de la cinta miran hacia los HDMI).
 4. Atornillar la cámara con el lente hacia abajo y nivelarla con un nivel de burbuja.
-5. Pegar las tiras LED bajo la viga, a ambos lados de la cámara, **inclinadas unos 45°** y con difusor.
+5. Ubicar una lámpara de escritorio fija a un costado del libro, **inclinada unos 45°**, para que su reflejo
+   no caiga dentro de la foto. Desde v2.3 no hay tira LED: sin buena luz el OCR lee peor.
 
 | Prueba | Cómo | Pasa si |
 |---|---|---|
 | T4.1 Captura | `rpicam-still -o prueba.jpg --width 2592 --height 1944` | Se guarda sin errores |
 | T4.2 Encuadre | Foto del libro abierto | Ambas páginas con ≥ 10 mm de margen |
 | T4.3 Nitidez | Texto de 10 pt al 100 % de zoom | Legible; si no, enfocar el lente para 350 mm |
-| T4.4 Reflejos | LED al 100 % con papel satinado | Sin zonas blancas sobre el texto |
+| T4.4 Reflejos | Lámpara encendida, papel satinado | Sin zonas blancas sobre el texto |
 | T5.1 Temperatura | 30 min de ciclo con IA y OCR | Bajo 80 °C (`vcgencmd measure_temp`) |
 | T5.2 Puerto fijo | Desconectar y reconectar el ESP32 | Reaparece `/dev/archilector-esp32` |
 | T6.3 Audio | Leer una página | Voz clara al 70 %, sin zumbido de motores |
@@ -491,7 +490,7 @@ Una fila por prueba, aunque falle. Una prueba repetida es una fila nueva.
 | La foto de la V1.3 sale borrosa | El lente viene enfocado para ~1 m | Girar el lente con la herramienta que trae (o una pinza fina) en pasos pequeños hasta que T4.3 pase a 350 mm |
 | La webcam no aparece en el panel | No es UVC o falta el enlace USB | `ls /dev/v4l/by-id/` debe mostrar `usb-…-video-index0`; probar otro puerto o cable |
 | Los comandos de voz no responden | Micrófono equivocado o sin conectar | Ver en el panel qué micrófono usa; revisar `voz.microfono` con `arecord -l` |
-| La foto de la webcam sale oscura | La exposición no alcanza a seguir a la luz LED | Subir `camara.webcam.asentar_s` a 1,0 s |
+| La foto de la webcam sale oscura | Poca luz o la exposición no alcanza a ajustarse | Acercar la lámpara; subir `camara.webcam.asentar_s` a 1,0 s |
 
 ---
 
