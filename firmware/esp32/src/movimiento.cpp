@@ -97,7 +97,11 @@ static uint8_t moverBrazo360(int destino, const Contexto& c) {
     return revisar(c);
   }
   const int sentido = delta > 0 ? 1 : -1;
-  const uint32_t ms = (uint32_t)(fabsf(delta) / 90.0f * (sentido > 0 ? cal.ms90Mas : cal.ms90Menos));
+  // El servo pierde MS_ARRANQUE en empezar a girar; el resto del tiempo es proporcional al
+  // ángulo. MS90_* es el tiempo total de un giro de 90°, arranque incluido.
+  const float ms90 = (float)(sentido > 0 ? cal.ms90Mas : cal.ms90Menos);
+  const float arranque = fminf((float)cal.msArranque, ms90 - 1.0f);
+  const uint32_t ms = (uint32_t)(arranque + fabsf(delta) / 90.0f * (ms90 - arranque));
   int senal = cal.quietoBrazo + sentido * cal.dirBrazo * cal.vel360;
   senal = senal < 0 ? 0 : (senal > 180 ? 180 : senal);
   escribirServo(PIN_SERVO_BRAZO, CANAL_BRAZO, (float)senal);
@@ -106,8 +110,10 @@ static uint8_t moverBrazo360(int destino, const Contexto& c) {
   uint32_t hecho = millis() - t0;
   if (hecho > ms) hecho = ms;
   escribirServo(PIN_SERVO_BRAZO, CANAL_BRAZO, angBrazo);  // quieto
-  // Si una parada lo cortó a mitad, se estima cuánto alcanzó a girar
-  posBrazo = r ? posBrazo + delta * (ms ? (float)hecho / ms : 1.0f) : (float)destino;
+  // Si una parada lo cortó a mitad, se estima cuánto alcanzó a girar (descontando el arranque)
+  float fraccion = ms > arranque ? ((float)hecho - arranque) / ((float)ms - arranque) : 1.0f;
+  fraccion = fraccion < 0 ? 0 : (fraccion > 1 ? 1 : fraccion);
+  posBrazo = r ? posBrazo + delta * fraccion : (float)destino;
   return r;
 }
 

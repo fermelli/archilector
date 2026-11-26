@@ -38,6 +38,7 @@ CALIBRACION_INICIAL = {
     "MS90_MAS": 600,
     "MS90_MENOS": 600,
     "DIR_BRAZO": 1,
+    "MS_ARRANQUE": 0,
 }
 RANGOS = {
     "ANG_REPOSO": (0, 180), "ANG_CONTACTO": (0, 180), "ANG_DEPOSITO": (0, 180),
@@ -47,6 +48,7 @@ RANGOS = {
     "PULSO_MIN": (400, 1200), "PULSO_MAX": (1800, 2600),
     "BRAZO_360": (0, 1), "QUIETO_BRAZO": (0, 180), "VEL_360": (5, 90),
     "MS90_MAS": (50, 10000), "MS90_MENOS": (50, 10000), "DIR_BRAZO": (-1, 1),
+    "MS_ARRANQUE": (0, 500),
 }
 
 
@@ -356,7 +358,9 @@ class SimuladorESP32:
             segundos = abs(valor) / c["VEL_RODILLO"]
         elif pieza == "B" and c["BRAZO_360"]:  # brazo de 360° emulado: tiempo calibrado por cada 90°
             delta = valor - self.angulos["B"]
-            segundos = abs(delta) / 90 * (c["MS90_MAS"] if delta > 0 else c["MS90_MENOS"]) / 1000
+            ms90 = c["MS90_MAS"] if delta > 0 else c["MS90_MENOS"]
+            arranque = min(c["MS_ARRANQUE"], ms90 - 1) if delta else 0
+            segundos = (arranque + abs(delta) / 90 * (ms90 - arranque)) / 1000
         else:
             actual = self.angulos[pieza]
             segundos = abs(valor - actual) / (c["VEL_GIRO"] if pieza == "B" else c["VEL_BARRA"])

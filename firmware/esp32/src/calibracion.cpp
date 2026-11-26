@@ -35,6 +35,7 @@ static const Parametro PARAMETROS[] = {
     {"MS90_MAS", &cal.ms90Mas, 50, 10000, 600},
     {"MS90_MENOS", &cal.ms90Menos, 50, 10000, 600},
     {"DIR_BRAZO", &cal.dirBrazo, -1, 1, 1},
+    {"MS_ARRANQUE", &cal.msArranque, 0, 500, 0},
 };
 static const size_t N_PARAMETROS = sizeof(PARAMETROS) / sizeof(PARAMETROS[0]);
 

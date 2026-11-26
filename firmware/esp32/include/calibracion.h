@@ -25,6 +25,7 @@ struct Calibracion {
   int32_t ms90Mas;       // MS90_MAS       ms para recorrer 90° hacia ángulos mayores
   int32_t ms90Menos;     // MS90_MENOS     ms para recorrer 90° hacia ángulos menores
   int32_t dirBrazo;      // DIR_BRAZO      1 o -1: lado de la señal que hace crecer el ángulo
+  int32_t msArranque;    // MS_ARRANQUE    ms que el servo tarda en empezar a girar (incluidos en MS90_*)
 };
 
 extern Calibracion cal;
