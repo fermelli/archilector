@@ -80,8 +80,56 @@ static uint8_t moverServo(uint8_t pin, uint8_t canal, float& actual, volatile bo
   return rampaServo(pin, canal, actual, destino, velocidad, c);
 }
 
+// --- Brazo con servo de 360° usado como si fuera de 180° (BRAZO_360 = 1) ---------------
+// No hay sensor: la posición se estima. Para ir a un ángulo, el servo gira hacia ese lado
+// el tiempo calibrado (MS90_MAS o MS90_MENOS por cada 90°) y vuelve a la señal de quieto.
+static float posBrazo = 90;  // posición estimada del brazo (°)
+
+static uint8_t pausa(uint32_t ms, const Contexto& c);
+
+static uint8_t moverBrazo360(int destino, const Contexto& c) {
+  const float delta = destino - posBrazo;
+  brazoSuelto = false;
+  angBrazo = (float)cal.quietoBrazo;
+  if (fabsf(delta) < 0.5f) {
+    escribirServo(PIN_SERVO_BRAZO, CANAL_BRAZO, angBrazo);
+    posBrazo = (float)destino;
+    return revisar(c);
+  }
+  const int sentido = delta > 0 ? 1 : -1;
+  const uint32_t ms = (uint32_t)(fabsf(delta) / 90.0f * (sentido > 0 ? cal.ms90Mas : cal.ms90Menos));
+  int senal = cal.quietoBrazo + sentido * cal.dirBrazo * cal.vel360;
+  senal = senal < 0 ? 0 : (senal > 180 ? 180 : senal);
+  escribirServo(PIN_SERVO_BRAZO, CANAL_BRAZO, (float)senal);
+  const uint32_t t0 = millis();
+  const uint8_t r = pausa(ms, c);
+  uint32_t hecho = millis() - t0;
+  if (hecho > ms) hecho = ms;
+  escribirServo(PIN_SERVO_BRAZO, CANAL_BRAZO, angBrazo);  // quieto
+  // Si una parada lo cortó a mitad, se estima cuánto alcanzó a girar
+  posBrazo = r ? posBrazo + delta * (ms ? (float)hecho / ms : 1.0f) : (float)destino;
+  return r;
+}
+
 static uint8_t moverBrazo(int destino, const Contexto& c) {
+  if (cal.brazo360) return moverBrazo360(destino, c);
   return moverServo(PIN_SERVO_BRAZO, CANAL_BRAZO, angBrazo, brazoSuelto, destino, cal.velGiro, c);
+}
+
+int brazoPosicion() { return (int)lroundf(cal.brazo360 ? posBrazo : angBrazo); }
+
+void brazoFijarPosicion(int angulo) { posBrazo = (float)angulo; }
+
+void brazoModoAplicar() {
+  // Al activar el modo 360° (o cambiar su quieto) el servo queda quieto; al volver al de
+  // posición, se ordena el ángulo estimado para que no salte.
+  brazoSuelto = false;
+  if (cal.brazo360) {
+    angBrazo = (float)cal.quietoBrazo;
+  } else {
+    angBrazo = posBrazo;
+  }
+  escribirServo(PIN_SERVO_BRAZO, CANAL_BRAZO, angBrazo);
 }
 
 static uint8_t moverBarra(int destino, const Contexto& c) {
@@ -217,7 +265,9 @@ static uint8_t secuenciaGiro(const Orden& o, const Contexto& c) {
 // Tiempo máximo de una orden MOVE: lo que tarda a la velocidad calibrada + 1,5 s
 static uint32_t limiteManual(const Orden& o) {
   float s;
-  if (o.pieza == 'B') {
+  if (o.pieza == 'B' && cal.brazo360) {
+    s = fabsf(posBrazo - o.extra) / 90.0f * (float)max(cal.ms90Mas, cal.ms90Menos) / 1000.0f;
+  } else if (o.pieza == 'B') {
     s = fabsf(angBrazo - o.extra) / cal.velGiro;
   } else if (o.pieza == 'R') {
     s = fabsf(angBarra - o.extra) / cal.velBarra;
@@ -237,7 +287,9 @@ void movimientoIniciar() {
   pwmIniciar(PIN_SERVO_BARRA, CANAL_BARRA, SERVO_FREQ_HZ, SERVO_RES_BITS);
   // Sin sensor de posición: se ordena directamente el reposo guardado en NVS.
   // Como cada secuencia termina en reposo, el salto al encender es mínimo (T2.2).
-  angBrazo = (float)cal.angReposo;
+  // Con el brazo de 360° se supone que quedó en reposo y se le ordena quedarse quieto.
+  posBrazo = (float)cal.angReposo;
+  angBrazo = cal.brazo360 ? (float)cal.quietoBrazo : (float)cal.angReposo;
   angBarra = (float)cal.barraCerrada;
   escribirServo(PIN_SERVO_BRAZO, CANAL_BRAZO, angBrazo);
   escribirServo(PIN_SERVO_BARRA, CANAL_BARRA, angBarra);

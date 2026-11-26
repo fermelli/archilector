@@ -100,5 +100,11 @@ def test_panel_web(tmp_path):
     assert not r["ok"] and r["respuesta"] == "NAK E05"
     r = cliente.post("/manual/comando", data={"comando": "SPIN", "valor": "60", "ms": "300", "quieto": "91"}).json()
     assert r["ok"] and sim.angulos["B"] == 91
+    r = cliente.post("/manual/comando", data={"comando": "CFG", "pieza": "QUIETO_BRAZO", "valor": "92"}).json()
+    assert r["ok"] and sim.cal["QUIETO_BRAZO"] == 92
+    r = cliente.post("/manual/comando", data={"comando": "CFG", "pieza": "QUIETO_BRAZO"}).json()
+    assert r["respuesta"] == "CFG QUIETO_BRAZO,92"
+    assert cliente.post("/manual/comando", data={"comando": "POS", "valor": "0"}).json()["ok"]
+    assert cliente.post("/manual/comando", data={"comando": "CFG", "pieza": "NADA"}).status_code == 400
     assert cliente.post("/manual/comando", data={"comando": "TURN"}).status_code == 400
     assert cliente.post("/manual/comando", data={"comando": "STATUS"}).json()["respuesta"].startswith("STATE")

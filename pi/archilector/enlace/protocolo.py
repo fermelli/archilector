@@ -31,7 +31,8 @@ TIEMPO_MAXIMO = {
     "BACK": 10.0,
     "MOVE": 28.0,  # tope; el ESP32 calcula el límite de cada orden según la velocidad calibrada
     "SPIN": 11.5,  # hasta 10 s de giro + margen
-    "FREE": 0.05,  # corta los pulsos de un servo (firmware 2.3.0)
+    "FREE": 0.05,
+    "POS": 0.05,  # posición estimada del brazo de 360° (firmware 2.3.0)  # corta los pulsos de un servo (firmware 2.3.0)
     "LIGHT": 0.05,
     "LCD": 0.05,
     "BEEP": 0.05,

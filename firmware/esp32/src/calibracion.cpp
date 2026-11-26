@@ -29,6 +29,12 @@ static const Parametro PARAMETROS[] = {
     {"T_ASENTAR", &cal.tAsentar, 0, 2000, 250},
     {"PULSO_MIN", &cal.pulsoMin, 400, 1200, 500},
     {"PULSO_MAX", &cal.pulsoMax, 1800, 2600, 2500},
+    {"BRAZO_360", &cal.brazo360, 0, 1, 0},
+    {"QUIETO_BRAZO", &cal.quietoBrazo, 0, 180, 90},
+    {"VEL_360", &cal.vel360, 5, 90, 30},
+    {"MS90_MAS", &cal.ms90Mas, 50, 10000, 600},
+    {"MS90_MENOS", &cal.ms90Menos, 50, 10000, 600},
+    {"DIR_BRAZO", &cal.dirBrazo, -1, 1, 1},
 };
 static const size_t N_PARAMETROS = sizeof(PARAMETROS) / sizeof(PARAMETROS[0]);
 
@@ -50,7 +56,7 @@ uint8_t calibracionFijar(const char* nombre, long valor) {
     const Parametro& p = PARAMETROS[i];
     if (strcmp(p.nombre, nombre) != 0) continue;
     if (valor < p.minimo || valor > p.maximo) return E05_RANGO;
-    if (strcmp(nombre, "DIR_RODILLO") == 0 && valor == 0) return E05_RANGO;
+    if ((strcmp(nombre, "DIR_RODILLO") == 0 || strcmp(nombre, "DIR_BRAZO") == 0) && valor == 0) return E05_RANGO;
     *p.destino = (int32_t)valor;
     nvs.begin("archilector", false);
     nvs.putInt(p.nombre, (int32_t)valor);
@@ -58,6 +64,16 @@ uint8_t calibracionFijar(const char* nombre, long valor) {
     return E_NINGUNO;
   }
   return E05_RANGO;
+}
+
+bool calibracionLeer(const char* nombre, long& valor) {
+  for (size_t i = 0; i < N_PARAMETROS; i++) {
+    if (strcmp(PARAMETROS[i].nombre, nombre) == 0) {
+      valor = *PARAMETROS[i].destino;
+      return true;
+    }
+  }
+  return false;
 }
 
 void calibracionDescribir(char* buf, size_t cap) {

@@ -151,6 +151,15 @@ def test_move_controla_cada_pieza(enlace, sim):
         with pytest.raises(RechazoESP32):
             enlace.comando("SPIN", *malos)
     assert enlace.comando("FREE", "B", 93).cmd == "ACK" and sim.angulos["B"] == 93
+    # Brazo de 360° como de 180°: lectura de CFG y posición estimada
+    assert enlace.comando("CFG", "BRAZO_360", 1).cmd == "ACK"
+    r = enlace.comando("CFG", "MS90_MAS")
+    assert (r.cmd, r.args) == ("CFG", ["MS90_MAS", "600"])
+    assert enlace.comando("POS", 0).cmd == "ACK" and enlace.comando("POS").args == ["0"]
+    assert enlace.comando("MOVE", "B", 90).cmd == "DONE" and enlace.comando("POS").args == ["90"]
+    with pytest.raises(RechazoESP32):
+        enlace.comando("CFG", "DIR_BRAZO", 0)
+    enlace.comando("CFG", "BRAZO_360", 0)
     assert enlace.comando("FREE", "B").cmd == "ACK" and "B" in sim.sueltos
     assert enlace.comando("MOVE", "B", 80).ok and "B" not in sim.sueltos
     with pytest.raises(RechazoESP32):

@@ -6,7 +6,7 @@
   <div>
     <h1>Control manual</h1>
     <p class="bajada">Mueva cada componente por separado para probar el armado. Cada orden espera a que la pieza termine;
-      STOP corta cualquier movimiento al instante. Los ángulos no cambian la calibración.</p>
+      STOP corta cualquier movimiento al instante. Mover piezas no cambia la calibración.</p>
   </div>
 </div>
 
@@ -43,80 +43,79 @@
     </div>
   </section>
 
-  {% for pieza, titulo, pines, inicial, es360 in [("B", "Brazo · MG995", "GPIO 18", 90, true), ("R", "Barra · SG90", "GPIO 19", 0, false)] %}
-  <section class="tarjeta servo" data-pieza="{{ pieza }}" data-inicial="{{ inicial }}" data-giratorio="{{ 'si' if es360 else 'no' }}" aria-labelledby="t-{{ pieza }}">
+  {% for pieza, titulo, pines, inicial in [("B", "Brazo · MG995", "GPIO 18", 90), ("R", "Barra · SG90", "GPIO 19", 0)] %}
+  <section class="tarjeta servo" data-pieza="{{ pieza }}" aria-labelledby="t-{{ pieza }}">
     <div class="tarjeta-cab"><h2 id="t-{{ pieza }}">{{ titulo }}</h2><span class="pines">{{ pines }}</span></div>
     <div class="tarjeta-cuerpo angulo">
-      <div class="opciones">
-        <label class="interruptor"><input type="checkbox" class="modo360"> Servo de 360° (rotación continua)</label>
-        <label class="interruptor"><input type="checkbox" class="invertir"> Invertir sentido</label>
+      {% if pieza == "B" %}
+      <label class="interruptor"><input type="checkbox" id="brazo360"> Servo de 360° usado como de 180° (por tiempo)</label>
+      <div class="pos-fila solo-360">
+        <span>Posición estimada</span><b class="lectura-valor" id="pos-brazo">—</b>
+        <span class="suave chico" id="pos-aviso"></span>
       </div>
+      {% endif %}
       <div class="angulo-fila">
-        <input type="range" min="0" max="180" step="1" value="{{ inicial }}" class="rango" aria-label="Señal de {{ titulo }} en grados">
+        <input type="range" min="0" max="180" step="1" value="{{ inicial }}" class="rango" aria-label="Ángulo de {{ titulo }}">
         <output class="lectura-valor">{{ inicial }}°</output>
       </div>
-      <p class="giro" hidden></p>
       <div class="atajos fino">
         {% for d in [-5, -1, 1, 5] %}
         <button class="sec chico-b mueve paso" data-delta="{{ d }}">{{ '+' if d > 0 else '−' }}{{ d|abs }}°</button>
         {% endfor %}
       </div>
-      <div class="atajos cuatro solo-360">
-        <button class="sec chico-b mueve vel" data-valor="0">◀ Rápido</button>
-        <button class="sec chico-b mueve vel" data-valor="75">◀ Lento</button>
-        <button class="sec chico-b mueve vel" data-valor="105">Lento ▶</button>
-        <button class="sec chico-b mueve vel" data-valor="180">Rápido ▶</button>
-      </div>
-      <div class="atajos solo-180">
+      <div class="atajos">
         {% for a in [0, 45, 90, 135, 180] %}
         <button class="sec chico-b atajo" data-angulo="{{ a }}">{{ a }}°</button>
         {% endfor %}
       </div>
-      {% if pieza == "B" %}
-      <div class="emular solo-360">
-        <div class="emular-cab">
-          <h3>Emular ángulos</h3>
-          <span class="suave chico">por tiempo, sin sensor</span>
-        </div>
-        <div class="pos-fila">
-          <span>Posición estimada</span><b class="pos lectura-valor">0°</b>
-          <button class="sec chico-b fijar0" type="button">Fijar aquí como 0°</button>
-        </div>
-        <div class="atajos">
-          <button class="mueve ir" data-a="0">Ir a 0°</button>
-          <button class="mueve ir" data-a="90">Ir a 90°</button>
-          <button class="mueve ir" data-a="180">Ir a 180°</button>
-        </div>
-        <button class="sec mueve idavuelta">{{ icono("repetir") }} Ida y vuelta 0° ↔ 90° · 3 veces</button>
-        <details class="calibrar-giro">
-          <summary>Calibrar el giro</summary>
-          <div class="campos">
-            <label class="campo"><span>Señal de quieto (°)</span>
-              <input type="number" class="quieto" min="0" max="180" value="90">
-              <small>Donde no gira. Búsquela con −1° / +1°.</small></label>
-            <label class="campo"><span>Velocidad del giro</span>
-              <input type="number" class="velgiro" min="5" max="90" value="30">
-              <small>Grados de señal desde el quieto: 5 lento, 90 máximo.</small></label>
-            <label class="campo"><span>ms para 90° hacia ▶</span>
-              <input type="number" class="msder" min="50" max="10000" value="600"></label>
-            <label class="campo"><span>ms para 90° hacia ◀</span>
-              <input type="number" class="msizq" min="50" max="10000" value="600"></label>
-          </div>
-          <button class="sec chico-b usarquieto" type="button" style="margin-top:10px">Usar la señal actual como quieto</button>
-          <p class="ayuda">Ponga el brazo en 0° a mano, toque «Fijar aquí como 0°» y luego «Ir a 90°». Si se pasa, baje
-            los ms; si no llega, súbalos. Haga lo mismo volviendo a 0° con el sentido ◀. La posición es una estimación:
-            vuelva a fijar 0° cada tanto.</p>
-        </details>
-      </div>
-      {% endif %}
       <div class="atajos acciones">
-        <button class="mueve mover">{{ icono("enviar") }} Enviar <span class="etq">{{ inicial }}°</span></button>
+        <button class="mueve mover">{{ icono("enviar") }} Mover a <span class="etq">{{ inicial }}°</span></button>
         <button class="peligro-sec parar" data-siempre>{{ icono("parada") }} Parar</button>
       </div>
-      <p class="ayuda nota-360" style="margin:0">Servo de 360°: 90° es quieto; cuanto más lejos de 90°, más rápido; el lado define el sentido.
-        Si en 90° se mueve despacio, busque su punto de quieto con −1° / +1° y anótelo en «Calibrar el giro»: «Parar» lo deja en esa señal.</p>
-      <p class="ayuda nota-180" style="margin:0">Servo de posición: va al ángulo y se queda. −1° / +1° lo mueven grado a grado.
-        «Parar» corta la señal: el servo queda suelto.</p>
+      {% if pieza == "B" %}
+      <button class="sec mueve solo-360" id="ida-vuelta">{{ icono("repetir") }} Ida y vuelta 0° ↔ 90° · 3 veces</button>
+
+      <div class="emular solo-360">
+        <div class="emular-cab"><h3>El brazo está ahora en…</h3><span class="suave chico">para corregir la estimación</span></div>
+        <div class="atajos">
+          {% for a in [0, 90, 180] %}<button class="sec chico-b fijar" data-a="{{ a }}">{{ a }}°</button>{% endfor %}
+        </div>
+        <p class="ayuda" style="margin:0">Sin sensor, la posición es una estimación: fíjela al encender, después de girarlo a mano
+          y cada tanto si se va corriendo.</p>
+      </div>
+
+      <details class="calibrar-giro emular solo-360">
+        <summary>Calibrar el giro (se guarda en el ESP32)</summary>
+        <div class="emular-cab" style="margin-top:12px"><h3>1 · Punto de quieto</h3><span class="suave chico">giro libre</span></div>
+        <div class="pos-fila">
+          <span>Señal</span><b class="lectura-valor" id="senal-libre">90°</b>
+          <span class="giro" id="giro-libre"></span>
+        </div>
+        <div class="atajos cuatro">
+          <button class="sec chico-b libre" data-delta="-1">Señal −1°</button>
+          <button class="sec chico-b libre" data-delta="1">Señal +1°</button>
+          <button class="sec chico-b libre" data-vel="-1">◀ Girar</button>
+          <button class="sec chico-b libre" data-vel="1">Girar ▶</button>
+        </div>
+        <button class="sec chico-b" id="usar-quieto" type="button">Guardar esta señal como quieto</button>
+        <div class="emular-cab" style="margin-top:8px"><h3>2 · Tiempos de giro</h3></div>
+        <div class="campos">
+          <label class="campo"><span>Señal de quieto (°)</span><input type="number" class="cfg" data-cfg="QUIETO_BRAZO" min="0" max="180"></label>
+          <label class="campo"><span>Velocidad (° de señal)</span><input type="number" class="cfg" data-cfg="VEL_360" min="5" max="90">
+            <small>5 lento · 90 máximo</small></label>
+          <label class="campo"><span>ms para 90° hacia más</span><input type="number" class="cfg" data-cfg="MS90_MAS" min="50" max="10000"></label>
+          <label class="campo"><span>ms para 90° hacia menos</span><input type="number" class="cfg" data-cfg="MS90_MENOS" min="50" max="10000"></label>
+        </div>
+        <label class="interruptor"><input type="checkbox" id="dir-brazo"> Invertir sentido (si al pedir 90° desde 0° gira al revés)</label>
+        <p class="ayuda" style="margin:0">Cómo: con «Señal ±1°» encuentre la señal en la que no gira y guárdela. Ponga el brazo
+          en 0° a mano, toque «El brazo está en 0°» y mueva a 90°. Si se pasa, baje «ms hacia más»; si no llega, súbalo.
+          Igual de 90° a 0° con «ms hacia menos». Cada valor se guarda al cambiarlo.</p>
+      </details>
+      {% endif %}
+      <p class="ayuda nota-{{ pieza }}" style="margin:0">{% if pieza == "B" %}<span class="solo-180">Servo de posición: va al ángulo
+        y se queda. «Parar» corta la señal y el servo queda suelto.</span><span class="solo-360">Con el servo de 360°, volteos
+        y «Volver a reposo» también usan esta emulación. «Parar» lo deja en su señal de quieto.</span>{% else %}Cerrada y abierta
+        según BARRA_CERRADA y BARRA_ABIERTA. «Parar» corta la señal: el servo queda suelto.{% endif %}</p>
     </div>
   </section>
   {% endfor %}
@@ -155,12 +154,12 @@
 (() => {
   const OCUPADO = {{ 'true' if ocupado else 'false' }};
   const HAY_ENLACE = {{ 'true' if hay_enlace else 'false' }};
-  const registro = document.getElementById('registro');
-  const vacio = document.getElementById('registro-vacio');
-  const insignia = document.getElementById('estado-esp32');
+  const $ = id => document.getElementById(id);
+  const registro = $('registro'), vacio = $('registro-vacio'), insignia = $('estado-esp32');
   const TONOS = { REPOSO: 'ok', MOVIENDO: 'info', PARADA: 'peligro', FALLA: 'peligro', ARRANQUE: 'aviso' };
-  let enCurso = false;
-  let cancelar = false;  // STOP o Parar cortan una tanda de «Ida y vuelta»
+  let enCurso = false;     // hay una orden de movimiento esperando DONE
+  let encadenado = false;  // «Ida y vuelta»: los botones siguen bloqueados entre órdenes
+  let cancelar = false;    // STOP o Parar cortan la ida y vuelta
 
   function habilitar() {
     document.querySelectorAll('button').forEach(b => {
@@ -174,9 +173,8 @@
     vacio.hidden = true;
     const li = document.createElement('li');
     li.className = ok ? 'ok' : 'mal';
-    const hora = new Date().toLocaleTimeString('es-BO', { hour12: false });
     li.innerHTML = '<span class="hora"></span><span class="orden"></span><span class="resp"></span>';
-    li.querySelector('.hora').textContent = hora;
+    li.querySelector('.hora').textContent = new Date().toLocaleTimeString('es-BO', { hour12: false });
     li.querySelector('.orden').textContent = orden;
     li.querySelector('.resp').textContent = '→ ' + respuesta + (ayuda ? ' · ' + ayuda : '');
     registro.prepend(li);
@@ -190,24 +188,23 @@
     insignia.querySelector('span').textContent = m[1].charAt(0) + m[1].slice(1).toLowerCase();
   }
 
-  let encadenado = false;  // durante «Ir a» e «Ida y vuelta» los botones siguen bloqueados entre órdenes
-  async function enviar(comando, pieza = '', valor = '', extra = {}) {
+  // Envía una orden al ESP32. silencio: no se anota (lecturas de fondo).
+  async function enviar(comando, pieza = '', valor = '', silencio = false) {
     const datos = new FormData();
-    Object.entries(extra).forEach(([k, v]) => datos.append(k, v));
     datos.append('comando', comando);
     datos.append('pieza', pieza);
     datos.append('valor', valor);
-    const mueve = ['MOVE', 'HOME', 'SPIN'].includes(comando);
+    const mueve = ['MOVE', 'HOME'].includes(comando);
     let resultado = null;
     if (mueve) { enCurso = true; habilitar(); insignia.className = 'insignia info'; insignia.querySelector('span').textContent = 'Moviendo'; }
     try {
       const r = await fetch('/manual/comando', { method: 'POST', body: datos });
       const j = await r.json();
       if (!r.ok) {
-        anotar([comando, pieza, valor].filter(Boolean).join(' '), j.detail || ('error ' + r.status), false);
+        if (!silencio) anotar([comando, pieza, valor].filter(Boolean).join(' '), j.detail || ('error ' + r.status), false);
         Panel.tostada(j.detail || 'No se pudo enviar la orden', 'peligro');
       } else {
-        anotar(j.orden, j.respuesta + (j.ms != null ? ` (${j.ms} ms)` : ''), j.ok, j.ayuda);
+        if (!silencio) anotar(j.orden, j.respuesta + (j.ms != null ? ` (${j.ms} ms)` : ''), j.ok, j.ayuda);
         if (!j.ok) Panel.tostada(j.ayuda || j.respuesta, 'peligro');
         pintarEstado(j.respuesta);
         resultado = j;
@@ -216,149 +213,150 @@
       anotar(comando, 'sin respuesta del panel', false);
       Panel.tostada('Sin respuesta del panel', 'peligro');
     } finally {
-      if (mueve && !encadenado) { enCurso = false; habilitar(); enviar('STATUS'); }
+      if (mueve && !encadenado) { enCurso = false; habilitar(); enviar('STATUS', '', '', true); posicion(); }
     }
     return resultado;
   }
 
-  // Servos: modo 360° o de posición, sentido invertible, grado a grado
-  let prefs = {};
-  try { prefs = JSON.parse(localStorage.getItem('archilector-manual') || '{}') || {}; } catch (e) { prefs = {}; }
-  const guardar = () => { try { localStorage.setItem('archilector-manual', JSON.stringify(prefs)); } catch (e) {} };
-  const servos = {};
+  // --- brazo de 360° emulado como de 180° ------------------------------------------
+  const cfg = {};  // valores leídos del ESP32
+  const chk360 = $('brazo360');
+  const es360 = () => !!(chk360 && chk360.checked);
+  let posDudosa = false;  // el brazo giró libre o a mano: hay que fijar la posición
+
+  function pintarModo() {
+    document.querySelectorAll('.solo-360').forEach(e => { e.hidden = !es360(); });
+    document.querySelectorAll('.solo-180').forEach(e => { e.hidden = es360(); });
+  }
+
+  async function posicion() {
+    if (!es360()) return;
+    const j = await enviar('POS', '', '', true);
+    const m = j && /POS\s+(\d+)/.exec(j.respuesta);
+    if (m) $('pos-brazo').textContent = m[1] + '°';
+    $('pos-aviso').textContent = posDudosa ? 'girado a mano: fije la posición abajo' : '';
+  }
+
+  async function leerCfg() {
+    for (const n of ['BRAZO_360', 'QUIETO_BRAZO', 'VEL_360', 'MS90_MAS', 'MS90_MENOS', 'DIR_BRAZO']) {
+      const j = await enviar('CFG', n, '', true);
+      const m = j && /CFG\s+\w+,(-?\d+)/.exec(j.respuesta);
+      if (m) cfg[n] = Number(m[1]);
+    }
+    if (chk360) {
+      chk360.checked = cfg.BRAZO_360 === 1;
+      document.querySelectorAll('input.cfg').forEach(i => { if (cfg[i.dataset.cfg] != null) i.value = cfg[i.dataset.cfg]; });
+      $('dir-brazo').checked = cfg.DIR_BRAZO === -1;
+      senalLibre = cfg.QUIETO_BRAZO ?? 90;
+      pintarLibre();
+    }
+    pintarModo();
+    posicion();
+  }
+
+  async function guardarCfg(nombre, valor) {
+    const j = await enviar('CFG', nombre, String(valor));
+    if (j && j.ok) cfg[nombre] = Number(valor);
+    return j && j.ok;
+  }
+
+  if (chk360) {
+    chk360.addEventListener('change', async () => {
+      if (!(await guardarCfg('BRAZO_360', chk360.checked ? 1 : 0))) chk360.checked = !chk360.checked;
+      pintarModo(); posicion();
+    });
+    document.querySelectorAll('input.cfg').forEach(i => i.addEventListener('change', () => guardarCfg(i.dataset.cfg, i.value)));
+    $('dir-brazo').addEventListener('change', e => guardarCfg('DIR_BRAZO', e.target.checked ? -1 : 1));
+    document.querySelectorAll('.fijar').forEach(b => b.addEventListener('click', async () => {
+      const j = await enviar('POS', '', b.dataset.a);
+      if (j && j.ok) { posDudosa = false; posicion(); }
+    }));
+    $('ida-vuelta').addEventListener('click', async () => {
+      cancelar = false; encadenado = true; enCurso = true; habilitar();
+      try {
+        for (const a of [90, 0, 90, 0, 90, 0]) {
+          const j = await enviar('MOVE', 'B', String(a));
+          if (cancelar || !j || !j.ok) break;
+          await posicion();
+          await new Promise(r => setTimeout(r, 400));
+        }
+      } finally {
+        encadenado = false; enCurso = false; habilitar(); enviar('STATUS', '', '', true); posicion();
+      }
+    });
+  }
+
+  // Giro libre para calibrar: fija una señal cruda (FREE,B,señal)
+  let senalLibre = 90;
+  function pintarLibre() {
+    if (!$('senal-libre')) return;
+    const q = cfg.QUIETO_BRAZO ?? 90, d = senalLibre - q;
+    $('senal-libre').textContent = senalLibre + '°';
+    $('giro-libre').textContent = d === 0 ? '● quieto (según la calibración)' : (d < 0 ? '◀' : '▶') + ' girando';
+  }
+  document.querySelectorAll('.libre').forEach(b => b.addEventListener('click', async () => {
+    const q = cfg.QUIETO_BRAZO ?? 90;
+    senalLibre = b.dataset.vel ? q + Number(b.dataset.vel) * (cfg.VEL_360 ?? 30) : senalLibre + Number(b.dataset.delta);
+    senalLibre = Math.min(180, Math.max(0, senalLibre));
+    const j = await enviar('FREE', 'B', String(senalLibre));
+    if (j && j.ok && senalLibre !== q) { posDudosa = true; posicion(); }
+    pintarLibre();
+  }));
+  if ($('usar-quieto')) $('usar-quieto').addEventListener('click', async () => {
+    if (await guardarCfg('QUIETO_BRAZO', senalLibre)) {
+      document.querySelector('input[data-cfg="QUIETO_BRAZO"]').value = senalLibre;
+      Panel.tostada('Señal de quieto guardada: ' + senalLibre + '°');
+      pintarLibre();
+    }
+  });
+
+  // --- servos: brazo y barra ---------------------------------------------------
+  const paradas = {};
   document.querySelectorAll('.servo').forEach(t => {
     const p = t.dataset.pieza;
-    const s = servos[p] = {
-      t, rango: t.querySelector('.rango'), salida: t.querySelector('.lectura-valor'), giro: t.querySelector('.giro'),
-      modo: t.querySelector('.modo360'), inv: t.querySelector('.invertir'),
+    const rango = t.querySelector('.rango');
+    const pintar = () => {
+      t.querySelector('.angulo-fila .lectura-valor').textContent = rango.value + '°';
+      t.querySelector('.etq').textContent = rango.value + '°';
     };
-    const pr = prefs[p] || {};
-    s.modo.checked = pr.modo360 ?? (t.dataset.giratorio === 'si');
-    s.inv.checked = !!pr.invertir;
-    const valor = () => Number(s.rango.value);
-    const enviado = () => s.inv.checked ? 180 - valor() : valor();
-    s.pintar = (suelto = false) => {
-      const v = valor();
-      s.salida.textContent = v + '°';
-      t.querySelector('.etq').textContent = v + '°';
-      const es360 = s.modo.checked;
-      t.querySelectorAll('.solo-360, .nota-360').forEach(e => { e.hidden = !es360; });
-      t.querySelectorAll('.solo-180, .nota-180').forEach(e => { e.hidden = es360; });
-      s.giro.hidden = !es360;
-      if (es360) {
-        s.giro.textContent = suelto ? '■ Detenido (sin señal)' : v === 90 ? '● Quieto (90°)'
-          : (v < 90 ? '◀' : '▶') + ' Girando al ' + Math.round(Math.abs(v - 90) / 90 * 100) + ' % de la velocidad';
-      }
-    };
-    s.mover = () => { s.pintar(); return enviar('MOVE', p, String(enviado())); };
-    s.rango.addEventListener('input', () => s.pintar());
-    [s.modo, s.inv].forEach(c => c.addEventListener('change', () => {
-      prefs[p] = Object.assign(prefs[p] || {}, { modo360: s.modo.checked, invertir: s.inv.checked }); guardar(); s.pintar();
-    }));
-    t.querySelectorAll('.atajo').forEach(b => b.addEventListener('click', () => { s.rango.value = b.dataset.angulo; s.pintar(); }));
+    const mover = () => { pintar(); return enviar('MOVE', p, rango.value); };
+    rango.addEventListener('input', pintar);
+    t.querySelectorAll('.atajo').forEach(b => b.addEventListener('click', () => { rango.value = b.dataset.angulo; pintar(); }));
     t.querySelectorAll('.paso').forEach(b => b.addEventListener('click', () => {
-      s.rango.value = Math.min(180, Math.max(0, valor() + Number(b.dataset.delta))); s.mover();
+      rango.value = Math.min(180, Math.max(0, Number(rango.value) + Number(b.dataset.delta))); mover();
     }));
-    t.querySelectorAll('.vel').forEach(b => b.addEventListener('click', () => { s.rango.value = b.dataset.valor; s.mover(); }));
-    t.querySelector('.mover').addEventListener('click', s.mover);
-    s.quieto = () => {
-      const q = t.querySelector('.quieto');
-      return q ? Math.min(180, Math.max(0, Number(q.value) || 90)) : 90;
-    };
-    s.parar = async () => {
+    t.querySelector('.mover').addEventListener('click', mover);
+    paradas[p] = async () => {
       cancelar = true;
-      // Si hay un giro en curso, STOP lo corta ya (el ESP32 vuelve al quieto); FREE se acepta en PARADA
-      if (enCurso) await enviar('STOP');
-      if (s.modo.checked) {
-        await enviar('FREE', p, String(s.quieto()));
-        s.rango.value = s.inv.checked ? 180 - s.quieto() : s.quieto(); s.pintar();
+      if (enCurso) await enviar('STOP');  // corta un giro en curso; FREE se acepta en PARADA
+      if (p === 'B' && es360()) {
+        senalLibre = cfg.QUIETO_BRAZO ?? 90;
+        await enviar('FREE', 'B', String(senalLibre));
+        pintarLibre(); posicion();
       } else {
         await enviar('FREE', p);
-        s.pintar(true);
       }
     };
-    t.querySelector('.parar').addEventListener('click', s.parar);
-    s.pintar();
-
-    const emu = t.querySelector('.emular');
-    if (emu) {
-      const campo = c => emu.querySelector('.' + c);
-      const e = (prefs[p] || {}).emu || {};
-      ['quieto', 'velgiro', 'msder', 'msizq'].forEach(c => { if (e[c] != null) campo(c).value = e[c]; });
-      let pos = Number.isFinite(e.pos) ? e.pos : 0;
-      const posEl = campo('pos');
-      const guardarEmu = () => {
-        prefs[p] = Object.assign(prefs[p] || {}, { emu: {
-          quieto: +campo('quieto').value, velgiro: +campo('velgiro').value,
-          msder: +campo('msder').value, msizq: +campo('msizq').value, pos } });
-        guardar();
-      };
-      const pintarPos = () => { posEl.textContent = Number.isFinite(pos) ? Math.round(pos) + '°' : '¿?'; };
-      emu.querySelectorAll('input').forEach(i => i.addEventListener('change', guardarEmu));
-      campo('fijar0').addEventListener('click', () => { pos = 0; pintarPos(); guardarEmu(); });
-      campo('usarquieto').addEventListener('click', () => {
-        campo('quieto').value = s.inv.checked ? 180 - valor() : valor(); guardarEmu();
-        Panel.tostada('Señal de quieto: ' + campo('quieto').value + '°');
-      });
-
-      // Gira hacia el destino el tiempo calibrado; el ESP32 cronometra y vuelve al quieto
-      const irA = async destino => {
-        if (!Number.isFinite(pos)) { Panel.tostada('Posición desconocida: ponga el brazo en 0° y toque «Fijar aquí como 0°»', 'peligro'); return false; }
-        const delta = destino - pos;
-        if (Math.abs(delta) < 1) return true;
-        const haciaDer = delta > 0;
-        const signo = (haciaDer ? 1 : -1) * (s.inv.checked ? -1 : 1);
-        const q = s.quieto();
-        const senal = Math.min(180, Math.max(0, q + signo * (+campo('velgiro').value || 30)));
-        let ms = Math.round(Math.abs(delta) / 90 * (+(haciaDer ? campo('msder') : campo('msizq')).value || 600));
-        while (ms > 0) {
-          const tramo = Math.min(ms, 10000);
-          const r = await enviar('SPIN', '', String(senal), { ms: String(tramo), quieto: String(q) });
-          if (!r || !r.ok) { pos = NaN; pintarPos(); guardarEmu(); return false; }
-          ms -= tramo;
-        }
-        pos = destino; pintarPos(); guardarEmu();
-        s.rango.value = s.inv.checked ? 180 - q : q; s.pintar();
-        return true;
-      };
-      const tanda = async pasos => {
-        cancelar = false; encadenado = true; enCurso = true; habilitar();
-        try {
-          for (const d of pasos) {
-            if (cancelar || !(await irA(d))) break;
-            await new Promise(r => setTimeout(r, 400));
-          }
-        } finally {
-          encadenado = false; enCurso = false; habilitar(); enviar('STATUS');
-        }
-      };
-      emu.querySelectorAll('.ir').forEach(b => b.addEventListener('click', () => tanda([Number(b.dataset.a)])));
-      campo('idavuelta').addEventListener('click', () => tanda([90, 0, 90, 0, 90, 0]));
-      pintarPos();
-    }
+    t.querySelector('.parar').addEventListener('click', paradas[p]);
   });
 
   document.querySelectorAll('button[data-comando]').forEach(b => {
     b.addEventListener('click', async () => {
+      if (b.dataset.comando === 'STOP') cancelar = true;
       await enviar(b.dataset.comando, b.dataset.pieza || '', b.dataset.valor || '');
-      if (b.dataset.comando === 'STOP') {  // el STOP general también detiene los servos de 360°
-        cancelar = true;
-        for (const [p, s] of Object.entries(servos)) {
-          if (s.modo.checked) await s.parar();
-        }
+      if (b.dataset.comando === 'STOP' && es360()) {  // el brazo de 360° queda en su señal de quieto
+        await enviar('FREE', 'B', String(cfg.QUIETO_BRAZO ?? 90));
+        posicion();
       }
     });
   });
 
-  document.getElementById('form-pasos').addEventListener('submit', ev => {
-    ev.preventDefault();
-    enviar('MOVE', 'M', document.getElementById('pasos').value);
-  });
+  $('form-pasos').addEventListener('submit', ev => { ev.preventDefault(); enviar('MOVE', 'M', $('pasos').value); });
+  $('limpiar').addEventListener('click', () => { registro.innerHTML = ''; vacio.hidden = false; });
 
-  document.getElementById('limpiar').addEventListener('click', () => { registro.innerHTML = ''; vacio.hidden = false; });
-
+  pintarModo();
   habilitar();
-  if (HAY_ENLACE) enviar('STATUS');
+  if (HAY_ENLACE) { enviar('STATUS', '', '', true); leerCfg(); }
 })();
 </script>
 {% endblock %}

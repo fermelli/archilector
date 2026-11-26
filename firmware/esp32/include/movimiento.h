@@ -19,3 +19,7 @@ void movimientoTarea(void* parametro);  // núcleo 1, prioridad máxima
 void motorApagar();                     // desenergiza las cuatro fases
 // FREE: 'B' brazo o 'R' barra sin pulsos (queda suelto); con senal >= 0, fijo en esa señal sin rampa
 void servoSoltar(char pieza, int senal = -1);
+// Brazo de 360° emulado como de 180° (BRAZO_360): posición estimada y su ajuste (POS)
+int brazoPosicion();
+void brazoFijarPosicion(int angulo);
+void brazoModoAplicar();  // tras cambiar BRAZO_360 o QUIETO_BRAZO

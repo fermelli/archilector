@@ -32,6 +32,12 @@ CALIBRACION_INICIAL = {
     "T_ASENTAR": 250,
     "PULSO_MIN": 500,
     "PULSO_MAX": 2500,
+    "BRAZO_360": 0,
+    "QUIETO_BRAZO": 90,
+    "VEL_360": 30,
+    "MS90_MAS": 600,
+    "MS90_MENOS": 600,
+    "DIR_BRAZO": 1,
 }
 RANGOS = {
     "ANG_REPOSO": (0, 180), "ANG_CONTACTO": (0, 180), "ANG_DEPOSITO": (0, 180),
@@ -39,6 +45,8 @@ RANGOS = {
     "BARRA_CERRADA": (0, 180), "VEL_BARRA": (10, 360), "VEL_RODILLO": (50, 1000),
     "DIR_RODILLO": (-1, 1), "EMBRAGUE": (0, 1), "T_ASENTAR": (0, 2000),
     "PULSO_MIN": (400, 1200), "PULSO_MAX": (1800, 2600),
+    "BRAZO_360": (0, 1), "QUIETO_BRAZO": (0, 180), "VEL_360": (5, 90),
+    "MS90_MAS": (50, 10000), "MS90_MENOS": (50, 10000), "DIR_BRAZO": (-1, 1),
 }
 
 
@@ -200,14 +208,28 @@ class SimuladorESP32:
                 self.sueltos.discard(t.args[0])
                 self.angulos[t.args[0]] = senal
             return self._enviar(t.seq, "ACK")
+        if c == "POS":
+            if not t.args:
+                return self._enviar(t.seq, f"POS,{self.angulos['B']}")
+            v = _entero(t.args, 0)
+            if len(t.args) != 1 or v is None or not 0 <= v <= 180:
+                return self._enviar(t.seq, "NAK,E05")
+            if self.estado == "MOVIENDO":
+                return self._enviar(t.seq, "NAK,E03")
+            self.angulos["B"] = v
+            return self._enviar(t.seq, "ACK")
         if c == "CFG":
+            if len(t.args) == 1:  # lectura
+                if t.args[0] not in RANGOS:
+                    return self._enviar(t.seq, "NAK,E05")
+                return self._enviar(t.seq, f"CFG,{t.args[0]},{self.cal[t.args[0]]}")
             if self.estado == "MOVIENDO":
                 return self._enviar(t.seq, "NAK,E03")
             v = _entero(t.args, 1)
             if len(t.args) != 2 or t.args[0] not in RANGOS or v is None:
                 return self._enviar(t.seq, "NAK,E05")
             lo, hi = RANGOS[t.args[0]]
-            if not lo <= v <= hi or (t.args[0] == "DIR_RODILLO" and v == 0):
+            if not lo <= v <= hi or (t.args[0] in ("DIR_RODILLO", "DIR_BRAZO") and v == 0):
                 return self._enviar(t.seq, "NAK,E05")
             self.cal[t.args[0]] = v
             return self._enviar(t.seq, "ACK")
@@ -332,6 +354,9 @@ class SimuladorESP32:
         c = self.cal
         if pieza == "M":
             segundos = abs(valor) / c["VEL_RODILLO"]
+        elif pieza == "B" and c["BRAZO_360"]:  # brazo de 360° emulado: tiempo calibrado por cada 90°
+            delta = valor - self.angulos["B"]
+            segundos = abs(delta) / 90 * (c["MS90_MAS"] if delta > 0 else c["MS90_MENOS"]) / 1000
         else:
             actual = self.angulos[pieza]
             segundos = abs(valor - actual) / (c["VEL_GIRO"] if pieza == "B" else c["VEL_BARRA"])

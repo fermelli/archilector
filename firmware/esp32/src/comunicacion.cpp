@@ -134,10 +134,25 @@ static void procesar(const Trama& t) {
   }
   if (!strcmp(c, "CFG")) {
     long v;
+    if (t.nargs == 1) {  // CFG,<NOMBRE>: lectura -> CFG,<NOMBRE>,<valor>
+      if (!calibracionLeer(t.args[0], v)) return nak(t.seq, E05_RANGO);
+      return enviarf(t.seq, "CFG,%s,%ld", t.args[0], v);
+    }
     if (estadoActual() == MOVIENDO) return nak(t.seq, E03_OCUPADO);
     if (t.nargs != 2 || !leerEntero(t.args[1], v)) return nak(t.seq, E05_RANGO);
     uint8_t r = calibracionFijar(t.args[0], v);
     if (r) return nak(t.seq, r);
+    if (!strcmp(t.args[0], "BRAZO_360") || !strcmp(t.args[0], "QUIETO_BRAZO")) brazoModoAplicar();
+    return enviar(t.seq, "ACK");
+  }
+  if (!strcmp(c, "POS")) {
+    // POS: posición estimada del brazo -> POS,<grados>. POS,<grados>: «el brazo está aquí»
+    // (con el servo de 360° hay que fijarla al encender o después de moverlo a mano).
+    if (t.nargs == 0) return enviarf(t.seq, "POS,%d", brazoPosicion());
+    long v;
+    if (t.nargs != 1 || !leerEntero(t.args[0], v) || v < 0 || v > 180) return nak(t.seq, E05_RANGO);
+    if (estadoActual() == MOVIENDO) return nak(t.seq, E03_OCUPADO);
+    brazoFijarPosicion((int)v);
     return enviar(t.seq, "ACK");
   }
   nak(t.seq, E02_DESCONOCIDO);

@@ -46,6 +46,12 @@ PARAMETROS_CFG = [
     ("T_ASENTAR", "Pausa al apoyar y depositar (ms)"),
     ("PULSO_MIN", "Pulso del servo para 0° (µs)"),
     ("PULSO_MAX", "Pulso del servo para 180° (µs)"),
+    ("BRAZO_360", "Brazo con servo de 360° usado como de 180° (1 sí, 0 no)"),
+    ("QUIETO_BRAZO", "Señal con la que el servo de 360° no gira (°)"),
+    ("VEL_360", "Velocidad de giro del servo de 360° (° de señal desde el quieto)"),
+    ("MS90_MAS", "ms para girar 90° hacia ángulos mayores"),
+    ("MS90_MENOS", "ms para girar 90° hacia ángulos menores"),
+    ("DIR_BRAZO", "Lado de la señal que hace crecer el ángulo (1 o -1)"),
 ]
 NOMBRES_CLASES = {
     "pagina_nueva": "Página nueva",
@@ -276,18 +282,28 @@ def crear_app(orquestador, db, enlace, cfg: dict, escucha=None) -> FastAPI:
     def manual_comando(comando: str = Form(...), pieza: str = Form(""), valor: str = Form(""),
                        ms: str = Form(""), quieto: str = Form("")):
         """Una orden del panel de control manual; responde JSON para no recargar la página."""
-        permitidos = {"PING", "STATUS", "HOME", "STOP", "BEEP", "MOVE", "FREE", "SPIN"}
+        permitidos = {"PING", "STATUS", "HOME", "STOP", "BEEP", "MOVE", "FREE", "SPIN", "POS", "CFG"}
         if comando not in permitidos:
             raise HTTPException(400, "comando no permitido")
         if enlace is None:
             raise HTTPException(409, "no hay enlace con el ESP32")
-        if orquestador.ocupado and comando not in ("STATUS", "STOP", "PING", "FREE"):
+        lectura = comando in ("POS", "CFG") and not valor.strip()
+        if orquestador.ocupado and comando not in ("STATUS", "STOP", "PING", "FREE") and not lectura:
             raise HTTPException(409, "hay un documento en curso: termínelo antes de mover piezas a mano")
         args: list[object] = []
         if comando in ("MOVE", "FREE"):
             if pieza not in P.PIEZAS_MOVE or (comando == "FREE" and pieza == "M"):
                 raise HTTPException(400, "pieza desconocida")
             args.append(pieza)
+        if comando == "CFG":  # leer (sin valor) o guardar un parámetro de calibración
+            if pieza not in dict(PARAMETROS_CFG):
+                raise HTTPException(400, "parámetro desconocido")
+            args.append(pieza)
+        if comando in ("CFG", "POS") and valor.strip():
+            try:
+                args.append(int(valor))
+            except ValueError:
+                raise HTTPException(400, "valor no numérico") from None
         if comando == "FREE" and valor.strip():  # FREE,B,<señal de quieto>
             try:
                 args.append(int(valor))
