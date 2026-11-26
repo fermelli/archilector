@@ -130,3 +130,46 @@ def test_retry_y_cfg(enlace, sim):
         enlace.comando("CFG", "PASOS_ARCO", 99999)
     assert enlace.comando("RETRY", 40).ok
     assert sim.ordenes_ejecutadas[-1] == "RETRY,40"
+
+
+class Desenchufable:
+    """Puerto que deja de funcionar al «desenchufarlo», como el USB del ESP32."""
+
+    def __init__(self, real):
+        self.real, self.enchufado = real, True
+
+    def write(self, datos):
+        if not self.enchufado:
+            raise OSError("device disconnected")
+        return self.real.write(datos)
+
+    def readline(self):
+        if not self.enchufado:
+            raise OSError("device reports readiness to read but returned no data")
+        return self.real.readline()
+
+    def close(self):
+        pass
+
+
+def test_se_reconecta_al_volver_a_enchufar_el_usb():
+    intentos = []
+
+    def reabrir():
+        intentos.append(1)
+        if len(intentos) < 2:
+            raise FileNotFoundError("/dev/archilector-esp32")  # todavía desenchufado
+        return SimuladorESP32(escala_tiempo=0.01)
+
+    puerto = Desenchufable(SimuladorESP32(escala_tiempo=0.01))
+    e = EnlaceESP32(puerto, latido=True, reabrir=reabrir)
+    try:
+        e.conectar()
+        puerto.enchufado = False
+        fin = time.monotonic() + 10
+        while (e.caido or len(intentos) < 2) and time.monotonic() < fin:
+            time.sleep(0.1)
+        assert len(intentos) >= 2 and not e.caido  # reabrió y el latido confirmó el enlace
+        assert e.comando("PING").cmd == "PONG"
+    finally:
+        e.cerrar()

@@ -143,6 +143,14 @@ class Orquestador:
                 return
         self.ordenes.put(nombre)
 
+    def orden_de_voz(self, nombre: str) -> None:
+        """Como ``orden``, pero la voz no empieza documentos: una palabra oída por error
+        («continúa») movería el mecanismo. Para empezar: tecla A o # o el panel."""
+        if not self.ocupado and nombre in ("iniciar", "confirmar"):
+            log.info("Orden de voz ignorada sin documento en curso: %s", nombre)
+            return
+        self.orden(nombre)
+
     def al_evento(self, ev: Evento) -> None:
         """Callback de ``EnlaceESP32`` para los eventos ``EVT`` (SEQ 0)."""
         if ev.tipo == "KEY" and ev.valor in TECLAS:

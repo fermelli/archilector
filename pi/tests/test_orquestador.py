@@ -323,3 +323,14 @@ def test_ambas_dos_hojas_por_numeracion(tmp_path):
     o.esperar_fin(20)
     assert sim.ordenes_ejecutadas == ["TURN", "TURN", "BACK"]
     assert libro.pagina_derecha == 5
+
+
+def test_la_voz_no_empieza_documentos(tmp_path):
+    o, sim, libro, db = armar(tmp_path, VerificadorGuionado())
+    o.orden_de_voz("iniciar")  # «continúa» oído por error, sin documento en curso
+    o.orden_de_voz("confirmar")
+    assert not o.ocupado and sim.ordenes_ejecutadas == []
+    o.orden("iniciar")  # tecla A o el panel sí
+    assert o.ocupado
+    o.orden("terminar")
+    o.esperar_fin(20)

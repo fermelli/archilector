@@ -9,6 +9,7 @@ Reglas implementadas (sección 8.6):
   Se mantiene también durante los movimientos, porque el ESP32 pasa a PARADA
   tras 5 s sin tramas válidas y un volteo dura unos 6 s.
 * Los eventos ``EVT`` (SEQ 0) se entregan por una cola y un callback.
+* Si se desenchufa el USB, con ``reabrir`` el puerto se vuelve a abrir solo al reconectarlo.
 """
 from __future__ import annotations
 
@@ -90,9 +91,12 @@ def abrir_puerto(puerto: str, **opciones_sim):
 
 
 class EnlaceESP32:
-    def __init__(self, puerto, latido: bool = True, al_evento: Callable[[Evento], None] | None = None):
-        """``puerto`` es un objeto tipo serial (``write``/``readline``) ya abierto."""
+    def __init__(self, puerto, latido: bool = True, al_evento: Callable[[Evento], None] | None = None,
+                 reabrir: Callable[[], object] | None = None):
+        """``puerto`` es un objeto tipo serial (``write``/``readline``) ya abierto; ``reabrir``
+        lo abre de nuevo si se pierde (el USB se desenchufó)."""
         self.puerto = puerto
+        self._reabrir = reabrir
         self.al_evento = al_evento
         self.eventos: queue.Queue[Evento] = queue.Queue()
         self.version_firmware: str | None = None
@@ -140,7 +144,11 @@ class EnlaceESP32:
 
     def _escribir(self, trama: str) -> None:
         with self._lock_envio:
-            self.puerto.write(trama.encode("ascii"))
+            try:
+                self.puerto.write(trama.encode("ascii"))
+            except Exception as exc:  # puerto desconectado: el lector intenta reabrirlo
+                self._marcar_caido(str(exc))
+                raise EnlaceCaido(f"no se pudo escribir al ESP32: {exc}") from exc
             self._ultimo_envio = time.monotonic()
 
     def escribir_crudo(self, texto: str) -> None:
@@ -199,6 +207,8 @@ class EnlaceESP32:
                     log.warning("NAK,E01 a %s: se reenvía", cmd)
                     continue
                 primera = r
+            if self.caido:
+                log.info("Enlace con el ESP32 restablecido")
             self.caido = False
 
             if primera.cmd == "NAK":
@@ -230,7 +240,8 @@ class EnlaceESP32:
                 crudo = self.puerto.readline()
             except Exception as exc:  # puerto desconectado
                 self._marcar_caido(str(exc))
-                time.sleep(0.5)
+                time.sleep(1.0)
+                self._reconectar()
                 continue
             if not crudo:
                 continue
@@ -250,6 +261,19 @@ class EnlaceESP32:
                     cola.put(t)
                 else:
                     log.debug("Respuesta sin orden pendiente: %s", t)
+
+    def _reconectar(self) -> None:
+        if self._reabrir is None:
+            return
+        try:
+            self.puerto.close()
+        except Exception:
+            pass
+        try:
+            self.puerto = self._reabrir()
+        except Exception:
+            return  # sigue desenchufado: se reintenta en 1 s
+        log.info("Puerto del ESP32 reabierto; el latido confirma el enlace")
 
     def _despachar_evento(self, t: P.Trama) -> None:
         if t.cmd != "EVT" or not t.args:

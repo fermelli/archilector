@@ -29,7 +29,8 @@ def _abrir_enlace(cfg: dict, puerto: str, libro, al_evento):
         return None
     sim = cfg["simulacion"]
     serie = abrir_puerto(puerto, libro=libro, escala_tiempo=sim["escala_tiempo"])
-    return EnlaceESP32(serie, latido=cfg["enlace"]["latido"], al_evento=al_evento)
+    reabrir = None if puerto.startswith("sim://") else (lambda: abrir_puerto(puerto))  # USB desenchufado y vuelto a enchufar
+    return EnlaceESP32(serie, latido=cfg["enlace"]["latido"], al_evento=al_evento, reabrir=reabrir)
 
 
 def construir(cfg: dict, puerto: str, fuente_camara: str, sin_voz: bool):
@@ -68,7 +69,7 @@ def construir(cfg: dict, puerto: str, fuente_camara: str, sin_voz: bool):
     orq = Orquestador(cfg, None, camara, ocr, verificador, clasificador, db, voz, registro)
     enlace = _abrir_enlace(cfg, puerto, libro, orq.al_evento)
     orq.enlace = enlace
-    escucha = None if sin_voz else stt.crear(cfg["voz"], orq.orden, lambda: voz.hablando)
+    escucha = None if sin_voz else stt.crear(cfg["voz"], orq.orden_de_voz, lambda: voz.hablando)
     return orq, enlace, db, escucha
 
 

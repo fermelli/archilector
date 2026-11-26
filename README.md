@@ -79,7 +79,7 @@ sudo systemctl start archilector                 # panel en http://<pi>.local:80
 ```bash
 cd pi
 python -m venv .venv && .venv/Scripts/pip install -e .[dev]     # en Linux: .venv/bin/pip
-.venv/Scripts/python -m pytest                                    # 80 pruebas
+.venv/Scripts/python -m pytest                                    # 86 pruebas
 .venv/Scripts/python -m archilector ejecutar --puerto sim:// --camara sim --sin-voz
 ```
 
@@ -136,7 +136,8 @@ si salta de más (o no avanza) se corrige la clase, aunque las páginas intermed
 **Teclado (tabla 7.2):** sin documento en curso, **A** empieza a leer y **#** empieza a archivar.
 Durante el documento: A seguir · B pausa · C repetir · D parada inmediata · \* página anterior ·
 \# confirmar · 1/2 volumen · 4/6 velocidad de la voz · 0 ayuda. En pausa, **#** termina el documento.
-**Voz:** «siguiente», «repite», «pausa», «continuar», «anterior», «parar», «ayuda».
+**Voz:** «siguiente», «repite», «pausa», «continuar», «anterior», «parar», «ayuda». Solo durante un documento:
+la voz no empieza uno (una palabra oída por error movería el mecanismo); para empezar, la tecla A o # o el panel.
 El micrófono se elige en `voz.microfono` por fragmentos del nombre en orden de preferencia, p. ej.
 `[REDRAGON, USB]` para usar el de la webcam (la GW600 se llama «REDRAGON Live Camera» en `arecord -l`) y, si no está, el micrófono USB; si se desconecta, la escucha
 pasa al siguiente sola (ver la [guía de armado](docs/armado/README.md#cámara-alternativa-webcam-usb)).
@@ -216,7 +217,7 @@ Mientras no haya modelos, la Pi usa la regla de píxeles y la regla de palabras 
 ## Pendiente de validar con hardware
 
 Compilado y probado en un PC con el simulador: el firmware compila sin advertencias en sus dos entornos y
-las 80 pruebas de la Pi pasan (protocolo, TC.1–TC.6, cada clase del verificador, modos, lectura adelantada,
+las 86 pruebas de la Pi pasan (protocolo, TC.1–TC.6, cada clase del verificador, modos, lectura adelantada,
 lectura con Claude, las dos páginas de una foto, voz, PDF y panel web).
 
 Probado en la Raspberry Pi 4, con el ESP32 simulado: captura con Picamera2 (CSI) y con la webcam GW600,
