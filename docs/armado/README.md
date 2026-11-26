@@ -23,6 +23,7 @@ travesaño de los dedos, disposición de la placa) aparece marcado como **propue
 | 10 | [Interconexión](svg/10-interconexion.svg) | Cables C01 a C20 |
 | 11 | [Secuencia de volteo](svg/11-secuencia-volteo.svg) | Qué hace cada parámetro de calibración |
 | 12 | [Orden de armado](svg/12-orden-armado.svg) | Fases, pruebas y decisión final |
+| 13 | [Fuente ATX](svg/13-fuente-atx.svg) | Fuente de computadora como fuente de actuadores (alternativa a B1) |
 
 ![Orden de armado](svg/12-orden-armado.svg)
 
@@ -208,6 +209,30 @@ del MG996R. Si en T3.3 el servo se esfuerza o vibra, agregar un contrapeso del o
 | T1.3 Carga | Resistencia de 2,2 Ω 15 W durante 1 min | ≥ 4,8 V y la fuente no se calienta en exceso |
 
 5. La Pi se conecta **solo a su fuente oficial**. Ningún pin de 5 V de la Pi se une a la bornera.
+
+### B1 (alternativa). Fuente de computadora (ATX)
+
+![Fuente ATX como fuente de actuadores](svg/13-fuente-atx.svg)
+
+Una fuente ATX reemplaza a la de 5 V 3 A: su salida de +5 V da 15 a 25 A, de sobra para los ~3 A del robot.
+Se usa **solo para los actuadores**; la Pi sigue con su fuente oficial (con carga, el +5 V de una ATX queda
+en 4,9–5,0 V y la Pi avisa baja tensión) y el ESP32 sigue alimentado por el USB de la Pi.
+
+1. En el conector de 24 pines, unir el **verde (PS_ON)** con un **negro (GND)** a través de un interruptor:
+   cerrado, la fuente enciende. Ese es el interruptor de actuadores. Una placa adaptadora ATX («breakout»)
+   trae bornes y el interruptor.
+2. **Rojo (+5 V)** → fusible de 3 A → fila +5 V de la bornera. **Negro (GND)** → fila GND.
+3. **El amarillo es de 12 V: nunca se usa** (quema servos, ESP32 y LCD); aislarlo junto con el naranja
+   (+3,3 V), el azul (−12 V) y el violeta (+5 VSB).
+4. Capacitor de 2200 µF entre +5 V y GND en la bornera, con la franja hacia GND.
+5. Pruebas T1.1 a T1.3 (arriba) **antes de conectar cualquier carga**.
+6. Unir la fila GND de la bornera con un GND del ESP32 (tierra común).
+7. Conectar primero el SG90 y probarlo desde el panel (Calibración: `BARRA_CERRADA` y HOME); después el
+   MG996R, el ULN2003 con el motor y la tira LED, siempre con la fuente apagada.
+
+Si la tensión oscila o la fuente se apaga sola con poca carga (pasa con fuentes viejas), agregar una
+resistencia de 10 Ω 5 W entre +5 V y GND. **El fusible es obligatorio**: con 20 A disponibles, un corto
+calienta los cables antes de que la fuente se proteja. No abrir la fuente: adentro hay tensión de red.
 
 ### B2. Placa de control (Técnico 4.4 y 4.5)
 

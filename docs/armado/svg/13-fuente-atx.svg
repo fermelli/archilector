@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" font-family="Arial, Helvetica, sans-serif">
+  <style>
+    text { fill: #1d2330; font-size: 14px; }
+    .t { font-size: 22px; font-weight: 700; }
+    .st { font-size: 14px; fill: #5b6472; }
+    .b { font-weight: 700; }
+    .s { font-size: 12.5px; fill: #5b6472; }
+    .caja { fill: #ffffff; stroke: #1d2330; stroke-width: 1.5; }
+    .ctrl { fill: #eaf1fb; stroke: #1f5fbf; stroke-width: 2; }
+    .atx { fill: #f4f5f7; stroke: #1d2330; stroke-width: 2; }
+    .v5 { stroke: #d32f2f; stroke-width: 3.5; fill: none; }
+    .gnd { stroke: #1d2330; stroke-width: 3.5; fill: none; }
+    .verde { stroke: #2e9b4a; stroke-width: 3; fill: none; }
+    .usb { stroke: #6a3fb5; stroke-width: 3; fill: none; }
+    .fino { stroke: #1d2330; stroke-width: 1.5; fill: none; }
+    .aviso { fill: #fff8e1; stroke: #b38600; stroke-width: 1.5; }
+    .peligro { fill: #fdecea; stroke: #d32f2f; stroke-width: 1.8; }
+    .no { fill: #d32f2f; font-weight: 700; font-size: 12.5px; }
+    .si { fill: #2e7d32; font-weight: 700; font-size: 12.5px; }
+  </style>
+  <rect width="1200" height="800" fill="#ffffff"/>
+  <text x="30" y="40" class="t">Alternativa a B1 · Fuente de computadora (ATX) como fuente de actuadores</text>
+  <text x="30" y="64" class="st">Solo el +5 V (rojo) y GND (negro) · la Pi sigue con su fuente oficial y el ESP32 por USB · rojo = +5 V · negro = GND · violeta = USB</text>
+
+  <!-- ================= FUENTE ATX ================= -->
+  <rect x="30" y="95" width="300" height="400" rx="10" class="atx"/>
+  <text x="180" y="125" text-anchor="middle" class="b">Fuente ATX</text>
+  <text x="180" y="144" text-anchor="middle" class="s">+5 V: 15 a 25 A (sobra para ~3 A)</text>
+  <text x="50" y="178" class="b">Conector de 24 pines</text>
+
+  <rect x="50" y="195" width="34" height="14" rx="3" fill="#d32f2f"/>
+  <text x="94" y="207">Rojo · +5 V</text><text x="315" y="207" text-anchor="end" class="si">USAR</text>
+  <rect x="50" y="225" width="34" height="14" rx="3" fill="#1d2330"/>
+  <text x="94" y="237">Negro · GND</text><text x="315" y="237" text-anchor="end" class="si">USAR</text>
+  <rect x="50" y="255" width="34" height="14" rx="3" fill="#2e9b4a"/>
+  <text x="94" y="267">Verde · PS_ON</text><text x="315" y="267" text-anchor="end" class="si">AL INTERRUPTOR</text>
+  <rect x="50" y="295" width="34" height="14" rx="3" fill="#f2c200"/>
+  <text x="94" y="307">Amarillo · +12 V</text><text x="315" y="307" text-anchor="end" class="no">NUNCA · aislar</text>
+  <rect x="50" y="325" width="34" height="14" rx="3" fill="#f28c00"/>
+  <text x="94" y="337">Naranja · +3,3 V</text><text x="315" y="337" text-anchor="end" class="s">no se usa</text>
+  <rect x="50" y="355" width="34" height="14" rx="3" fill="#1f5fbf"/>
+  <text x="94" y="367">Azul · −12 V</text><text x="315" y="367" text-anchor="end" class="s">no se usa</text>
+  <rect x="50" y="385" width="34" height="14" rx="3" fill="#8e44ad"/>
+  <text x="94" y="397">Violeta · +5 VSB</text><text x="315" y="397" text-anchor="end" class="s">no se usa</text>
+  <text x="50" y="435" class="s">Placa adaptadora ATX («breakout»): trae</text>
+  <text x="50" y="452" class="s">bornes, el interruptor y a veces la</text>
+  <text x="50" y="469" class="s">resistencia de carga. Es lo más cómodo.</text>
+
+  <!-- ================= INTERRUPTOR (PS_ON) ================= -->
+  <path d="M330 262 H372 V545" class="verde"/>
+  <rect x="285" y="545" width="180" height="70" rx="8" class="caja"/>
+  <text x="375" y="569" text-anchor="middle" class="b">Interruptor</text>
+  <text x="375" y="587" text-anchor="middle" class="s">verde ↔ negro</text>
+  <text x="375" y="603" text-anchor="middle" class="s">cerrado = fuente encendida</text>
+  <path d="M465 580 H495 V545" class="gnd"/>
+  <text x="503" y="560" class="s">a un negro (GND)</text>
+  <text x="285" y="635" class="s">Hace de «interruptor de actuadores»</text>
+
+  <!-- ================= FUSIBLE ================= -->
+  <path d="M330 202 H430" class="v5"/>
+  <rect x="430" y="185" width="110" height="36" rx="6" class="caja"/>
+  <text x="485" y="202" text-anchor="middle" class="b">Fusible 3 A</text>
+  <text x="485" y="216" text-anchor="middle" class="s">obligatorio</text>
+  <path d="M540 202 H640" class="v5"/>
+  <text x="560" y="194" class="s">+5 V</text>
+  <path d="M330 232 H600 V300 H640" class="gnd"/>
+  <text x="560" y="288" class="s">GND</text>
+
+  <!-- ================= BORNERA ================= -->
+  <rect x="640" y="160" width="190" height="190" rx="10" class="caja"/>
+  <text x="735" y="182" text-anchor="middle" class="b">Bornera</text>
+  <rect x="660" y="194" width="150" height="16" rx="3" fill="#d32f2f"/>
+  <text x="735" y="207" text-anchor="middle" fill="#ffffff" class="b" style="fill:#fff">fila +5 V</text>
+  <rect x="660" y="292" width="150" height="16" rx="3" fill="#1d2330"/>
+  <text x="735" y="305" text-anchor="middle" class="b" style="fill:#fff">fila GND</text>
+  <!-- capacitor -->
+  <path d="M690 210 V240 M670 240 H710 M670 250 H710 M690 250 V292" class="fino"/>
+  <text x="718" y="242" class="s">2200 µF</text>
+  <text x="718" y="258" class="s">franja a GND</text>
+  <text x="735" y="335" text-anchor="middle" class="s">T1.1 a T1.3 antes de cargar</text>
+
+  <!-- ================= PLACA DE CONTROL Y CARGAS ================= -->
+  <path d="M830 202 H900" class="v5"/>
+  <path d="M830 300 H900" class="gnd"/>
+  <text x="840" y="194" class="s">C02</text>
+  <text x="840" y="292" class="s">C15</text>
+  <rect x="900" y="110" width="270" height="280" rx="10" class="ctrl"/>
+  <text x="1035" y="138" text-anchor="middle" class="b">Placa de control</text>
+  <text x="1035" y="156" text-anchor="middle" class="s">una sola entrada de +5 V y GND</text>
+  <text x="918" y="190">• MG996R · brazo</text><text x="1155" y="190" text-anchor="end" class="s">hasta 2,5 A</text>
+  <text x="918" y="218">• SG90 · barra</text><text x="1155" y="218" text-anchor="end" class="s">0,1 a 0,7 A</text>
+  <text x="918" y="246">• ULN2003 + 28BYJ-48</text><text x="1155" y="246" text-anchor="end" class="s">~0,25 A</text>
+  <text x="918" y="274">• Tira LED (IRLZ44N)</text><text x="1155" y="274" text-anchor="end" class="s">~0,4 A</text>
+  <text x="918" y="302">• Buzzer, LCD (BSS138)</text><text x="1155" y="302" text-anchor="end" class="s">poco</text>
+  <text x="1035" y="340" text-anchor="middle" class="s">El +5 V no toca el pin 5V/VIN</text>
+  <text x="1035" y="356" text-anchor="middle" class="s">del DevKit (regla 1)</text>
+
+  <!-- ================= PI Y ESP32 ================= -->
+  <rect x="560" y="440" width="170" height="60" rx="8" class="caja"/>
+  <text x="645" y="465" text-anchor="middle" class="b">Fuente oficial Pi</text>
+  <text x="645" y="483" text-anchor="middle" class="s">5,1 V · 3 A · USB-C</text>
+  <path d="M730 470 H780" class="v5"/>
+  <rect x="780" y="430" width="150" height="80" rx="10" class="ctrl"/>
+  <text x="855" y="462" text-anchor="middle" class="b">Raspberry Pi 4</text>
+  <text x="855" y="482" text-anchor="middle" class="s">no se conecta a la ATX</text>
+  <path d="M930 470 H990" class="usb"/>
+  <text x="947" y="462" class="s">USB</text>
+  <text x="947" y="490" class="s">C16</text>
+  <rect x="990" y="430" width="180" height="80" rx="10" class="ctrl"/>
+  <text x="1080" y="462" text-anchor="middle" class="b">ESP32 DevKit</text>
+  <text x="1080" y="482" text-anchor="middle" class="s">datos y alimentación por USB</text>
+  <!-- tierra común -->
+  <path d="M600 300 V410 H1120 V430" class="gnd"/>
+  <text x="790" y="402" class="s">tierra común: GND de la bornera → un GND del ESP32</text>
+
+  <!-- ================= AVISOS ================= -->
+  <rect x="30" y="660" width="560" height="120" rx="8" class="peligro"/>
+  <text x="48" y="688" class="b">Peligro</text>
+  <text x="48" y="710">• El amarillo es de 12 V: quema servos, ESP32 y LCD al instante.</text>
+  <text x="48" y="732">• Con 20 A disponibles, un corto calienta cables: siempre el fusible.</text>
+  <text x="48" y="754">• No abrir la fuente: adentro hay tensión de red aun desenchufada.</text>
+
+  <rect x="610" y="540" width="560" height="240" rx="8" class="aviso"/>
+  <text x="628" y="568" class="b">Antes de conectar cargas (B1)</text>
+  <text x="628" y="592">1. Puente verde–negro por el interruptor; amarillo aislado.</text>
+  <text x="628" y="614">2. T1.1 en vacío: 4,9 a 5,25 V entre +5 V y GND.</text>
+  <text x="628" y="636">3. T1.2 desenchufada: sin continuidad entre +5 V y GND.</text>
+  <text x="628" y="658">4. T1.3 con 2,2 Ω 15 W por 1 min: 4,8 V o más.</text>
+  <text x="628" y="680">5. Unir GND de la bornera con GND del ESP32.</text>
+  <text x="628" y="702">6. Primero el SG90; después MG996R, motor y LED.</text>
+  <text x="628" y="732" class="s">Si la tensión oscila o la fuente se apaga sola, falta carga mínima:</text>
+  <text x="628" y="750" class="s">resistencia de 10 Ω 5 W entre +5 V y GND. Todo con la fuente apagada.</text>
+</svg>
