@@ -20,29 +20,30 @@
   <text x="30" y="38" class="t">Interconexión completa: cables C01 a C20 (Documento Técnico 9.1 y 9.2)</text>
   <text x="30" y="62" class="st">Cada cable lleva en ambos extremos una etiqueta con su código. C06 queda reservado para los relés de la alternativa A.</text>
 
-  <!-- fuentes y bornera -->
-  <rect x="30" y="285" width="180" height="70" rx="8" class="caja"/>
-  <text x="120" y="314" text-anchor="middle" class="b">Fuente 5 V · 3 A</text>
-  <text x="120" y="334" text-anchor="middle" class="s">jack, fusible 4 A, interruptor</text>
-  <path d="M210 305 H290" class="v5"/><path d="M210 335 H290" class="gnd"/>
-  <text x="250" y="295" text-anchor="middle" class="c">C01</text><text x="250" y="355" text-anchor="middle" class="s">AWG 18</text>
-  <rect x="290" y="270" width="170" height="100" rx="8" class="caja"/>
-  <text x="375" y="298" text-anchor="middle" class="b">Bornera</text>
-  <text x="375" y="318" text-anchor="middle" class="s">capacitor 2200 µF</text>
-  <text x="375" y="336" text-anchor="middle" class="s">punto único de tierra</text>
-  <path d="M460 300 H530" class="v5"/><path d="M460 340 H530" class="gnd"/>
-  <text x="495" y="292" text-anchor="middle" class="c">C02</text><text x="495" y="332" text-anchor="middle" class="c">C15</text>
-  <text x="495" y="362" text-anchor="middle" class="s">AWG 20</text>
+  <!-- fuente ATX directo a la placa (v2.3: sin bornera) -->
+  <rect x="30" y="270" width="200" height="100" rx="8" class="caja"/>
+  <text x="130" y="298" text-anchor="middle" class="b">Fuente ATX</text>
+  <text x="130" y="318" text-anchor="middle" class="s">rojo +5 V y negro GND</text>
+  <text x="130" y="336" text-anchor="middle" class="s">interruptor en PS_ON</text>
+  <text x="130" y="354" text-anchor="middle" class="s">esquema 13</text>
+  <path d="M230 300 H310" class="v5"/>
+  <rect x="310" y="289" width="64" height="22" rx="3" fill="#fff" stroke="#1d2330" stroke-width="1.8"/>
+  <path d="M316 300 H368" stroke="#1d2330" stroke-width="1.5"/>
+  <text x="342" y="282" text-anchor="middle" class="s">fusible 4 A</text>
+  <path d="M374 300 H530" class="v5"/><path d="M230 340 H530" class="gnd"/>
+  <text x="270" y="290" text-anchor="middle" class="c">C01</text>
+  <text x="450" y="292" text-anchor="middle" class="c">C02</text><text x="450" y="332" text-anchor="middle" class="c">C15</text>
+  <text x="380" y="362" text-anchor="middle" class="s">AWG 18–20 · capacitor 2200 µF</text><text x="380" y="380" text-anchor="middle" class="s">en la entrada de la placa</text>
 
   <!-- placa -->
   <rect x="530" y="90" width="200" height="460" rx="12" class="ctrl"/>
   <text x="630" y="122" text-anchor="middle" class="b" style="font-size:16px">Placa de control</text>
   <text x="630" y="146" text-anchor="middle" class="s">ESP32 DevKit</text>
-  <text x="630" y="164" text-anchor="middle" class="s">BSS138 · IRLZ44N · 2N2222</text>
+  <text x="630" y="164" text-anchor="middle" class="s">IRLZ44N · 2N2222</text>
   <text x="630" y="182" text-anchor="middle" class="s">pull-ups 10 kΩ</text>
   <text x="630" y="200" text-anchor="middle" class="s">conectores de servos</text>
-  <text x="630" y="420" text-anchor="middle" class="s">C10: puentes en la placa</text>
-  <text x="630" y="438" text-anchor="middle" class="s">ESP32 → BSS138 (lado LV)</text>
+  <text x="630" y="420" text-anchor="middle" class="s">GND de la placa =</text>
+  <text x="630" y="438" text-anchor="middle" class="s">punto único de tierra</text>
 
   <!-- salidas de la placa -->
   <g>
@@ -63,8 +64,7 @@
     <path d="M730 355 H870" class="sig"/><text x="800" y="347" text-anchor="middle" class="c">C13</text><text x="800" y="372" text-anchor="middle" class="s">2 · AWG 22</text>
     <rect x="870" y="332" width="200" height="46" rx="6" class="caja"/><text x="882" y="353" class="b">Buzzer</text><text x="882" y="370" class="s">colector del 2N2222</text>
 
-    <path d="M730 415 H870" class="i2c"/><text x="800" y="407" text-anchor="middle" class="c">C11</text><text x="800" y="432" text-anchor="middle" class="s">4 · Dupont</text>
-    <rect x="870" y="392" width="200" height="46" rx="6" class="caja"/><text x="882" y="413" class="b">LCD 16×2</text><text x="882" y="430" class="s">desde el lado HV del BSS138</text>
+    <rect x="870" y="392" width="200" height="46" rx="6" fill="none" stroke="#8a8f99" stroke-width="1.5" stroke-dasharray="5 4"/><text x="882" y="413" class="s">C10 y C11: sin uso en v2.3</text><text x="882" y="430" class="s">(sin LCD ni BSS138)</text>
 
     <path d="M730 475 H870" class="sig"/><text x="800" y="467" text-anchor="middle" class="c">C12</text><text x="800" y="492" text-anchor="middle" class="s">8 · cinta</text>
     <rect x="870" y="452" width="200" height="46" rx="6" class="caja"/><text x="882" y="473" class="b">Teclado 4×4</text><text x="882" y="490" class="s">filas y columnas</text>
@@ -97,9 +97,9 @@
   <rect x="30" y="420" width="430" height="190" rx="10" fill="#fff8e1" stroke="#b38600" stroke-width="1.5"/>
   <text x="45" y="445" class="b">Orden de conexión (Técnico 9.3)</text>
   <text x="45" y="470" class="s">1. Mecánica completa, sin nada eléctrico.</text>
-  <text x="45" y="492" class="s">2. Bornera y placa: C01, C02 y C15.</text>
+  <text x="45" y="492" class="s">2. Fuente ATX y placa: C01, C02 y C15.</text>
   <text x="45" y="514" class="s">3. Actuadores: C07, C08, C09, C03, C13 y C14.</text>
-  <text x="45" y="536" class="s">4. Interfaz: C11 y C12.</text>
+  <text x="45" y="536" class="s">4. Interfaz: C12 (teclado).</text>
   <text x="45" y="558" class="s">5. Pi: C17, C16, C18, C19, C05 y C04.</text>
   <text x="45" y="580" class="s">6. Revisar polaridad, una sola tierra (C15), cables</text>
   <text x="58" y="598" class="s">lejos del brazo, holgura de C03, cinta CSI firme.</text>

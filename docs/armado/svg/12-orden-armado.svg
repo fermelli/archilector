@@ -37,11 +37,11 @@
   <path d="M205 172 V186" class="flecha" marker-end="url(#f)"/><path d="M205 242 V256" class="flecha" marker-end="url(#f)"/><path d="M205 312 V326" class="flecha" marker-end="url(#f)"/><path d="M205 382 V396" class="flecha" marker-end="url(#f)"/>
 
   <!-- Electrónica -->
-  <rect x="425" y="118" width="340" height="54" rx="8" class="ele"/><text x="437" y="140" class="b">1. Alimentación: jack, fusible, bornera</text><text x="437" y="159" class="prueba">T1.1 · T1.2 · T1.3 · esquema 02</text>
+  <rect x="425" y="118" width="340" height="54" rx="8" class="ele"/><text x="437" y="140" class="b">1. Alimentación: fuente ATX y fusible</text><text x="437" y="159" class="prueba">T1.1 · T1.2 · T1.3 · esquema 02</text>
   <rect x="425" y="188" width="340" height="54" rx="8" class="ele"/><text x="437" y="210" class="b">2. Placa de control, sin el DevKit</text><text x="437" y="229" class="s">continuidad: ningún pin a +5 V · esquemas 03–05</text>
-  <rect x="425" y="258" width="340" height="54" rx="8" class="ele"/><text x="437" y="280" class="b">3. Firmware prueba_salidas</text><text x="437" y="299" class="prueba">T2.2 · T2.3 · T2.4 · T2.5</text>
+  <rect x="425" y="258" width="340" height="54" rx="8" class="ele"/><text x="437" y="280" class="b">3. Firmware prueba_salidas</text><text x="437" y="299" class="prueba">T2.2 · T2.3 · T2.5</text>
   <rect x="425" y="328" width="340" height="54" rx="8" class="ele"/><text x="437" y="350" class="b">4. Firmware principal + prueba-enlace</text><text x="437" y="369" class="prueba">T2.1 · TC.1 a TC.6</text>
-  <rect x="425" y="398" width="340" height="54" rx="8" class="ele"/><text x="437" y="420" class="b">5. LCD, teclado y buzzer en la caja</text><text x="437" y="439" class="prueba">T6.1 · T6.2 (D detiene en &lt; 100 ms)</text>
+  <rect x="425" y="398" width="340" height="54" rx="8" class="ele"/><text x="437" y="420" class="b">5. Teclado y buzzer en la caja</text><text x="437" y="439" class="prueba">T6.2 (D detiene en &lt; 100 ms)</text>
   <path d="M595 172 V186" class="flecha" marker-end="url(#f)"/><path d="M595 242 V256" class="flecha" marker-end="url(#f)"/><path d="M595 312 V326" class="flecha" marker-end="url(#f)"/><path d="M595 382 V396" class="flecha" marker-end="url(#f)"/>
 
   <!-- Pi -->

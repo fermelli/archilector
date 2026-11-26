@@ -45,7 +45,7 @@
   </g>
   <!-- pines derecha -->
   <g class="pin" text-anchor="end">
-    <text x="766" y="185">GPIO21 SDA</text><text x="766" y="215">GPIO22 SCL</text><text x="766" y="245">3V3</text>
+    <text x="766" y="185">GPIO21</text><text x="766" y="215">GPIO22</text><text x="766" y="245">3V3</text>
     <text x="766" y="315">GPIO13 F1</text><text x="766" y="345">GPIO16 F2</text>
     <text x="766" y="375">GPIO17 F3</text><text x="766" y="405">GPIO23 F4</text>
     <text x="766" y="455">GPIO34 C1</text><text x="766" y="485">GPIO35 C2</text>
@@ -119,20 +119,12 @@
   <text x="35" y="673" class="s">El +5 V de los servos nunca toca este pin.</text>
 
   <!-- ===================== DERECHA ===================== -->
-  <!-- I2C -->
-  <path d="M788 181 H880" class="sda"/><path d="M788 211 H880" class="scl"/><path d="M788 241 H880" class="v33"/>
-  <rect x="880" y="160" width="170" height="110" rx="8" class="caja"/>
-  <text x="965" y="152" text-anchor="middle" class="b">Módulo BSS138</text>
-  <g class="pin" style="font-size:13px"><text x="890" y="185">LV1</text><text x="890" y="215">LV2</text><text x="890" y="245">LV</text>
-  <text x="1040" y="185" text-anchor="end">HV1</text><text x="1040" y="215" text-anchor="end">HV2</text><text x="1040" y="245" text-anchor="end">HV</text></g>
-  <text x="965" y="263" text-anchor="middle" class="s">GND común · C10</text>
-  <path d="M1050 181 H1110" class="sda"/><path d="M1050 211 H1110" class="scl"/>
-  <path d="M1050 241 H1068" class="v5"/><text x="1071" y="246" class="s">+5 V</text>
-  <rect x="1110" y="160" width="170" height="110" rx="8" class="caja"/>
-  <text x="1195" y="152" text-anchor="middle" class="b">LCD 16×2 + PCF8574</text>
-  <g class="pin" style="font-size:13px"><text x="1120" y="185">SDA</text><text x="1120" y="215">SCL</text></g>
-  <text x="1120" y="240" class="s">VCC +5 V · GND</text>
-  <text x="1120" y="258" class="s">C11 · 0x27 o 0x3F</text>
+  <!-- GPIO 21 y 22 libres; 3V3 alimenta las resistencias del teclado -->
+  <rect x="880" y="160" width="400" height="66" rx="8" class="caja" stroke-dasharray="6 4"/>
+  <text x="895" y="185" class="b">GPIO 21 y 22: libres (v2.3)</text>
+  <text x="895" y="206" class="s">Sin LCD ni convertidor BSS138: los mensajes van al panel web,</text>
+  <text x="895" y="221" class="s">a la voz y al buzzer. El comando LCD del protocolo no hace nada.</text>
+  <path d="M788 241 H808 V430 H820" class="v33"/>
 
   <!-- teclado -->
   <path d="M788 311 H900" class="sig"/><path d="M788 341 H900" class="sig"/>
@@ -151,7 +143,7 @@
   </g>
   <circle cx="826" cy="451" r="3" fill="#1d2330"/><circle cx="842" cy="481" r="3" fill="#1d2330"/>
   <circle cx="858" cy="511" r="3" fill="#1d2330"/><circle cx="874" cy="541" r="3" fill="#1d2330"/>
-  <text x="808" y="425" class="s">10 kΩ a 3V3</text>
+  <text x="816" y="424" class="s">10 kΩ a 3V3</text>
 
   <rect x="900" y="290" width="380" height="270" rx="8" class="caja"/>
   <text x="1090" y="282" text-anchor="middle" class="b">Teclado 4×4 · C12 (cinta de 8 hilos)</text>
@@ -180,7 +172,7 @@
   <text x="912" y="657" class="s">115200 8N1 · /dev/archilector-esp32 · alimenta al ESP32</text>
   <path d="M788 701 H900" class="gnd"/>
   <rect x="900" y="680" width="380" height="54" rx="8" class="caja"/>
-  <text x="912" y="703" class="b">Bornera GND (C15)</text>
+  <text x="912" y="703" class="b">GND de la placa (C15)</text>
   <text x="912" y="722" class="s">tierra única: une la rama de la Pi con la de actuadores</text>
 
   <!-- leyenda colores -->
@@ -190,8 +182,6 @@
   <path d="M190 832 H230" class="v33"/><text x="237" y="837">Naranja +3,3 V</text>
   <path d="M370 832 H410" class="gnd"/><text x="417" y="837">Negro GND</text>
   <path d="M520 832 H560" class="pwm"/><text x="567" y="837">Amarillo PWM servos</text>
-  <path d="M730 832 H770" class="sda"/><text x="777" y="837">Azul SDA</text>
-  <path d="M870 832 H910" class="scl"/><text x="917" y="837">Verde SCL</text>
-  <path d="M1010 832 H1050" class="sig"/><text x="1057" y="837">Blanco (gris aquí): otras</text>
-  <text x="35" y="864" class="s">El +5 V de la bornera (C02) alimenta servos, ULN2003, tira LED, buzzer y el lado HV del BSS138. Antes de insertar el DevKit: ningún pin del ESP32 con continuidad a +5 V.</text>
+  <path d="M760 832 H800" class="sig"/><text x="807" y="837">Blanco (gris aquí): otras</text>
+  <text x="35" y="864" class="s">El +5 V de la placa (C02, desde la fuente ATX por el fusible de 4 A) alimenta servos, ULN2003, tira LED y buzzer. Antes de insertar el DevKit: ningún pin del ESP32 con continuidad a +5 V.</text>
 </svg>

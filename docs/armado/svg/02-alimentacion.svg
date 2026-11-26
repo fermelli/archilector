@@ -15,7 +15,7 @@
   </style>
   <rect width="1200" height="760" fill="#ffffff"/>
   <text x="30" y="40" class="t">Bloque B1 · Alimentación: dos fuentes separadas y una sola tierra</text>
-  <text x="30" y="64" class="st">Documento Técnico v2.2, sección 3 · rojo = +5 V · negro = GND · violeta = USB · corrientes estimadas (confirmar con T1.4)</text>
+  <text x="30" y="64" class="st">Documento Técnico v2.3, sección 3 · rojo = +5 V · negro = GND · violeta = USB · corrientes estimadas (confirmar con T1.4)</text>
 
   <!-- ================= RAMA DE LA PI ================= -->
   <text x="30" y="104" class="b">Rama de la Raspberry Pi (2,2 A de 3 A)</text>
@@ -30,7 +30,7 @@
   <text x="437" y="140" text-anchor="middle" class="b">Raspberry Pi 4 (2 GB)</text>
   <text x="437" y="160" text-anchor="middle" class="s">~1,3 A con IA y OCR</text>
   <text x="437" y="185" text-anchor="middle" class="s">Ventilador 30 mm: pines 4 (5 V)</text><text x="437" y="201" text-anchor="middle" class="s">y 14 (GND) · cable C04</text>
-  <text x="437" y="224" text-anchor="middle" class="s">Ningún 5 V de la Pi va a la bornera</text>
+  <text x="437" y="224" text-anchor="middle" class="s">Ningún 5 V de la Pi va a la fuente ATX</text>
   <text x="437" y="250" text-anchor="middle" class="s">USB-A (negro) → ESP32 · C16</text>
 
   <!-- periféricos de la Pi -->
@@ -55,76 +55,57 @@
   <text x="600" y="292" class="s">C16 · USB con datos, ≤ 1 m: datos del ESP32 + su alimentación (0,25 A) + unión de tierra</text>
 
   <!-- ================= RAMA DE ACTUADORES ================= -->
-  <text x="30" y="352" class="b">Rama de actuadores (2,1 A sostenido de 3 A · pico 3,7 A)</text>
+  <text x="30" y="352" class="b">Rama de actuadores (2,0 A sostenido · pico 3,6 A · la fuente ATX da 15 a 25 A en +5 V)</text>
 
-  <!-- fuente -->
-  <rect x="30" y="400" width="170" height="100" rx="8" class="caja"/>
-  <text x="115" y="432" text-anchor="middle" class="b">Fuente 5 V · 3 A</text>
-  <text x="115" y="452" text-anchor="middle" class="s">conmutada</text>
-  <text x="115" y="470" text-anchor="middle" class="s">plug 5,5 × 2,1 mm</text>
-  <path d="M200 430 H250" class="v5"/>
-  <path d="M200 470 H250" class="gnd"/>
+  <!-- fuente ATX -->
+  <rect x="30" y="385" width="200" height="120" rx="8" class="caja"/>
+  <text x="130" y="413" text-anchor="middle" class="b">Fuente ATX</text>
+  <text x="130" y="431" text-anchor="middle" class="s">de computadora</text>
+  <text x="130" y="453" text-anchor="middle" class="s">solo rojo (+5 V) y negro (GND)</text>
+  <text x="130" y="471" text-anchor="middle" class="s">amarillo (12 V): aislado</text>
+  <text x="130" y="489" text-anchor="middle" class="s">detalle en el esquema 13</text>
+  <path d="M230 430 H430" class="v5"/>
+  <path d="M230 470 H300 V560 H905" class="gnd"/>
+  <text x="245" y="422" class="s">rojo +5 V</text>
+  <text x="245" y="490" class="s">negro GND</text>
 
-  <!-- jack -->
-  <rect x="250" y="405" width="110" height="90" rx="6" class="caja"/>
-  <text x="305" y="436" text-anchor="middle" class="b">Jack</text>
-  <text x="305" y="454" text-anchor="middle" class="s">de panel</text>
-  <text x="305" y="472" text-anchor="middle" class="s">5,5 × 2,1</text>
-  <text x="372" y="424" class="s">(+)</text>
-  <text x="372" y="490" class="s">(−)</text>
+  <!-- interruptor PS_ON -->
+  <path d="M130 505 V545" stroke="#2e9b4a" stroke-width="3" fill="none"/>
+  <rect x="40" y="545" width="190" height="56" rx="6" class="caja"/>
+  <circle cx="75" cy="573" r="5" fill="#fff" stroke="#1d2330" stroke-width="2"/>
+  <circle cx="120" cy="573" r="5" fill="#fff" stroke="#1d2330" stroke-width="2"/>
+  <path d="M79 570 L117 553" stroke="#1d2330" stroke-width="2.5"/>
+  <text x="135" y="567" class="b" style="font-size:13px">Interruptor</text>
+  <text x="135" y="585" class="s">verde ↔ negro</text>
+  <text x="40" y="620" class="s">enciende la fuente = corta los actuadores</text>
 
   <!-- fusible -->
-  <path d="M360 430 H430" class="v5"/>
   <rect x="430" y="418" width="70" height="24" rx="3" fill="#fff" stroke="#1d2330" stroke-width="1.8"/>
   <path d="M436 430 H494" stroke="#1d2330" stroke-width="1.5"/>
   <text x="465" y="408" text-anchor="middle" class="b">Fusible 4 A</text>
-  <text x="465" y="462" text-anchor="middle" class="s">portafusible</text>
+  <text x="465" y="462" text-anchor="middle" class="s">portafusible · obligatorio</text>
+  <path d="M500 430 H905" class="v5"/>
+  <text x="560" y="422" class="s">C01 + C02 · AWG 18 rojo</text>
+  <text x="560" y="552" class="s">C01 + C15 · AWG 18 negro</text>
 
-  <!-- interruptor -->
-  <path d="M500 430 H555" class="v5"/>
-  <circle cx="560" cy="430" r="5" fill="#fff" stroke="#1d2330" stroke-width="2"/>
-  <circle cx="615" cy="430" r="5" fill="#fff" stroke="#1d2330" stroke-width="2"/>
-  <path d="M564 427 L612 406" stroke="#1d2330" stroke-width="2.5"/>
-  <text x="588" y="396" text-anchor="middle" class="b">Interruptor</text>
-  <text x="588" y="462" text-anchor="middle" class="s">corta solo los actuadores</text>
-  <path d="M620 430 H690" class="v5"/>
-  <text x="430" y="526" class="s">C01 · AWG 18 rojo y negro</text>
+  <!-- capacitor en la entrada de la placa -->
+  <path d="M850 430 V478" class="v5"/>
+  <path d="M832 478 H868" stroke="#1d2330" stroke-width="3"/>
+  <path d="M832 490 Q850 482 868 490" stroke="#1d2330" stroke-width="3" fill="none"/>
+  <path d="M850 488 V560" class="gnd"/>
+  <text x="640" y="476" class="b">C 2200 µF · ≥ 10 V</text>
+  <text x="640" y="494" class="s">soldado en la entrada</text>
+  <text x="640" y="510" class="s">de la placa; franja (−) a GND</text>
 
-  <!-- GND desde el jack -->
-  <path d="M360 470 H400 V550 H690" class="gnd"/>
-
-  <!-- bornera -->
-  <rect x="690" y="405" width="300" height="50" rx="4" fill="#fdecea" stroke="#d32f2f" stroke-width="2"/>
-  <rect x="690" y="525" width="300" height="50" rx="4" fill="#eceef1" stroke="#1d2330" stroke-width="2"/>
-  <g fill="#ffffff" stroke="#5b6472" stroke-width="1.5">
-    <circle cx="725" cy="430" r="10"/><circle cx="775" cy="430" r="10"/><circle cx="825" cy="430" r="10"/>
-    <circle cx="875" cy="430" r="10"/><circle cx="925" cy="430" r="10"/><circle cx="965" cy="430" r="10"/>
-    <circle cx="725" cy="550" r="10"/><circle cx="775" cy="550" r="10"/><circle cx="825" cy="550" r="10"/>
-    <circle cx="875" cy="550" r="10"/><circle cx="925" cy="550" r="10"/><circle cx="965" cy="550" r="10"/>
-  </g>
-  <text x="840" y="397" text-anchor="middle" class="b">Bornera · fila +5 V</text>
-  <text x="840" y="600" text-anchor="middle" class="b">Bornera · fila GND = punto único de tierra</text>
-
-  <!-- capacitor -->
-  <path d="M775 440 V478" class="v5"/>
-  <path d="M757 478 H793" stroke="#1d2330" stroke-width="3"/>
-  <path d="M757 490 Q775 482 793 490" stroke="#1d2330" stroke-width="3" fill="none"/>
-  <path d="M775 488 V540" class="gnd"/>
-  <text x="800" y="476" class="b">C 2200 µF · ≥ 10 V</text>
-  <text x="800" y="494" class="s">electrolítico; la franja (−) hacia GND,</text>
-  <text x="800" y="510" class="s">junto a las salidas de los servos</text>
-
-  <!-- salidas a la placa -->
-  <path d="M965 430 H1010 V445 H1020" class="v5"/>
-  <path d="M965 550 H1040 V532" class="gnd"/>
-  <text x="1000" y="422" class="s">C02</text>
-  <text x="1006" y="574" class="s">C15</text>
-
-  <rect x="1020" y="432" width="160" height="100" rx="10" class="ctrl"/>
-  <text x="1100" y="458" text-anchor="middle" class="b">Placa de control</text>
-  <text x="1100" y="478" text-anchor="middle" class="s">ESP32 DevKit</text>
-  <text x="1100" y="496" text-anchor="middle" class="s">reparte +5 V y GND</text>
-  <text x="1100" y="514" text-anchor="middle" class="s">a cada conector</text>
+  <!-- placa de control -->
+  <rect x="905" y="395" width="275" height="190" rx="10" class="ctrl"/>
+  <text x="1042" y="423" text-anchor="middle" class="b">Placa de control</text>
+  <text x="1042" y="443" text-anchor="middle" class="s">ESP32 DevKit (por USB desde la Pi)</text>
+  <text x="1042" y="470" text-anchor="middle" class="s">entrada única: +5 V (C02) y GND (C15)</text>
+  <text x="1042" y="490" text-anchor="middle" class="s">reparte +5 V y GND a cada conector</text>
+  <text x="1042" y="520" text-anchor="middle" class="b" style="font-size:13px">GND de la placa =</text>
+  <text x="1042" y="538" text-anchor="middle" class="b" style="font-size:13px">punto único de tierra</text>
+  <text x="1042" y="566" text-anchor="middle" class="s">el +5 V no toca el pin 5V/VIN</text>
 
   <!-- cargas -->
   <rect x="690" y="620" width="490" height="120" rx="8" class="caja"/>
@@ -133,15 +114,14 @@
   <text x="705" y="688">SG90 barra · 0,25 A (pico 0,65 A)</text>
   <text x="705" y="708">28BYJ-48 + ULN2003 · 0,24 A</text>
   <text x="950" y="668">Tira LED blanca · 0,6 A</text>
-  <text x="950" y="688">LCD + BSS138 (lado 5 V) · 0,08 A</text>
-  <text x="950" y="708">Buzzer · 0,03 A</text>
-  <text x="705" y="730" class="s">Si en T1.4 baja de 4,8 V al girar el brazo: usar fuente de 5 V · 5 A.</text>
+  <text x="950" y="688">Buzzer · 0,03 A</text>
+  <text x="705" y="730" class="s">Si la tensión oscila o la ATX se apaga sola: 10 Ω 5 W entre +5 V y GND.</text>
 
   <!-- reglas -->
-  <rect x="30" y="620" width="640" height="120" rx="8" class="aviso"/>
-  <text x="45" y="645" class="b">Reglas de seguridad (sección 1.4) y pruebas antes de conectar cargas</text>
-  <text x="45" y="667">• Ningún motor ni servo se alimenta desde el 5 V o el 3,3 V del ESP32 o de la Pi.</text>
-  <text x="45" y="687">• Una sola tierra: la fila GND. No unir la Pi a la bornera con otro cable (lazo de tierra).</text>
-  <text x="45" y="707">• Conectar y desconectar todo con la alimentación apagada.</text>
-  <text x="45" y="727">• T1.1: 4,9–5,25 V en vacío · T1.2: sin corto · T1.3: ≥ 4,8 V con 2,2 Ω 15 W por 1 min.</text>
+  <rect x="30" y="640" width="640" height="100" rx="8" class="aviso"/>
+  <text x="45" y="662" class="b">Reglas (sección 1.4) y pruebas antes de conectar cargas</text>
+  <text x="45" y="682">• Ningún motor ni servo se alimenta desde el 5 V o el 3,3 V del ESP32 o de la Pi.</text>
+  <text x="45" y="700">• Una sola tierra: el GND de la placa. No unir la Pi a ese punto con otro cable.</text>
+  <text x="45" y="718">• De la ATX solo rojo y negro; el amarillo (12 V) se aísla. Todo con la fuente apagada.</text>
+  <text x="45" y="736">• T1.1: 4,9–5,25 V en vacío · T1.2: sin corto · T1.3: ≥ 4,8 V con 2,2 Ω 15 W por 1 min.</text>
 </svg>

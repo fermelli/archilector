@@ -1,8 +1,8 @@
 # ArchiLector · software v2.2 (alternativa B, rodillos Canon)
 
 Software del robot que pasa solo las páginas de libros empastados, las digitaliza como PDF buscable
-y las lee en voz alta. Implementa el **Documento de Diseño v2.2** y el **Documento Técnico de Armado y
-Comunicación v2.2** con la alternativa B de cambio de página: dos rodillos Canon FB6-3405-000 en una
+y las lee en voz alta. Implementa el **Documento de Diseño v2.3** y el **Documento Técnico de Armado y
+Comunicación v2.3** con la alternativa B de cambio de página: dos rodillos Canon FB6-3405-000 en una
 varilla M8, brazo con servo MG996R, motor 28BYJ-48 y barra de retención con SG90.
 
 ```
@@ -37,7 +37,7 @@ pio run -e prueba_salidas -t upload   # prueba T2.3 (activa cada salida; tambié
 | `comunicacion.cpp` | Comandos PING, STATUS, HOME, TURN, RETRY, BACK, LIGHT, LCD, BEEP, STOP, CFG; vigilancia de 5 s | Técnico 8.3 y 8.6 |
 | `estado.cpp` | ARRANQUE → REPOSO ⇄ MOVIENDO → FALLA / PARADA | Técnico figura 8.3 |
 | `movimiento.cpp` | Secuencias del rodillo con servos en rampa y parada en < 10 ms | Técnico figura 8.2, Diseño tabla 5 |
-| `interfaz.cpp`, `lcd_i2c.cpp` | Teclado 4×4, LCD por PCF8574 (0x27/0x3F), buzzer, tira LED | Técnico 7.2 y 7.3 |
+| `interfaz.cpp`, `lcd_i2c.cpp` | Teclado 4×4, buzzer, tira LED; la LCD por PCF8574 es opcional (en v2.3 no se monta y el firmware sigue sin ella) | Técnico 7.2 y 7.3 |
 | `calibracion.cpp` | Parámetros de la tabla 5.5 en NVS | Técnico 5.5 |
 
 Tareas de FreeRTOS: movimiento en el núcleo 1 con prioridad máxima; comunicación e interfaz en el núcleo 0.
@@ -122,7 +122,7 @@ foto (LED 100 %) → corrección y OCR → clasificador → guardar / leer en vo
    → TURN → DONE → foto → verificador ─┬─ página nueva  → siguiente página
                                        ├─ misma página  → RETRY,40 (máx. 2), después pide ayuda
                                        ├─ dos hojas     → BACK y verifica de nuevo; si persiste, pide ayuda
-                                       ├─ hoja doblada  → LCD «REVISE LA HOJA», 3 pitidos, espera #
+                                       ├─ hoja doblada  → «REVISE LA HOJA» (panel y voz), 3 pitidos, espera #
                                        └─ confianza < 0,80 → otra foto; si se repite, hoja doblada
 ```
 

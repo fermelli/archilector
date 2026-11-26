@@ -67,8 +67,11 @@
   <circle cx="335" cy="570" r="7" fill="#fff" stroke="#1d2330"/><circle cx="335" cy="600" r="7" fill="#fff" stroke="#1d2330"/>
   <path d="M342 570 H352 M342 600 H362" stroke="#1d2330" stroke-width="2"/>
   <path d="M318 585 H230" class="lider"/><text x="225" y="572" text-anchor="end" class="b">Entrada única de alimentación</text>
-  <text x="225" y="589" text-anchor="end" class="s">+5 V de la bornera (C02, AWG 20)</text><text x="225" y="606" text-anchor="end" class="s">GND de la bornera (C15, AWG 20)</text>
+  <text x="225" y="589" text-anchor="end" class="s">+5 V de la ATX, fusible 4 A (C02)</text><text x="225" y="606" text-anchor="end" class="s">GND de la ATX (C15) · AWG 20</text><text x="225" y="623" text-anchor="end" class="s">capacitor 2200 µF (azul) junto al borne</text>
 
+  <!-- capacitor de entrada -->
+  <rect x="381" y="556" width="28" height="44" rx="5" fill="#1f3b73" stroke="#1d2330"/>
+  <rect x="381" y="556" width="7" height="44" fill="#c9ced6"/>
   <!-- MOSFET y resistencias -->
   <rect x="420" y="548" width="70" height="58" rx="3" fill="#9aa3ae" stroke="#1d2330"/>
   <rect x="425" y="540" width="60" height="12" fill="#c9ced6" stroke="#1d2330"/>
@@ -89,15 +92,10 @@
   <circle cx="545" cy="708" r="6" fill="#fff" stroke="#1d2330"/><circle cx="571" cy="708" r="6" fill="#fff" stroke="#1d2330"/>
   <path d="M558 726 V808 H570" class="lider"/><text x="575" y="815" class="b">Buzzer · C13</text><text x="575" y="832" class="s">(dentro de la caja)</text>
 
-  <!-- BSS138 -->
-  <rect x="678" y="152" width="96" height="98" rx="4" fill="#1f5fbf" fill-opacity="0.18" stroke="#1f5fbf" stroke-width="2"/>
-  <text x="726" y="196" text-anchor="middle" class="b" style="font-size:13px">BSS138</text>
-  <text x="726" y="213" text-anchor="middle" class="s">LV ← · → HV</text>
-  <path d="M774 200 H840" class="lider"/><text x="845" y="196" class="b">Adaptador de nivel I2C (C10)</text><text x="845" y="213" class="s">LV: 3V3 y GPIO 21/22 · HV: +5 V</text>
-  <path d="M639 172 H678 M639 190 H678" stroke="#1f5fbf" stroke-width="2.5"/>
-  <!-- LCD -->
-  <rect x="740" y="280" width="18" height="72" class="hdr"/>
-  <path d="M758 316 H840" class="lider"/><text x="845" y="312" class="b">LCD 16×2 · C11</text><text x="845" y="329" class="s">+5 V · GND · SDA · SCL (lado HV)</text>
+  <!-- GPIO 21/22 libres (v2.3: sin LCD ni BSS138) -->
+  <path d="M774 200 H840" class="lider"/><text x="845" y="196" class="b">Sin LCD ni BSS138 (v2.3)</text><text x="845" y="213" class="s">GPIO 21 y 22 libres · mensajes en el panel</text><text x="845" y="230" class="s">web, la voz y el buzzer</text>
+  <rect x="678" y="160" width="96" height="80" rx="4" fill="none" stroke="#8a8f99" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <text x="726" y="205" text-anchor="middle" class="s">libre</text>
   <!-- teclado -->
   <rect x="740" y="372" width="18" height="142" class="hdr"/>
   <path d="M639 400 H740 M639 420 H740 M639 440 H740 M639 460 H740" stroke="#8a8f99" stroke-width="2"/>

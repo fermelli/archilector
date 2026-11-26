@@ -131,33 +131,43 @@
     <text x="15" y="392" class="s">GPIO 34–39 no tienen pull-up interno: sin estas resistencias el teclado no funciona.</text>
   </g>
 
-  <!-- ============ (d) I2C ============ -->
+  <!-- ============ (d) ENTRADA DE ALIMENTACIÓN ============ -->
   <g transform="translate(610,510)">
     <rect width="570" height="400" rx="10" class="marco"/>
-    <text x="15" y="30" class="h">(d) Adaptador de nivel I2C (3,3 V ↔ 5 V)</text>
-    <text x="240" y="72" text-anchor="middle" class="b">Módulo BSS138 · 4 canales</text>
-    <rect x="150" y="82" width="180" height="170" rx="6" class="caja"/>
-    <g class="pin"><text x="160" y="115">LV</text><text x="160" y="155">LV1</text><text x="160" y="195">LV2</text><text x="160" y="235">GND</text>
-    <text x="320" y="115" text-anchor="end">HV</text><text x="320" y="155" text-anchor="end">HV1</text><text x="320" y="195" text-anchor="end">HV2</text><text x="320" y="235" text-anchor="end">GND</text></g>
-    <!-- lado ESP32 -->
-    <text x="12" y="115" class="pin">3V3</text><path d="M45 110 H150" class="v33"/>
-    <text x="12" y="155" class="pin">GPIO21</text><path d="M68 150 H150" class="sda"/>
-    <text x="12" y="195" class="pin">GPIO22</text><path d="M68 190 H150" class="scl"/>
-    <text x="12" y="235" class="pin">GND</text><path d="M45 230 H150" class="gnd"/>
-    <text x="80" y="143" class="s">SDA</text><text x="80" y="183" class="s">SCL</text>
-    <!-- lado 5 V -->
-    <path d="M365 92 V270" class="v5"/><text x="345" y="86" class="b" style="fill:#d32f2f">+5 V</text>
-    <path d="M330 110 H365" class="v5"/><circle cx="365" cy="110" r="3.5" fill="#d32f2f"/>
-    <path d="M330 150 H410" class="sda"/><path d="M330 190 H410" class="scl"/>
-    <path d="M330 230 H410" class="gnd"/><path d="M365 270 H410" class="v5"/>
-    <rect x="410" y="82" width="150" height="210" rx="6" class="caja"/>
-    <rect x="430" y="98" width="110" height="30" rx="3" fill="#cfe8c5" stroke="#5b6472"/>
-    <text x="485" y="118" text-anchor="middle" class="pin">LISTO</text>
-    <g class="pin"><text x="420" y="155">SDA</text><text x="420" y="195">SCL</text><text x="420" y="235">GND</text><text x="420" y="275">VCC</text></g>
-    <text x="485" y="310" text-anchor="middle" class="s">LCD 16×2 + PCF8574</text>
-    <text x="15" y="340" class="s">• Las pull-ups ya vienen en el módulo y en la mochila PCF8574: no agregue otras.</text>
-    <text x="15" y="360" class="s">• El contraste se ajusta con el potenciómetro azul de la mochila.</text>
-    <text x="15" y="380" class="s">• T2.4: el escaneo I2C debe mostrar la LCD en 0x27 (o 0x3F).</text>
+    <text x="15" y="30" class="h">(d) Entrada de alimentación de la placa (sin bornera)</text>
+    <!-- fuente -->
+    <rect x="15" y="70" width="120" height="110" rx="6" class="caja"/>
+    <text x="75" y="98" text-anchor="middle" class="b">Fuente ATX</text>
+    <text x="75" y="118" text-anchor="middle" class="s">rojo +5 V</text>
+    <text x="75" y="136" text-anchor="middle" class="s">negro GND</text>
+    <text x="75" y="160" text-anchor="middle" class="s">esquema 13</text>
+    <!-- fusible -->
+    <path d="M135 95 H175" class="v5"/>
+    <rect x="175" y="84" width="60" height="22" rx="3" class="r"/><path d="M181 95 H229" class="w" style="stroke-width:1.5"/>
+    <text x="205" y="76" text-anchor="middle" class="b">Fusible 4 A</text>
+    <path d="M235 95 H300" class="v5"/>
+    <path d="M135 160 H300" class="gnd"/>
+    <text x="250" y="88" class="s">C02</text><text x="250" y="153" class="s">C15</text>
+    <!-- buses de la placa -->
+    <path d="M300 95 H555" class="v5" style="stroke-width:5"/>
+    <path d="M300 160 H555" class="gnd" style="stroke-width:5"/>
+    <text x="430" y="85" text-anchor="middle" class="b" style="fill:#d32f2f">bus +5 V de la placa</text>
+    <text x="430" y="182" text-anchor="middle" class="b">bus GND = tierra única</text>
+    <!-- capacitor -->
+    <path d="M330 95 V118" class="v5"/><path d="M314 118 H346" stroke="#1d2330" stroke-width="2.5"/>
+    <path d="M314 128 Q330 121 346 128" stroke="#1d2330" stroke-width="2.5" fill="none"/><path d="M330 127 V160" class="gnd"/>
+    <circle cx="330" cy="95" r="3.5" fill="#d32f2f"/><circle cx="330" cy="160" r="3.5" class="nodo"/>
+    <text x="352" y="122" class="s">2200 µF ≥ 10 V</text><text x="352" y="138" class="s">franja (−) a GND</text>
+    <!-- salidas -->
+    <g class="s">
+      <text x="15" y="225">Del bus +5 V y GND salen: servos (MG996R, SG90), ULN2003,</text>
+      <text x="15" y="243">tira LED (por el IRLZ44N) y buzzer (por el 2N2222).</text>
+      <text x="15" y="270">El GND del ESP32 se une al bus GND; el +5 V no toca su pin 5V/VIN.</text>
+      <text x="15" y="297">Sin LCD ni BSS138 en v2.3: GPIO 21 y 22 quedan libres.</text>
+      <text x="15" y="324">• Medir T1.1–T1.3 en el bus antes de insertar el DevKit.</text>
+      <text x="15" y="345">• Pistas o cables del bus en AWG 20 o más grueso (picos de 3,6 A).</text>
+      <text x="15" y="366">• De la ATX solo rojo y negro; el amarillo (12 V) aislado.</text>
+    </g>
   </g>
 
   <!-- ============ SERVOS ============ -->
@@ -165,5 +175,5 @@
   <text x="35" y="952" class="h">Conectores de servo (3 pines macho en la placa)</text>
   <rect x="470" y="934" width="30" height="24" fill="#d4a600"/><rect x="500" y="934" width="30" height="24" fill="#d32f2f"/><rect x="530" y="934" width="30" height="24" fill="#6d4c41"/>
   <text x="575" y="952">Señal (naranja) · +5 V (rojo) · GND (marrón).</text>
-  <text x="35" y="978" class="s">Sin componentes: la señal de 3,3 V basta para MG996R y SG90. Si un servo tiembla, pasar su señal por un canal libre del BSS138 (LV3 → HV3).</text>
+  <text x="35" y="978" class="s">Sin componentes: la señal de 3,3 V basta para MG996R y SG90. Si un servo tiembla, revisar la tierra común y el capacitor de la entrada.</text>
 </svg>

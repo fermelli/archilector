@@ -1,7 +1,7 @@
-# Guía de armado de ArchiLector v2.2 (alternativa B, rodillos)
+# Guía de armado de ArchiLector v2.3 (alternativa B, rodillos)
 
 Esta guía lleva del **robot sin armar** al **primer volteo verificado por la IA**. Sigue el
-*Documento Técnico de Armado y Comunicación v2.2*: cada paso cita su sección (por ejemplo «Técnico 5.4»)
+*Documento Técnico de Armado y Comunicación v2.3*: cada paso cita su sección (por ejemplo «Técnico 5.4»)
 y cada prueba lleva su código (T1.1, TC.3…), para anotarla en la hoja de registro.
 
 Lo que el Documento Técnico no especifica (torre, viga, caja de electrónica, fijación de los brazos,
@@ -12,7 +12,7 @@ travesaño de los dedos, disposición de la placa) aparece marcado como **propue
 | # | Esquema | Para qué sirve |
 |---|---|---|
 | 01 | [Vista general](svg/01-vista-general.svg) | Dónde va cada bloque sobre la base |
-| 02 | [Alimentación](svg/02-alimentacion.svg) | Fuentes, fusible, bornera, tierra única |
+| 02 | [Alimentación](svg/02-alimentacion.svg) | Fuente ATX, fusible, entrada de la placa, tierra única |
 | 03 | [Conexionado del ESP32](svg/03-esp32-conexionado.svg) | Cada pin GPIO y su destino |
 | 04 | [Circuitos auxiliares](svg/04-circuitos-auxiliares.svg) | LED con MOSFET, buzzer, teclado, I2C |
 | 05 | [Placa de control](svg/05-placa-control.svg) | Disposición en la placa perforada de 7 × 9 cm |
@@ -23,7 +23,7 @@ travesaño de los dedos, disposición de la placa) aparece marcado como **propue
 | 10 | [Interconexión](svg/10-interconexion.svg) | Cables C01 a C20 |
 | 11 | [Secuencia de volteo](svg/11-secuencia-volteo.svg) | Qué hace cada parámetro de calibración |
 | 12 | [Orden de armado](svg/12-orden-armado.svg) | Fases, pruebas y decisión final |
-| 13 | [Fuente ATX](svg/13-fuente-atx.svg) | Fuente de computadora como fuente de actuadores (alternativa a B1) |
+| 13 | [Fuente ATX](svg/13-fuente-atx.svg) | Conector de la fuente de computadora, paso a paso |
 
 ![Orden de armado](svg/12-orden-armado.svg)
 
@@ -48,14 +48,12 @@ Estado según la tabla 2 del Documento de Diseño: **D** = disponible en el inve
 | Servo MG996R (con bocina metálica) | 1 | C | Girar los brazos |
 | Servo SG90 | 2 | 1 D + 1 C | Barra de retención (el otro queda de repuesto) |
 | Teclado 4×4 de membrana | 1 | D | Botones |
-| LCD 16×2 con mochila I2C PCF8574 | 1 | D | Estado |
 | Buzzer activo de 5 V | 1 | D | Alarmas |
-| Módulo convertidor de nivel BSS138 (4 canales) | 1 | C | I2C 3,3 V ↔ 5 V |
 | MOSFET IRLZ44N | 1 | C | Tira LED |
 | Transistor 2N2222 + diodo 1N4148 | 1 + 1 | C | Buzzer |
 | Resistencias 1/4 W: 100 Ω, 1 kΩ, 100 kΩ y 4 × 10 kΩ | 7 | C | Circuitos auxiliares |
 | Placa perforada 7 × 9 cm + 2 tiras de zócalo hembra | 1 | C | Placa de control |
-| Conectores macho: 2 × 3 pines, 6, 4 y 8 pines; 3 borneras de tornillo de 2 vías | — | C | Conexiones de la placa |
+| Conectores macho: 2 × 3 pines, 6 y 8 pines; 3 bornes de tornillo de 2 vías (entrada, LED, buzzer) | — | C | Conexiones de la placa |
 | Tira LED blanca de 5 V + difusor | ~40 cm | C | Iluminación uniforme |
 | Micrófono USB | 1 | C | Comandos por voz |
 | Amplificador PAM8403 + parlante 4–8 Ω 3 W + potenciómetro de volumen | 1 | C | Lectura en voz alta |
@@ -65,11 +63,10 @@ Estado según la tabla 2 del Documento de Diseño: **D** = disponible en el inve
 
 | Componente | Cant. | Uso |
 |---|---|---|
-| Fuente conmutada 5 V 3 A, plug 5,5 × 2,1 mm | 1 | Rama de actuadores |
-| Jack hembra de panel 5,5 × 2,1 mm | 1 | Entrada de la fuente |
+| Fuente de computadora (ATX), solo +5 V y GND | 1 | Rama de actuadores (B1) |
+| Interruptor chico para PS_ON (verde ↔ negro) | 1 | Enciende la fuente = interruptor de actuadores |
 | Interruptor de palanca | 1 | Corta solo los actuadores |
 | Portafusible + fusible de 4 A | 1 | En serie con +5 V |
-| Bornera de barra de 2 filas × 6 posiciones (o una alternativa: ver «Sin bornera» en B1) | 1 | +5 V y GND |
 | Capacitor electrolítico 2200 µF, ≥ 10 V | 1 | Transitorios de los servos |
 | Cable AWG 18 rojo y negro (1 m) y AWG 20–22 en colores (3 m) | — | Fuente y ramales |
 | Resistencia de 2,2 Ω 15 W | 1 | Solo para la prueba T1.3 |
@@ -113,7 +110,7 @@ destornilladores, calibre (pie de rey), nivel de burbuja, escuadra, pistola de s
 ## 2. Antes de empezar: seguridad y colores (Técnico 1.3 y 1.4)
 
 1. **Ningún motor ni servo** se alimenta desde los pines de 5 V o 3,3 V del ESP32 o de la Pi.
-2. **Una sola tierra:** todas las tierras se unen en la fila GND de la bornera.
+2. **Una sola tierra:** todas las tierras se unen en el GND de la placa de control.
 3. Se conecta y desconecta todo **con la alimentación apagada**.
 4. **Ninguna señal de 5 V entra a un pin del ESP32** (sus pines no toleran 5 V).
 
@@ -192,65 +189,39 @@ del MG996R. Si en T3.3 el servo se esfuerza o vibra, agregar un contrapeso del o
 
 ## 4. Carril B · Electrónica
 
-### B1. Alimentación (Técnico 3.5)
+### B1. Alimentación (Técnico 3.5, v2.3)
 
 ![Alimentación](svg/02-alimentacion.svg)
 
-1. Montar el jack, el interruptor y el portafusible en una pared de la caja de electrónica.
-2. **C01** con AWG 18 rojo: (+) del jack → fusible → interruptor → fila +5 V de la bornera.
-   Con AWG 18 negro: (−) del jack → fila GND.
-3. Soldar o atornillar el capacitor de 2200 µF entre +5 V y GND en la bornera, **con la franja hacia GND**.
-4. Hacer las pruebas **antes de conectar cualquier carga**:
+![Fuente ATX paso a paso](svg/13-fuente-atx.svg)
+
+Los actuadores se alimentan con una **fuente de computadora (ATX)**: su salida de +5 V da 15 a 25 A, de sobra
+para los ~3,6 A de pico del robot. No hay bornera: la fuente entra directo a la **única entrada de la placa de
+control** (C02 y C15), y el GND de la placa es el punto único de tierra. La Pi sigue con su fuente oficial (con
+carga, el +5 V de una ATX queda en 4,9–5,0 V y la Pi avisaría baja tensión) y el ESP32 sigue alimentado por el
+USB de la Pi.
+
+1. En el conector de 24 pines, unir el **verde (PS_ON)** con un **negro (GND)** a través de un interruptor:
+   cerrado, la fuente enciende. Ese es el interruptor de actuadores. Una placa adaptadora ATX («breakout») trae
+   bornes y el interruptor.
+2. **C01** con AWG 18: **rojo (+5 V)** → portafusible con **fusible de 4 A** → entrada +5 V de la placa (C02).
+   **Negro (GND)** → entrada GND de la placa (C15). Sirve el rojo y el negro de un conector Molex o SATA.
+3. **El amarillo es de 12 V: nunca se usa** (quema servos y el ESP32); aislarlo junto con el naranja (+3,3 V),
+   el azul (−12 V) y el violeta (+5 VSB).
+4. Soldar el capacitor de 2200 µF en la entrada de la placa, entre +5 V y GND, **con la franja hacia GND**.
+5. Hacer las pruebas en la entrada de la placa, **sin el DevKit y sin cargas**:
 
 | Prueba | Procedimiento | Pasa si |
 |---|---|---|
-| T1.1 Tensión en vacío | Multímetro entre +5 V y GND de la bornera | 4,9 a 5,25 V |
-| T1.2 Aislamiento | Fuente desconectada, continuidad entre +5 V y GND | Sin cortocircuito |
+| T1.1 Tensión en vacío | Multímetro entre +5 V y GND de la entrada | 4,9 a 5,25 V |
+| T1.2 Aislamiento | Fuente desenchufada, continuidad entre +5 V y GND | Sin cortocircuito |
 | T1.3 Carga | Resistencia de 2,2 Ω 15 W durante 1 min | ≥ 4,8 V y la fuente no se calienta en exceso |
 
-5. La Pi se conecta **solo a su fuente oficial**. Ningún pin de 5 V de la Pi se une a la bornera.
-
-### B1 (alternativa). Fuente de computadora (ATX)
-
-![Fuente ATX como fuente de actuadores](svg/13-fuente-atx.svg)
-
-Una fuente ATX reemplaza a la de 5 V 3 A: su salida de +5 V da 15 a 25 A, de sobra para los ~3 A del robot.
-Se usa **solo para los actuadores**; la Pi sigue con su fuente oficial (con carga, el +5 V de una ATX queda
-en 4,9–5,0 V y la Pi avisa baja tensión) y el ESP32 sigue alimentado por el USB de la Pi.
-
-1. En el conector de 24 pines, unir el **verde (PS_ON)** con un **negro (GND)** a través de un interruptor:
-   cerrado, la fuente enciende. Ese es el interruptor de actuadores. Una placa adaptadora ATX («breakout»)
-   trae bornes y el interruptor.
-2. **Rojo (+5 V)** → fusible de 3 A → fila +5 V de la bornera. **Negro (GND)** → fila GND.
-3. **El amarillo es de 12 V: nunca se usa** (quema servos, ESP32 y LCD); aislarlo junto con el naranja
-   (+3,3 V), el azul (−12 V) y el violeta (+5 VSB).
-4. Capacitor de 2200 µF entre +5 V y GND en la bornera, con la franja hacia GND.
-5. Pruebas T1.1 a T1.3 (arriba) **antes de conectar cualquier carga**.
-6. Unir la fila GND de la bornera con un GND del ESP32 (tierra común).
-7. Conectar primero el SG90 y probarlo desde el panel (Calibración: `BARRA_CERRADA` y HOME); después el
-   MG996R, el ULN2003 con el motor y la tira LED, siempre con la fuente apagada.
+6. La Pi se conecta **solo a su fuente oficial**. Ningún pin de 5 V de la Pi se une a la fuente ATX.
 
 Si la tensión oscila o la fuente se apaga sola con poca carga (pasa con fuentes viejas), agregar una
 resistencia de 10 Ω 5 W entre +5 V y GND. **El fusible es obligatorio**: con 20 A disponibles, un corto
 calienta los cables antes de que la fuente se proteja. No abrir la fuente: adentro hay tensión de red.
-
-### B1 (alternativa). Sin bornera
-
-La bornera solo es el **punto de unión** del +5 V y del GND: ahí llegan la fuente, el capacitor de 2200 µF
-y los cables a las cargas. Cualquiera de estas opciones cumple la misma función (de mejor a más improvisada):
-
-| Opción | Cómo | Ojo con |
-|---|---|---|
-| Empalmes de palanca tipo Wago 221 | Uno de 5 vías para +5 V y otro para GND; sin soldar | Pelar 11 mm; el capacitor se suelda a dos cables cortos |
-| Regleta de empalme de tornillos | La de instalaciones eléctricas, cortada en tramos: una fila para +5 V y otra para GND | Apretar bien; marcar +5 V en rojo |
-| Placa adaptadora ATX («breakout») | Sus bornes de +5 V y GND hacen de bornera (con la fuente ATX) | Igual va el fusible de 3 A en el +5 V |
-| Directo a la placa de control | La fuente (por el fusible) entra a la única entrada de +5 V y GND de la placa (C02 y C15); el capacitor se suelda ahí | Si el ESP32 va en la placa, la tierra común ya queda hecha |
-| Empalme soldado con termocontraíble | Retorcer, soldar y aislar | Cada cambio obliga a cortar y soldar de nuevo |
-
-Para **probar solo el SG90** alcanza con: rojo del SG90 → +5 V de la fuente **por un fusible** (sirve un
-portafusible de línea de auto), marrón → GND de la fuente **y además** un cable de ese GND a un GND del ESP32,
-naranja → GPIO 19. Para eso sirve una protoboard (el SG90 consume poco); **para el MG996R no**: sus picos de
-hasta 2,5 A calientan los rieles de la protoboard. Ahí usar Wago, regleta o la placa de control.
 
 ### B2. Placa de control (Técnico 4.4 y 4.5)
 
@@ -263,13 +234,11 @@ hasta 2,5 A calientan los rieles de la protoboard. Ahí usar Wago, regleta o la 
 1. Medir la separación entre las filas de pines de **su** DevKit y soldar las dos tiras de zócalo hembra.
 2. Soldar las 4 resistencias de 10 kΩ del teclado, el IRLZ44N con sus resistencias de 100 Ω y 100 kΩ,
    el 2N2222 con su resistencia de 1 kΩ y el 1N4148, y los conectores de 3 pines de los servos.
-3. Llevar a la placa **una sola entrada** de +5 V (C02) y GND (C15) desde la bornera; de ahí se alimentan
-   los servos, el LED, el buzzer, el ULN2003 y el lado de 5 V del BSS138. El 5 V **no toca el pin
-   5V/VIN** del DevKit.
-4. Cablear los GPIO según el esquema 03 y el código de colores.
-5. Instalar el BSS138 junto al conector de la LCD.
-6. **Con el multímetro: ningún zócalo del ESP32 con continuidad a +5 V.**
-7. Insertar el DevKit y conectarlo solo por USB.
+3. Llevar a la placa **una sola entrada** de +5 V (C02) y GND (C15) desde la fuente ATX (B1); de ahí se
+   alimentan los servos, el LED, el buzzer y el ULN2003. El 5 V **no toca el pin 5V/VIN** del DevKit.
+4. Cablear los GPIO según el esquema 03 y el código de colores. GPIO 21 y 22 quedan libres (sin LCD en v2.3).
+5. **Con el multímetro: ningún zócalo del ESP32 con continuidad a +5 V.**
+6. Insertar el DevKit y conectarlo solo por USB.
 
 ### B2 (alternativa). Armado de prueba en protoboard
 
@@ -279,14 +248,14 @@ aguantan alrededor de 1 A: sirven para casi todo, **salvo la alimentación del M
 | Carga | ¿En la protoboard? |
 |---|---|
 | SG90 (barra), ULN2003 + 28BYJ-48 (~0,25 A) | Sí |
-| Circuitos del MOSFET (LED), del 2N2222 (buzzer) y del convertidor de nivel (LCD) | Sí |
+| Circuitos del MOSFET (LED) y del 2N2222 (buzzer) | Sí |
 | Resistencias de 10 kΩ del teclado | Sí |
 | Tira LED de 40 cm (~0,4 A) | Sí, con cables cortos y gruesos |
 | **MG996R: rojo y marrón** | **No**: empalmados directo a la fuente, después del fusible |
 | MG996R: señal (GPIO 18) | Sí |
 
 ```
-Fuente +5 V ── fusible 3 A ──┬──────────► riel + de la protoboard
+Fuente +5 V ── fusible 4 A ──┬──────────► riel + de la protoboard
                              └─ empalme ─► MG996R rojo      (fuera de la protoboard)
 Fuente GND ──────────────────┬──────────► riel − de la protoboard
                              └─ empalme ─► MG996R marrón
@@ -300,7 +269,7 @@ Riel − ─► GND del ESP32 (tierra común) · capacitor de 2200 µF entre rie
 4. El ESP32 queda **fuera** de la protoboard (es tan ancho que tapa un lado) y se cablea con Dupont: del riel −
    a un GND del ESP32; **ningún cable del riel + va al ESP32** (ni a 5V/VIN ni a 3V3).
 5. Conectar las cargas de a una, con la fuente apagada: SG90 → MG996R (sin bocina, paso E5) → ULN2003 y motor
-   → buzzer → tira LED → LCD.
+   → buzzer → tira LED.
 6. Pasar a la placa de control si un contacto se calienta, si algo falla al mover un cable o cuando el
    robot ya esté probado.
 
@@ -318,7 +287,6 @@ pio device monitor
 |---|---|
 | T2.2 Arranque limpio | Al reiniciar, ningún servo salta ni se encienden el LED o el buzzer |
 | T2.3 Salidas | Cada GPIO cambia de estado y el motor gira en ambos sentidos |
-| T2.4 I2C | El escaneo muestra la LCD en 0x27 (o 0x3F) |
 | T2.5 Teclado | Las 16 teclas se leen una vez cada una, sin rebotes |
 
 Si el motor solo vibra, el orden de fases IN1–IN4 está cambiado: intercambiar los cables de GPIO 33 y 25.
@@ -337,33 +305,18 @@ cd pi
 ```
 
 El comando ejecuta T2.1 (PONG en menos de 50 ms) y TC.1 a TC.6, e imprime «Pasa» o «FALLA» para cada una.
-TC.2, TC.3 y TC.5 **mueven el mecanismo**. TC.4 es manual: desconecte el USB en reposo y, en 5 s,
-la LCD debe mostrar «SIN ENLACE».
+TC.2, TC.3 y TC.5 **mueven el mecanismo**. TC.4 es manual: desconecte el USB en reposo y, en 5 s, el
+ESP32 debe pasar a parada (un pitido largo); al reconectar, el panel muestra el enlace restablecido.
 
-### B5. Interfaz (Técnico 7.5)
+### B5. Interfaz (Técnico 7.5, v2.3: sin LCD)
 
-1. Montar la LCD y el teclado en el frente de la caja, y el buzzer dentro, frente a un agujero de 5 mm.
-2. Conectar la LCD al lado de 5 V del BSS138 (C11) y el teclado a la placa con su cinta (C12), filas primero.
-3. Ajustar el contraste con el potenciómetro de la mochila PCF8574.
-4. **T6.1:** los textos de la LCD se leen completos. **T6.2:** con el brazo girando, la tecla **D** lo
-   detiene en menos de 100 ms, aunque la Pi esté desconectada.
+1. Montar el teclado en el frente de la caja y el buzzer dentro, frente a un agujero de 5 mm.
+2. Conectar el teclado a la placa con su cinta (C12), filas primero.
+3. **T6.2:** con el brazo girando, la tecla **D** lo detiene en menos de 100 ms, aunque la Pi esté desconectada.
 
-**Sin el BSS138.** La LCD **no** se conecta directo al ESP32: la mochila PCF8574 tiene resistencias que llevan
-SDA y SCL a 5 V, y los pines del ESP32 no toleran 5 V (regla 4). Opciones:
-
-1. Dejar la LCD para el final: el robot funciona sin ella (los mensajes también aparecen en el panel web y por voz).
-2. Comprar el módulo («convertidor de nivel lógico 4 canales» o «level shifter BSS138»).
-3. Armarlo en la protoboard con **2 transistores 2N7000** y **4 resistencias de 10 kΩ**, uno por línea (SDA y SCL):
-
-   ```
-   3,3 V ── 10 kΩ ──┬── GPIO 21 (o 22) del ESP32
-                    S
-   3,3 V ────────── G    2N7000  (cara plana de frente: S, G, D)
-                    D
-   5 V ──── 10 kΩ ──┴── SDA (o SCL) de la LCD
-   ```
-4. Alimentar la mochila I2C a 3,3 V: es seguro, pero casi todas las LCD 16×2 son de 5 V y a 3,3 V el texto
-   apenas se ve. Solo sirve con una LCD de 3,3 V.
+En la versión 2.3 no hay LCD ni convertidor BSS138: los mensajes («LISTO», «VOLTEANDO», «SIN ENLACE»…) se
+ven en el panel web y se avisan por voz y con el buzzer. El firmware detecta que no hay pantalla y sigue; el
+comando `LCD` del protocolo se conserva y no hace nada. GPIO 21 y 22 quedan libres.
 
 ---
 
@@ -450,7 +403,7 @@ y agregarlo a `deploy/99-archilector.rules`.
 ### Revisión antes de energizar
 - Polaridad de C01 y C02.
 - Ningún +5 V en un pin del ESP32.
-- Una sola unión de tierra (C15); **ningún** cable de tierra extra entre la Pi y la bornera.
+- Una sola unión de tierra (C15); **ningún** cable de tierra extra entre la Pi y la placa de control.
 - Cables lejos del recorrido del brazo; bucle de holgura en C03; cinta CSI firme.
 
 ### Energización por etapas
@@ -526,12 +479,11 @@ Una fila por prueba, aunque falle. Una prueba repetida es una fila nueva.
 
 | Síntoma | Causa probable | Qué hacer |
 |---|---|---|
-| La LCD enciende pero no muestra texto | Contraste o dirección | Girar el potenciómetro de la mochila; revisar T2.4 (0x27 o 0x3F) |
 | Teclas fantasma o que no responden | Faltan las pull-ups de 10 kΩ | Revisar el circuito (c) del esquema 04 |
-| Un servo tiembla | Señal de 3,3 V débil o caída de tensión | Pasar su señal por un canal libre del BSS138; revisar el capacitor |
+| Un servo tiembla | Tierra no común o caída de tensión | Revisar la unión de GND con el ESP32 y el capacitor de la entrada |
 | La Pi avisa subtensión o se reinicia | Carga en la rama de la Pi | Solo su fuente oficial; `vcgencmd get_throttled` debe dar 0x0 |
 | Durante el giro el ESP32 se reinicia (la Pi registra E07) | Caída de tensión en la rama de actuadores | T1.4; si baja de 4,8 V, fuente de 5 V 5 A |
-| La LCD dice «SIN ENLACE» | No llegan tramas de la Pi | Cable USB solo de carga, servicio detenido o puerto equivocado |
+| El panel muestra el ESP32 «caído» y suena un pitido largo | No llegan tramas de la Pi | Cable USB solo de carga, servicio detenido o puerto equivocado |
 | El rodillo arquea hacia el lado equivocado | Sentido invertido | `CFG DIR_RODILLO -1` |
 | La hoja no pasa | Poca presión o poco arco | Bajar `ANG_CONTACTO` unos grados, subir `PASOS_ARCO`, limpiar la goma con alcohol isopropílico |
 | Pasan dos hojas | Demasiada presión o papel satinado | Subir `ANG_CONTACTO`, preacondicionar el libro, limpiar la goma |

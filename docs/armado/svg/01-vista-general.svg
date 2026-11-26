@@ -56,7 +56,7 @@
 
   <!-- caja de electrónica -->
   <rect x="864" y="478" width="128" height="232" rx="6" fill="#ffffff" stroke="#1d2330" stroke-width="2"/>
-  <rect x="876" y="494" width="104" height="40" rx="3" fill="#fdecea" stroke="#d32f2f"/><text x="928" y="519" text-anchor="middle" class="s">bornera</text>
+  <rect x="876" y="494" width="104" height="40" rx="3" fill="#fdecea" stroke="#d32f2f"/><text x="928" y="519" text-anchor="middle" class="s">fusible 4 A</text>
   <rect x="876" y="544" width="104" height="96" rx="3" fill="#eaf1fb" stroke="#1f5fbf"/><text x="928" y="588" text-anchor="middle" class="s">placa de</text><text x="928" y="604" text-anchor="middle" class="s">control</text>
   <rect x="876" y="650" width="104" height="44" rx="3" fill="#eceef1" stroke="#5b6472"/><text x="928" y="677" text-anchor="middle" class="s">teclado 4×4</text>
   <rect x="872" y="704" width="112" height="10" fill="#9ad08d" stroke="#2e7d32"/>
@@ -80,9 +80,9 @@
   <path d="M618 300 L1010 230" class="lider"/><text x="1015" y="214" class="b">Brazos + rodillos</text><text x="1015" y="231" class="s">en reposo, sobre el lomo</text><text x="1015" y="248" class="s">(esquemas 06 a 08)</text>
   <path d="M600 414 L620 360 H1010 V300" class="lider"/><text x="1015" y="286" class="b">Cámara a 350 mm</text><text x="1015" y="303" class="s">en la viga (esquema 09)</text>
   <path d="M976 414 H1010" class="lider"/><text x="1015" y="410" class="b">P11 torre</text><text x="1015" y="427" class="s">fuera del giro del brazo</text>
-  <path d="M992 560 H1010" class="lider"/><text x="1015" y="540" class="b">Caja de electrónica</text><text x="1015" y="557" class="s">bornera, fusible, placa</text><text x="1015" y="574" class="s">de control y buzzer</text>
-  <path d="M984 709 H1010" class="lider"/><text x="1015" y="700" class="b">LCD en el frente</text><text x="1015" y="717" class="s">teclado sobre la caja</text>
-  <path d="M985 484 L1010 470" class="lider"/><text x="1015" y="474" class="s">jack 5 V e interruptor</text>
+  <path d="M992 560 H1010" class="lider"/><text x="1015" y="540" class="b">Caja de electrónica</text><text x="1015" y="557" class="s">fusible, placa</text><text x="1015" y="574" class="s">de control y buzzer</text>
+  <path d="M984 709 H1010" class="lider"/><text x="1015" y="700" class="b">Teclado en el frente</text><text x="1015" y="717" class="s">sin LCD (v2.3)</text>
+  <path d="M985 484 L1010 470" class="lider"/><text x="1015" y="474" class="s">a la fuente ATX</text>
   <text x="1015" y="620" class="s" style="fill:#6a3fb5">USB Pi ↔ ESP32 (C16)</text><text x="1015" y="637" class="s" style="fill:#6a3fb5">baja por la torre, ≤ 1 m</text>
   <path d="M952 455 L1010 615" class="lider"/>
 
