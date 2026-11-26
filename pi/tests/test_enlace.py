@@ -158,6 +158,9 @@ def test_move_controla_cada_pieza(enlace, sim):
     assert enlace.comando("POS", 0).cmd == "ACK" and enlace.comando("POS").args == ["0"]
     assert enlace.comando("MOVE", "B", 90).cmd == "DONE" and enlace.comando("POS").args == ["90"]
     assert enlace.comando("CFG", "MS_ARRANQUE", 60).cmd == "ACK"
+    assert enlace.comando("CFG", "MS_TOPE", 300).cmd == "ACK" and sim.cal["MS_TOPE"] == 300
+    with pytest.raises(RechazoESP32):
+        enlace.comando("CFG", "PRESION_360", 46)
     assert enlace.comando("MOVE", "B", 20).ok and enlace.comando("POS").args == ["20"]
     with pytest.raises(RechazoESP32):
         enlace.comando("CFG", "DIR_BRAZO", 0)

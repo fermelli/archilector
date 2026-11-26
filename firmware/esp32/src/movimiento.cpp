@@ -212,13 +212,37 @@ static uint8_t secuenciaHome(const Contexto& c) {
 
 // TURN / RETRY (figura 8.2): brazo 0° · rodillo arquea · barra abre ·
 // giro a 180° · barra cierra · brazo a 90°
+// Brazo de 360°: lo deja en su señal de quieto (sin empujar)
+static void brazoQuieto() {
+  if (!cal.brazo360) return;
+  angBrazo = (float)cal.quietoBrazo;
+  escribirServo(PIN_SERVO_BRAZO, CANAL_BRAZO, angBrazo);
+}
+
+// Apoyar en el contacto. Con el servo de 360° (MS_TOPE > 0) el brazo sigue empujando
+// suavemente hacia la hoja, que hace de tope: al terminar está exactamente en
+// ANG_CONTACTO y el error de la estimación no se acumula de un volteo a otro. El empuje
+// se mantiene durante el arco para que la goma agarre (sin señal este servo no sostiene).
+static uint8_t apoyarEnContacto(const Contexto& c) {
+  PASO(moverBrazo(cal.angContacto, c));
+  if (!cal.brazo360 || cal.msTope <= 0) return E_NINGUNO;
+  int senal = cal.quietoBrazo - cal.dirBrazo * cal.presion360;  // hacia ángulos menores
+  senal = senal < 0 ? 0 : (senal > 180 ? 180 : senal);
+  angBrazo = (float)senal;
+  escribirServo(PIN_SERVO_BRAZO, CANAL_BRAZO, angBrazo);
+  uint8_t r = pausa((uint32_t)cal.msTope, c);
+  posBrazo = (float)cal.angContacto;  // apoyado contra la hoja: posición conocida
+  return r;
+}
+
 static uint8_t secuenciaVolteo(int32_t pasosExtra, const Contexto& c) {
   PASO(moverBarra(cal.barraCerrada, c));
   // 1. Apoyar: el rodillo descansa sobre la página derecha, cerca del borde
-  PASO(moverBrazo(cal.angContacto, c));
+  PASO(apoyarEnContacto(c));
   PASO(pausa(cal.tAsentar, c));
   // 2. Arquear: el rodillo gira hacia el lomo y levanta solo la hoja de arriba
   PASO(girarRodillo(cal.pasosArco + pasosExtra, 1, c));
+  brazoQuieto();  // deja de empujar antes de llevar la hoja
   // 3. Montar: la barra se abre para recibir la hoja. El motor se desenergiza
   //    para que el rodillo gire libre cuando la hoja salga por debajo.
   PASO(moverBarra(cal.barraAbierta, c));
@@ -328,6 +352,9 @@ void movimientoTarea(void*) {
       case ORDEN_MOVER: r = secuenciaManual(o.pieza, o.extra, c); break;
       case ORDEN_GIRO: r = secuenciaGiro(o, c); break;
     }
+    // Si una parada cortó el volteo mientras empujaba contra la hoja, el brazo de 360°
+    // no debe quedar girando: vuelve a su señal de quieto.
+    if (r != E_NINGUNO && o.tipo != ORDEN_GIRO && !brazoSuelto) brazoQuieto();
     motorApagar();
     if (r == E_NINGUNO && g_abortar) r = E06_PARADA;  // STOP llegó justo al terminar
     uint32_t duracion = millis() - c.inicio;

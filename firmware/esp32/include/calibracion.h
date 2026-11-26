@@ -26,6 +26,8 @@ struct Calibracion {
   int32_t ms90Menos;     // MS90_MENOS     ms para recorrer 90° hacia ángulos menores
   int32_t dirBrazo;      // DIR_BRAZO      1 o -1: lado de la señal que hace crecer el ángulo
   int32_t msArranque;    // MS_ARRANQUE    ms que el servo tarda en empezar a girar (incluidos en MS90_*)
+  int32_t msTope;        // MS_TOPE        ms que sigue empujando contra la hoja al apoyar (0 = no)
+  int32_t presion360;    // PRESION_360    grados de señal desde el quieto con que empuja la hoja
 };
 
 extern Calibracion cal;

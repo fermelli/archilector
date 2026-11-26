@@ -39,6 +39,8 @@ CALIBRACION_INICIAL = {
     "MS90_MENOS": 600,
     "DIR_BRAZO": 1,
     "MS_ARRANQUE": 0,
+    "MS_TOPE": 0,
+    "PRESION_360": 10,
 }
 RANGOS = {
     "ANG_REPOSO": (0, 180), "ANG_CONTACTO": (0, 180), "ANG_DEPOSITO": (0, 180),
@@ -48,7 +50,7 @@ RANGOS = {
     "PULSO_MIN": (400, 1200), "PULSO_MAX": (1800, 2600),
     "BRAZO_360": (0, 1), "QUIETO_BRAZO": (0, 180), "VEL_360": (5, 90),
     "MS90_MAS": (50, 10000), "MS90_MENOS": (50, 10000), "DIR_BRAZO": (-1, 1),
-    "MS_ARRANQUE": (0, 500),
+    "MS_ARRANQUE": (0, 500), "MS_TOPE": (0, 2000), "PRESION_360": (0, 45),
 }
 
 

@@ -107,6 +107,10 @@
           <label class="campo"><span>ms para 90° hacia menos</span><input type="number" class="cfg" data-cfg="MS90_MENOS" min="50" max="10000"></label>
           <label class="campo"><span>Arranque (ms)</span><input type="number" class="cfg" data-cfg="MS_ARRANQUE" min="0" max="500">
             <small>Si los giros cortos se quedan cortos, súbalo</small></label>
+          <label class="campo"><span>Empuje contra la hoja (ms)</span><input type="number" class="cfg" data-cfg="MS_TOPE" min="0" max="2000">
+            <small>En cada volteo corrige la posición en el contacto. 0 = no</small></label>
+          <label class="campo"><span>Fuerza del empuje</span><input type="number" class="cfg" data-cfg="PRESION_360" min="0" max="45">
+            <small>° de señal desde el quieto; también aprieta el rodillo durante el arco</small></label>
         </div>
         <label class="interruptor"><input type="checkbox" id="dir-brazo"> Invertir sentido (si al pedir 90° desde 0° gira al revés)</label>
         <p class="ayuda" style="margin:0">Cómo: con «Señal ±1°» encuentre la señal en la que no gira y guárdela. Ponga el brazo
@@ -240,7 +244,7 @@
   }
 
   async function leerCfg() {
-    for (const n of ['BRAZO_360', 'QUIETO_BRAZO', 'VEL_360', 'MS90_MAS', 'MS90_MENOS', 'DIR_BRAZO', 'MS_ARRANQUE']) {
+    for (const n of ['BRAZO_360', 'QUIETO_BRAZO', 'VEL_360', 'MS90_MAS', 'MS90_MENOS', 'DIR_BRAZO', 'MS_ARRANQUE', 'MS_TOPE', 'PRESION_360']) {
       const j = await enviar('CFG', n, '', true);
       const m = j && /CFG\s+\w+,(-?\d+)/.exec(j.respuesta);
       if (m) cfg[n] = Number(m[1]);

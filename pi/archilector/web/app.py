@@ -53,6 +53,8 @@ PARAMETROS_CFG = [
     ("MS90_MENOS", "ms para girar 90° hacia ángulos menores"),
     ("DIR_BRAZO", "Lado de la señal que hace crecer el ángulo (1 o -1)"),
     ("MS_ARRANQUE", "ms que el servo de 360° tarda en empezar a girar"),
+    ("MS_TOPE", "ms que el brazo de 360° empuja contra la hoja al apoyar (0 = no)"),
+    ("PRESION_360", "Fuerza con que empuja la hoja (° de señal desde el quieto)"),
 ]
 NOMBRES_CLASES = {
     "pagina_nueva": "Página nueva",
