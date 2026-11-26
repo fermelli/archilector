@@ -9,16 +9,16 @@
 #define PROTO_VERSION "P1"
 
 // ---------------------------------------------------------------------------
-// Pines · tabla 4.3 del Documento Técnico (fuente de verdad ante la tabla 2b
-// del Documento de Diseño, que tiene otra asignación para buzzer y teclado).
+// Pines · tabla 4.3 del Documento Técnico y tabla 2b del Documento de Diseño
+// (iguales desde la versión 2.3).
 // ---------------------------------------------------------------------------
 static const uint8_t PIN_MOTOR[4] = {32, 33, 25, 26};  // ULN2003 IN1..IN4 (cable C09)
 #define PIN_SERVO_BRAZO 18                              // MG996R (C07), LEDC 50 Hz 16 bit
 #define PIN_SERVO_BARRA 19                              // SG90 (C08),   LEDC 50 Hz 16 bit
 #define PIN_LED         27                              // compuerta IRLZ44N (C14), LEDC 1 kHz
 #define PIN_BUZZER       4                              // base 2N2222 (C13)
-#define PIN_SDA         21                              // BSS138 LV1 (C10)
-#define PIN_SCL         22                              // BSS138 LV2 (C10)
+#define PIN_SDA         21                              // I2C de la LCD opcional; libre desde v2.3
+#define PIN_SCL         22                              // I2C de la LCD opcional; libre desde v2.3
 static const uint8_t PIN_FILAS[4]    = {13, 16, 17, 23};  // salidas, una en bajo a la vez
 static const uint8_t PIN_COLUMNAS[4] = {34, 35, 36, 39};  // solo entrada, pull-up externo 10 kΩ
 
