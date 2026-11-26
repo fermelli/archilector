@@ -306,11 +306,18 @@ class Orquestador:
         corregida = preproceso.corregir(foto, self.cfg["vision"]["lado_pagina"])
         if corregida.izquierda is None:
             return Captura(foto, corregida, self.ocr.leer(corregida.pagina))
+        # vision.division «claude»: Claude ubica el lomo y lee las dos páginas en una llamada
+        pliego = None
+        if self.cfg["vision"].get("division") == "claude" and hasattr(self.ocr, "leer_pliego"):
+            pliego = self.ocr.leer_pliego(corregida.libro)
+        if pliego:
+            columna, ocr_izq, ocr_der = pliego
+            corregida = preproceso.dividir(corregida.libro, columna, corregida.contorno_hallado)
+        else:  # división local; con Claude las dos páginas se leen a la vez, el OCR local de a una
+            with ThreadPoolExecutor(2 if getattr(self.ocr, "hay_clave", False) else 1) as ex:
+                ocr_izq, ocr_der = ex.map(self.ocr.leer, (corregida.izquierda, corregida.pagina))
         izq = preproceso.FotoCorregida(corregida.libro, corregida.izquierda,
                                        preproceso.nitidez(corregida.izquierda), corregida.contorno_hallado)
-        # Con Claude las dos páginas se leen a la vez; el OCR local, de a una
-        with ThreadPoolExecutor(2 if getattr(self.ocr, "hay_clave", False) else 1) as ex:
-            ocr_izq, ocr_der = ex.map(self.ocr.leer, (izq.pagina, corregida.pagina))
         return Captura(foto, corregida, ocr_der, izquierda=Captura(foto, izq, ocr_izq))
 
     def _procesar_pagina(self, doc_id: int, modo: str, c: Captura) -> None:

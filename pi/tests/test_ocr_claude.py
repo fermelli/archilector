@@ -111,3 +111,61 @@ def test_el_clasificador_usa_la_categoria_de_claude():
     assert (c.categoria, c.fuente) == ("formulario_tabla", "claude")
     assert Clasificador(None).clasificar(blanca, "", "otra").fuente == "regla"  # sin sugerencia válida, la regla
     assert Clasificador(None).clasificar(blanca, "").categoria == "blanco"
+
+
+def _pagina_falsa(n, *lineas):
+    return {"es_pagina": n is not None, "numero_pagina": n, "lineas": list(lineas), "categoria": "texto"}
+
+
+def test_claude_divide_el_libro_y_lee_las_dos_paginas():
+    c = ClienteFalso({"lomo": 0.47, "izquierda": _pagina_falsa(None), "derecha": _pagina_falsa(9, "Fin.")})
+    col, izq, der = OCRClaude(Local(), cliente=c).leer_pliego(PAGINA)
+    assert col == int(2592 * 0.47)
+    assert izq.texto == "" and der.texto == "Fin." and der.numero_pagina == 9
+    assert all(x <= 2592 - col for l in der.lineas for x, _ in l.caja)
+    datos = c.pedidos[0]["messages"][0]["content"][0]["source"]["data"]
+    img = cv2.imdecode(np.frombuffer(base64.b64decode(datos), np.uint8), cv2.IMREAD_COLOR)
+    assert max(img.shape[:2]) == 2576  # la foto entera, con detalle para cada página
+
+
+def test_si_claude_no_divide_queda_la_division_local():
+    o = OCRClaude(Local(), cliente=ClienteFalso(APIConnectionError("sin red")))
+    assert o.leer_pliego(PAGINA) is None
+    assert o.leer_pliego(PAGINA) is None  # tras un error de red no insiste hasta la pausa
+    assert len(o._cliente.pedidos) == 1
+
+
+class OCRPliego:
+    """Divide el libro simulado como lo haría Claude: lomo y número de cada lado."""
+
+    def __init__(self, libro, falla=False):
+        self.libro, self.falla, self.veces = libro, falla, 0
+
+    def leer_pliego(self, libro):
+        self.veces += 1
+        if self.falla:
+            return None
+        n = self.libro.pagina_derecha
+        return (libro.shape[1] // 2, ResultadoOCR(numero_pagina=(n - 1) or None), ResultadoOCR(numero_pagina=n))
+
+    def leer(self, pagina):
+        return ResultadoOCR()
+
+
+def test_orquestador_usa_la_division_de_claude(tmp_path):
+    o, sim, libro, db = armar(tmp_path, VerificadorGuionado(), lado="ambas")
+    o.cfg["vision"]["division"] = "claude"
+    o.ocr = OCRPliego(libro)
+    doc = o.iniciar_documento("x", "l", "archivo", max_paginas=4)
+    o.esperar_fin(20)
+    assert o.ocr.veces == 2 and sim.ordenes_ejecutadas == ["TURN"]
+    assert [p["numero_impreso"] for p in db.paginas(doc)] == [None, 1, 2, 3]
+
+
+def test_orquestador_sin_claude_divide_en_local(tmp_path):
+    o, sim, libro, db = armar(tmp_path, VerificadorGuionado(), lado="ambas")
+    o.cfg["vision"]["division"] = "claude"
+    o.ocr = OCRPliego(libro, falla=True)
+    doc = o.iniciar_documento("x", "l", "archivo", max_paginas=2)
+    o.esperar_fin(20)
+    assert len(db.paginas(doc)) == 2  # se leyó igual, con el lomo hallado en local

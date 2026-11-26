@@ -70,27 +70,46 @@ def nitidez(img: np.ndarray) -> float:
 
 
 def lomo(libro: np.ndarray) -> int:
-    """Columna del lomo: la franja más oscura (su sombra) en el 30 % central; si no se nota, la mitad."""
+    """Columna del lomo, en el 40 % central:
+    1. el hueco sin tinta entre las dos columnas de texto (los márgenes interiores);
+    2. si no hay texto, la franja más oscura (la sombra del pliegue);
+    3. si tampoco se nota, la mitad."""
     gris = cv2.cvtColor(libro, cv2.COLOR_BGR2GRAY) if libro.ndim == 3 else libro
     ancho = gris.shape[1]
-    a, b = int(ancho * 0.35), int(ancho * 0.65)
+    a, b = int(ancho * 0.3), int(ancho * 0.7)
+    tinta = (cv2.adaptiveThreshold(gris, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 25, 15)[:, a:b] > 0).mean(axis=0)
+    vacia = np.flatnonzero(tinta < 0.25 * np.median(tinta))
+    if len(vacia):
+        # Huecos separados por marcas cortas (la costura, una mota) cuentan como uno solo
+        cortes = np.flatnonzero(np.diff(vacia) > ancho * 0.02)
+        tramos = np.split(vacia, cortes + 1)
+        t = max(tramos, key=lambda x: x[-1] - x[0])
+        if t[-1] - t[0] < 0.8 * (b - a):  # si casi todo está vacío, no hay texto: se mira la sombra
+            return a + int(t[0] + t[-1]) // 2
     k = max(3, ancho // 200)
     perfil = np.convolve(gris[:, a:b].mean(axis=0), np.ones(k) / k, mode="same")[k:-k]
     i = int(np.argmin(perfil))
     return a + k + i if perfil[i] < 0.9 * np.median(perfil) else ancho // 2
 
 
-def separar_pagina(libro: np.ndarray, lado: str = "derecha") -> np.ndarray:
-    """Corta en el lomo, con un margen del 2 % para no comerse letras junto al pliegue."""
-    c, m = lomo(libro), int(libro.shape[1] * 0.02)
+def separar_pagina(libro: np.ndarray, lado: str = "derecha", columna: int | None = None) -> np.ndarray:
+    """Corta en el lomo (o en ``columna``), con un margen del 2 % para no comerse letras junto al pliegue."""
+    c, m = (lomo(libro) if columna is None else columna), int(libro.shape[1] * 0.02)
     return libro[:, max(0, c - m):] if lado == "derecha" else libro[:, :c + m]
+
+
+def dividir(libro: np.ndarray, columna: int | None = None, contorno_hallado: bool = True) -> FotoCorregida:
+    """Las dos páginas del libro abierto, cortadas en ``columna`` (la que dio Claude) o en el lomo hallado."""
+    c = lomo(libro) if columna is None else columna
+    der, izq = (mejorar_contraste(separar_pagina(libro, lado, c)) for lado in ("derecha", "izquierda"))
+    return FotoCorregida(libro=libro, pagina=der, nitidez=nitidez(der), contorno_hallado=contorno_hallado, izquierda=izq)
 
 
 def corregir(img: np.ndarray, lado: str = "derecha") -> FotoCorregida:
     """``lado``: derecha, izquierda o ambas (la derecha queda en ``pagina``)."""
     esquinas = detectar_libro(img)
     libro = enderezar(img, esquinas) if esquinas is not None else img
-    pagina = mejorar_contraste(separar_pagina(libro, "izquierda" if lado == "izquierda" else "derecha"))
-    izquierda = mejorar_contraste(separar_pagina(libro, "izquierda")) if lado == "ambas" else None
-    return FotoCorregida(libro=libro, pagina=pagina, nitidez=nitidez(pagina), contorno_hallado=esquinas is not None,
-                         izquierda=izquierda)
+    if lado == "ambas":
+        return dividir(libro, contorno_hallado=esquinas is not None)
+    pagina = mejorar_contraste(separar_pagina(libro, lado))
+    return FotoCorregida(libro=libro, pagina=pagina, nitidez=nitidez(pagina), contorno_hallado=esquinas is not None)

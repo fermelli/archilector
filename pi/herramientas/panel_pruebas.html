@@ -68,7 +68,14 @@
                 <option value="ninguno">La foto completa</option>
               </select>
             </label>
+            <label class="campo" id="div-campo"><span>Quién divide las páginas</span>
+              <select id="division">
+                <option value="local">La Pi, buscando el lomo (sin internet)</option>
+                <option value="claude">Claude, con la foto entera (una sola llamada)</option>
+              </select>
+            </label>
           </div>
+          <p class="ayuda" id="div-nota" hidden>Claude ubica el lomo y lee las dos páginas a la vez. Si en «Leer con» no eligió un modelo de Claude, se usa Haiku.</p>
 
           <div id="man" style="margin-top:14px" hidden>
             <div class="etiqueta" style="margin-bottom:6px">Recorte, en % de la foto</div>
@@ -101,6 +108,10 @@
           <div class="aviso-caja peligro" id="err" style="margin:14px 0 0" hidden>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
             <div id="err-texto"></div>
+          </div>
+          <div class="aviso-caja aviso" id="aviso" style="margin:14px 0 0" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <div id="aviso-texto"></div>
           </div>
         </div>
       </section>
@@ -144,7 +155,13 @@ const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
 let timer = null, ultimo = null, lecturaMostrada = null;
 
 $("enlace-robot").href = location.protocol + "//" + location.hostname + ":8000/";
-$("modo").addEventListener("change", (e) => { $("man").hidden = e.target.value !== "manual"; });
+function verAjustes() {
+  $("man").hidden = $("modo").value !== "manual";
+  $("div-campo").hidden = $("modo").value !== "ambas";
+  $("div-nota").hidden = $("div-campo").hidden || $("division").value !== "claude";
+}
+$("modo").addEventListener("change", verAjustes);
+$("division").addEventListener("change", verAjustes);
 $("vel").addEventListener("input", (e) => { $("velv").textContent = (+e.target.value).toFixed(2) + "×"; });
 $("go").addEventListener("click", lanzar);
 
@@ -192,7 +209,7 @@ function barra(tono, texto) {
 }
 
 async function lanzar() {
-  const b = { ocr: $("ocr").value, vel: +$("vel").value, modo: $("modo").value, x0: $("x0").value, y0: $("y0").value,
+  const b = { ocr: $("ocr").value, vel: +$("vel").value, modo: $("modo").value, division: $("division").value, x0: $("x0").value, y0: $("y0").value,
               x1: $("x1").value, y1: $("y1").value, referencia: $("ref").value };
   let j;
   try { j = await (await fetch("/api/leer", { method: "POST", body: JSON.stringify(b) })).json(); }
@@ -213,6 +230,7 @@ async function consultar() {
   let e;
   try { e = await (await fetch("/api/estado", { cache: "no-store" })).json(); } catch (err) { return; }
   pintarPasos(e);
+  $("aviso").hidden = !e.aviso; $("aviso-texto").textContent = e.aviso || "";
   if (e.lectura && e.lectura !== lecturaMostrada && !(e.resultado && e.resultado === ultimo)) mostrarLectura(e.lectura);
   if (e.corriendo && !timer) { timer = setInterval(consultar, 400); $("go").disabled = true; barra("info vivo", "Probando…"); }
   $("fase").textContent = e.fase || "Sin ejecutar";
@@ -276,6 +294,7 @@ function mostrar(r) {
     tesela(r.numero_izquierda !== undefined ? (r.numero_izquierda ?? "—") + " · " + (r.numero_pagina ?? "—") : (r.numero_pagina ?? "—"),
            r.numero_izquierda !== undefined ? "números de página (izquierda · derecha)" : "número de página leído"),
     tesela(r.nitidez, "nitidez (laplaciano)"),
+    ...(r.lomo_claude !== undefined ? [tesela(pct(r.lomo_claude) + " · " + pct(r.lomo_local), "lomo según Claude · según la Pi (del ancho)")] : []),
   ];
   if (r.similitud_ocr !== undefined) {
     teselas.unshift(tesela(pct(r.wer_ocr), "error de palabras del OCR", r.wer_ocr < 0.1 ? "ok" : "aviso"),

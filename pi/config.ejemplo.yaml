@@ -27,6 +27,7 @@ ocr:
 
 vision:
   lado_pagina: ambas              # ambas: izquierda y luego derecha, de la misma foto | derecha (alcance 1.4)
+  division: local                 # con «ambas»: local (busca el lomo) | claude (Claude ubica el lomo; sin red, local)
   region_canto: [0.0, 0.2, 0.15, 0.8]   # canto de las hojas pasadas en la foto: ajustar tras el montaje
   paso_numeracion: 1              # avance del número impreso por página leída (2 con «derecha»)
 

@@ -25,6 +25,7 @@ POR_DEFECTO: dict = {
     },
     "vision": {
         "lado_pagina": "ambas",  # ambas (izquierda y luego derecha) | derecha | izquierda
+        "division": "local",  # con «ambas»: local (busca el lomo) | claude (Claude lo ubica; sin red, local)
         # Canto de las hojas pasadas en la foto (fracciones x0, y0, x1, y1); ajustar tras el montaje
         "region_canto": [0.0, 0.2, 0.15, 0.8],
         "paso_numeracion": 1,  # cuánto avanza el número impreso por página leída (2 con «derecha»)

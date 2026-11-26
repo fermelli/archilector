@@ -38,6 +38,16 @@ ESQUEMA = {
     "required": ["es_pagina", "numero_pagina", "lineas", "categoria"],
     "additionalProperties": False,
 }
+# Libro abierto entero: Claude ubica el lomo y lee cada página por separado
+PLIEGO = ("La foto muestra un libro abierto. lomo: dónde está el pliegue entre las dos páginas, como fracción del "
+          "ancho de la foto (0 = borde izquierdo, 1 = borde derecho). izquierda y derecha: cada página por separado; "
+          "si de un lado no hay página (la tapa, la mesa), es_pagina es false.")
+ESQUEMA_PLIEGO = {
+    "type": "object",
+    "properties": {"lomo": {"type": "number"}, "izquierda": ESQUEMA, "derecha": ESQUEMA},
+    "required": ["lomo", "izquierda", "derecha"],
+    "additionalProperties": False,
+}
 
 
 def _jpeg_b64(img: np.ndarray, lado_max: int = 1568) -> str:
@@ -57,12 +67,22 @@ def _a_resultado(lineas: list[str], numero, alto: int, ancho: int, categoria: st
     return ResultadoOCR(res, numero if isinstance(numero, int) else numero_impreso(res, alto), categoria)
 
 
+def motivo(exc: Exception) -> str:
+    """Por qué falló Claude, en palabras para el panel."""
+    if "content filtering" in str(exc):
+        return "el filtro de contenido de Anthropic bloqueó la respuesta (suele pasar al transcribir libros publicados)"
+    if type(exc).__name__ in ("APIConnectionError", "APITimeoutError"):
+        return "sin conexión con la API"
+    return f"{type(exc).__name__}: {exc}"[:200]
+
+
 class OCRClaude:
     def __init__(self, respaldo, modelo: str = MODELOS[0], cliente=None):
         self.respaldo, self.modelo, self._cliente = respaldo, modelo, cliente
         self._pausa_hasta = 0.0
         self._lock = threading.Lock()  # el OCR local no admite dos páginas a la vez
         self.ultimo = "local"  # quién leyó la última página, para el panel
+        self.motivo = ""  # por qué falló la última vez
 
     @property
     def hay_clave(self) -> bool:
@@ -75,6 +95,7 @@ class OCRClaude:
                 self.ultimo = self.modelo
                 return r
             except Exception as exc:  # sin internet, cuota, rechazo...: lee el OCR local
+                self.motivo = motivo(exc)
                 log.warning("Claude no leyó la página (%s): se usa el OCR local", exc)
                 if type(exc).__name__ in ("APIConnectionError", "APITimeoutError"):
                     self._pausa_hasta = time.monotonic() + PAUSA_S
@@ -82,22 +103,47 @@ class OCRClaude:
         with self._lock:
             return self.respaldo.leer(pagina)
 
+    def leer_pliego(self, libro: np.ndarray) -> tuple[int, ResultadoOCR, ResultadoOCR] | None:
+        """Claude divide el libro abierto y lee las dos páginas en una sola llamada.
+        Devuelve (columna del lomo, izquierda, derecha), o None si no se pudo (se divide en local)."""
+        if not self.hay_clave or time.monotonic() < self._pausa_hasta:
+            return None
+        try:
+            d = self._pedir(libro, ESQUEMA_PLIEGO, PLIEGO, 8192, 2576)  # 2576 px: cada página con su detalle
+        except Exception as exc:
+            self.motivo = motivo(exc)
+            log.warning("Claude no dividió el libro (%s): se divide en local", exc)
+            if type(exc).__name__ in ("APIConnectionError", "APITimeoutError"):
+                self._pausa_hasta = time.monotonic() + PAUSA_S
+            return None
+        self.ultimo = self.modelo
+        alto, ancho = libro.shape[:2]
+        col = int(ancho * min(max(float(d["lomo"]), 0.2), 0.8))
+        log.info("Claude (%s) ubicó el lomo en %.0f %% del ancho", self.modelo, 100 * col / ancho)
+        return col, self._pagina(d["izquierda"], alto, col), self._pagina(d["derecha"], alto, ancho - col)
+
+    @staticmethod
+    def _pagina(d: dict, alto: int, ancho: int) -> ResultadoOCR:
+        if not d["es_pagina"]:
+            return ResultadoOCR()
+        return _a_resultado(d["lineas"], d["numero_pagina"], alto, ancho, d.get("categoria"))
+
     def _leer_claude(self, pagina: np.ndarray) -> ResultadoOCR:
+        return self._pagina(self._pedir(pagina, ESQUEMA, "Transcribe esta página."), *pagina.shape[:2])
+
+    def _pedir(self, img: np.ndarray, esquema: dict, pedido: str, max_tokens: int = 4096, lado_max: int = 1568) -> dict:
         if self._cliente is None:
             import anthropic
 
-            self._cliente = anthropic.Anthropic(timeout=30, max_retries=1)
+            self._cliente = anthropic.Anthropic(timeout=60, max_retries=1)
         m = self._cliente.messages.create(
-            model=self.modelo, max_tokens=4096, system=SISTEMA,
-            output_config={"effort": "low", "format": {"type": "json_schema", "schema": ESQUEMA}},
+            model=self.modelo, max_tokens=max_tokens, system=SISTEMA,
+            output_config={"effort": "low", "format": {"type": "json_schema", "schema": esquema}},
             messages=[{"role": "user", "content": [
-                {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": _jpeg_b64(pagina)}},
-                {"type": "text", "text": "Transcribe esta página."}]}])
+                {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": _jpeg_b64(img, lado_max)}},
+                {"type": "text", "text": pedido}]}])
         if m.stop_reason != "end_turn":
             raise RuntimeError(f"respuesta incompleta ({m.stop_reason})")
         d = json.loads(next(b.text for b in m.content if b.type == "text"))
-        log.info("Claude (%s) leyó %d líneas (%s); %d+%d tokens", self.modelo, len(d["lineas"]), d.get("categoria"),
-                 m.usage.input_tokens, m.usage.output_tokens)
-        if not d["es_pagina"]:
-            return ResultadoOCR()
-        return _a_resultado(d["lineas"], d["numero_pagina"], *pagina.shape[:2], d.get("categoria"))
+        log.info("Claude (%s): %d+%d tokens", self.modelo, m.usage.input_tokens, m.usage.output_tokens)
+        return d
